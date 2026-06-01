@@ -142,12 +142,16 @@ class GeoLocation {
   final String? networkDomain;
   final LocationCoordinate? location;
   final Velocity? velocity;
+  final DateTime? timestamp;
+  final DateTime? validUntil;
 
   GeoLocation({
     required this.referenceFrame,
     this.networkDomain,
     this.location,
     this.velocity,
+    this.timestamp,
+    this.validUntil,
   });
 
   Map<String, dynamic> toJson() => {
@@ -155,6 +159,8 @@ class GeoLocation {
         if (networkDomain != null) 'network-domain': networkDomain,
         if (location != null) ...location!.toJson(),
         if (velocity != null && !velocity!.isEmpty) 'velocity': velocity!.toJson(),
+        if (timestamp != null) 'timestamp': timestamp!.toUtc().toIso8601String(),
+        if (validUntil != null) 'valid-until': validUntil!.toUtc().toIso8601String(),
       };
 
   factory GeoLocation.fromJson(Map<String, dynamic> json) {
@@ -171,6 +177,12 @@ class GeoLocation {
       location: location,
       velocity: json['velocity'] != null
           ? Velocity.fromJson(json['velocity'] as Map<String, dynamic>)
+          : null,
+      timestamp: json['timestamp'] != null
+          ? DateTime.parse(json['timestamp'] as String)
+          : null,
+      validUntil: json['valid-until'] != null
+          ? DateTime.parse(json['valid-until'] as String)
           : null,
     );
   }
@@ -308,6 +320,27 @@ class ReferenceFrameValidator {
     final parts = trimmed.split('.');
     if (parts.length >= 2 && parts[1].length > 12) {
       throw FormatException("$componentName precision cannot exceed 12 decimal places");
+    }
+    return parsed;
+  }
+
+  static void validateTemporalValidity(DateTime? timestamp, DateTime? validUntil) {
+    if (timestamp != null && validUntil != null) {
+      if (validUntil.isBefore(timestamp) || validUntil.isAtSameMomentAs(timestamp)) {
+        throw const FormatException('valid-until must be chronologically after the recording timestamp');
+      }
+    }
+  }
+
+  static DateTime? parseDateTime(String valString, String fieldName) {
+    final trimmed = valString.trim();
+    if (trimmed.isEmpty) return null;
+    if (!trimmed.endsWith('Z') && !trimmed.endsWith('+00:00')) {
+      throw FormatException('$fieldName must end with Z or +00:00 to specify UTC timezone');
+    }
+    final parsed = DateTime.tryParse(trimmed);
+    if (parsed == null) {
+      throw FormatException('Invalid date-time format for $fieldName');
     }
     return parsed;
   }

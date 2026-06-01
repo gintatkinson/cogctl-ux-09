@@ -7,6 +7,7 @@ class MockLocationService {
   final List<GeoLocation> _locations = [];
 
   MockLocationService._internal() {
+    final now = DateTime.now();
     // Populate with SDN Multi-Domain Network Reference Frames & coordinates
     _locations.addAll([
       GeoLocation(
@@ -24,6 +25,7 @@ class MockLocationService {
           longitude: -122.4194,
           height: 10.0,
         ),
+        timestamp: now.subtract(const Duration(hours: 1)),
       ),
       GeoLocation(
         networkDomain: 'Submarine Cable (Subsea)',
@@ -40,6 +42,8 @@ class MockLocationService {
           longitude: -121.7251,
           height: -4500.0,
         ),
+        timestamp: now.subtract(const Duration(hours: 2)),
+        validUntil: now.add(const Duration(days: 10)),
       ),
       GeoLocation(
         networkDomain: 'Non-Terrestrial Network (NTN)',
@@ -62,6 +66,8 @@ class MockLocationService {
           vEast: 500.0,
           vUp: 0.0,
         ),
+        timestamp: now.subtract(const Duration(days: 5)),
+        validUntil: now.subtract(const Duration(days: 2)), // Expired
       ),
       GeoLocation(
         networkDomain: 'Deep Space Network (DSN)',
@@ -84,6 +90,7 @@ class MockLocationService {
           vEast: 8500.0,
           vUp: -150.0,
         ),
+        timestamp: now.subtract(const Duration(days: 1)),
       ),
       GeoLocation(
         networkDomain: 'Quantum Key Distribution (QKD)',
@@ -100,6 +107,8 @@ class MockLocationService {
           longitude: 139.6503,
           height: 25.0,
         ),
+        timestamp: now,
+        validUntil: now.add(const Duration(days: 30)),
       ),
     ]);
   }
@@ -128,6 +137,8 @@ class MockLocationService {
         throw const FormatException("Longitude must be between -180.0 and 180.0");
       }
     }
+
+    ReferenceFrameValidator.validateTemporalValidity(location.timestamp, location.validUntil);
 
     _locations.add(location);
   }

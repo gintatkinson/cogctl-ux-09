@@ -255,5 +255,69 @@ void main() {
       expect(parsed.velocity!.vEast, -1.2);
       expect(parsed.velocity!.vUp, 0.1);
     });
+
+    group('Temporal Validity Tests (Feature 5)', () {
+      test('Date-Time Parser Validation', () {
+        // Valid ISO 8601 UTC formats
+        expect(ReferenceFrameValidator.parseDateTime('2026-06-01T12:00:00Z', 'timestamp')?.isUtc, true);
+        expect(ReferenceFrameValidator.parseDateTime('2026-06-01T12:00:00.123Z', 'timestamp')?.isUtc, true);
+        expect(ReferenceFrameValidator.parseDateTime('2026-06-01T12:00:00+00:00', 'timestamp')?.isUtc, true);
+
+        // Invalid formats or offset non-UTC formats
+        expect(
+          () => ReferenceFrameValidator.parseDateTime('2026-06-01 12:00:00', 'timestamp'),
+          throwsA(predicate((e) => e is FormatException && e.message.contains('must end with Z or +00:00'))),
+        );
+        expect(
+          () => ReferenceFrameValidator.parseDateTime('2026-06-01T12:00:00+05:00', 'timestamp'),
+          throwsA(predicate((e) => e is FormatException && e.message.contains('must end with Z or +00:00'))),
+        );
+      });
+
+      test('Chronological Validity (valid-until > timestamp)', () {
+        final t1 = DateTime.parse('2026-06-01T12:00:00Z');
+        final t2 = DateTime.parse('2026-06-01T13:00:00Z');
+
+        // Valid: t2 is after t1
+        expect(() => ReferenceFrameValidator.validateTemporalValidity(t1, t2), returnsNormally);
+
+        // Invalid: t2 equals t1
+        expect(
+          () => ReferenceFrameValidator.validateTemporalValidity(t1, t1),
+          throwsA(predicate((e) => e is FormatException && e.message.contains('chronologically after the recording timestamp'))),
+        );
+
+        // Invalid: t2 before t1
+        expect(
+          () => ReferenceFrameValidator.validateTemporalValidity(t2, t1),
+          throwsA(predicate((e) => e is FormatException && e.message.contains('chronologically after the recording timestamp'))),
+        );
+      });
+
+      test('GeoLocation Serializes and Deserializes Timestamp and Valid Until', () {
+        final location = GeoLocation(
+          referenceFrame: ReferenceFrame(
+            astronomicalBody: 'earth',
+            geodeticSystem: GeodeticSystem(geodeticDatum: 'wgs-84'),
+          ),
+          location: EllipsoidCoordinate(latitude: 37.7, longitude: -122.4),
+          timestamp: DateTime.parse('2026-06-01T12:00:00Z'),
+          validUntil: DateTime.parse('2026-06-02T12:00:00Z'),
+        );
+
+        final jsonMap = location.toJson();
+        expect(jsonMap['timestamp'], '2026-06-01T12:00:00.000Z');
+        expect(jsonMap['valid-until'], '2026-06-02T12:00:00.000Z');
+
+        final parsed = GeoLocation.fromJson(jsonMap);
+        expect(parsed.timestamp, isNotNull);
+        expect(parsed.timestamp!.isUtc, true);
+        expect(parsed.timestamp!.toIso8601String(), '2026-06-01T12:00:00.000Z');
+
+        expect(parsed.validUntil, isNotNull);
+        expect(parsed.validUntil!.isUtc, true);
+        expect(parsed.validUntil!.toIso8601String(), '2026-06-02T12:00:00.000Z');
+      });
+    });
   });
 }
