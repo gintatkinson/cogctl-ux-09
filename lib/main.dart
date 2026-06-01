@@ -7,6 +7,8 @@ import 'models/counter_gauge.dart';
 import 'services/mock_counter_gauge_service.dart';
 import 'models/identifiers_references.dart';
 import 'services/mock_identifiers_references_service.dart';
+import 'models/date_time.dart';
+import 'services/mock_date_time_service.dart';
 
 
 void main() {
@@ -213,12 +215,21 @@ class _ReferenceFrameDashboardState extends State<ReferenceFrameDashboard> {
   final _identifierValueController = TextEditingController();
   String? _identifierValueError;
 
+  // Date & Time state
+  final MockDateTimeService _dateTimeService = MockDateTimeService();
+  List<YangDateTimeReference> _dateTimeNodes = [];
+  YangDateTimeReference? _selectedDateTimeNode;
+  final _dateTimeFormKey = GlobalKey<FormState>();
+  final _dateTimeValueController = TextEditingController();
+  String? _dateTimeValueError;
+
   @override
   void initState() {
     super.initState();
     _refreshList();
     _refreshCounterGaugeList();
     _refreshIdentifierList();
+    _refreshDateTimeList();
 
     _expiryUpdateTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
       if (mounted) {
@@ -633,6 +644,102 @@ class _ReferenceFrameDashboardState extends State<ReferenceFrameDashboard> {
     }
   }
 
+  void _refreshDateTimeList() {
+    setState(() {
+      _dateTimeNodes = _dateTimeService.getNodes();
+      if (_selectedDateTimeNode != null) {
+        final existingIndex = _dateTimeNodes.indexWhere((n) => n.id == _selectedDateTimeNode!.id);
+        if (existingIndex != -1) {
+          _selectedDateTimeNode = _dateTimeNodes[existingIndex];
+        } else if (_dateTimeNodes.isNotEmpty) {
+          _selectedDateTimeNode = _dateTimeNodes.first;
+        }
+      } else if (_dateTimeNodes.isNotEmpty) {
+        _selectedDateTimeNode = _dateTimeNodes.first;
+        _dateTimeValueController.text = _selectedDateTimeNode!.value;
+      }
+    });
+  }
+
+  void _submitDateTimeUpdate() {
+    if (_selectedDateTimeNode == null) return;
+    
+    final text = _dateTimeValueController.text.trim();
+    if (text.isEmpty) {
+      setState(() {
+        _dateTimeValueError = 'Value cannot be empty';
+      });
+      return;
+    }
+
+    try {
+      _dateTimeService.updateNodeValue(
+        _selectedDateTimeNode!.id,
+        text,
+      );
+      
+      setState(() {
+        _dateTimeValueError = null;
+      });
+
+      _refreshDateTimeList();
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Successfully updated ${_selectedDateTimeNode!.name} to $text'),
+          backgroundColor: Colors.green,
+        ),
+      );
+    } catch (e) {
+      setState(() {
+        _dateTimeValueError = e.toString().replaceFirst('FormatException: ', '');
+      });
+    }
+  }
+
+  void _setToCurrentTime() {
+    if (_selectedDateTimeNode == null) return;
+    
+    final now = DateTime.now().toUtc();
+    String formattedValue = '';
+    
+    switch (_selectedDateTimeNode!.type) {
+      case YangDateTimeType.dateAndTime:
+        formattedValue = '${now.year.toString().padLeft(4, '0')}-'
+            '${now.month.toString().padLeft(2, '0')}-'
+            '${now.day.toString().padLeft(2, '0')}T'
+            '${now.hour.toString().padLeft(2, '0')}:'
+            '${now.minute.toString().padLeft(2, '0')}:'
+            '${now.second.toString().padLeft(2, '0')}Z';
+        break;
+      case YangDateTimeType.date:
+        formattedValue = '${now.year.toString().padLeft(4, '0')}-'
+            '${now.month.toString().padLeft(2, '0')}-'
+            '${now.day.toString().padLeft(2, '0')}Z';
+        break;
+      case YangDateTimeType.dateNoZone:
+        formattedValue = '${now.year.toString().padLeft(4, '0')}-'
+            '${now.month.toString().padLeft(2, '0')}-'
+            '${now.day.toString().padLeft(2, '0')}';
+        break;
+      case YangDateTimeType.time:
+        formattedValue = '${now.hour.toString().padLeft(2, '0')}:'
+            '${now.minute.toString().padLeft(2, '0')}:'
+            '${now.second.toString().padLeft(2, '0')}Z';
+        break;
+      case YangDateTimeType.timeNoZone:
+        formattedValue = '${now.hour.toString().padLeft(2, '0')}:'
+            '${now.minute.toString().padLeft(2, '0')}:'
+            '${now.second.toString().padLeft(2, '0')}';
+        break;
+    }
+    
+    setState(() {
+      _dateTimeValueController.text = formattedValue;
+      _dateTimeValueError = null;
+    });
+  }
+
   void _clearForm() {
     _bodyController.clear();
     _datumController.clear();
@@ -650,6 +757,7 @@ class _ReferenceFrameDashboardState extends State<ReferenceFrameDashboard> {
     _vUpController.clear();
     _timestampController.clear();
     _validUntilController.clear();
+    _dateTimeValueController.clear();
     setState(() {
       _coordinateMode = 'Ellipsoidal';
       _selectedNetworkDomain = 'Terrestrial Fiber (L0-L4)';
@@ -672,6 +780,7 @@ class _ReferenceFrameDashboardState extends State<ReferenceFrameDashboard> {
       _validUntilError = null;
       _computedSpeed = null;
       _computedHeading = null;
+      _dateTimeValueError = null;
     });
   }
 
@@ -1077,7 +1186,9 @@ class _ReferenceFrameDashboardState extends State<ReferenceFrameDashboard> {
                         ? 'RFC 9179 Geo-Location Specs'
                         : (_currentScreen == 'counters_gauges'
                             ? 'RFC 9911 Counters & Gauges'
-                            : 'RFC 9911 Identifiers & Refs'),
+                            : (_currentScreen == 'identifiers_references'
+                                ? 'RFC 9911 Identifiers & Refs'
+                                : 'RFC 9911 Date & Time Types')),
                     style: TextStyle(fontWeight: FontWeight.w400, fontSize: 16, color: Colors.white.withValues(alpha: 0.9)),
                   ),
                 ],
@@ -1087,7 +1198,9 @@ class _ReferenceFrameDashboardState extends State<ReferenceFrameDashboard> {
                     ? 'RFC 9179 Geo-Location Specs'
                     : (_currentScreen == 'counters_gauges'
                         ? 'RFC 9911 Counters & Gauges'
-                        : 'RFC 9911 Identifiers & Refs'),
+                        : (_currentScreen == 'identifiers_references'
+                            ? 'RFC 9911 Identifiers & Refs'
+                            : 'RFC 9911 Date & Time Types')),
                 style: TextStyle(fontWeight: FontWeight.w500, fontSize: 16, color: Colors.white.withValues(alpha: 0.9)),
               ),
         actions: [
@@ -1206,40 +1319,75 @@ class _ReferenceFrameDashboardState extends State<ReferenceFrameDashboard> {
                                 ],
                               ),
                             ))
-                      : (isDesktop
-                          ? Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                _buildIdentifiersReferencesHeader(theme),
-                                const SizedBox(height: 12),
-                                _buildIdentifiersReferencesSummary(theme),
-                                const SizedBox(height: 24),
-                                Expanded(
-                                  child: Row(
+                      : (_currentScreen == 'identifiers_references'
+                          ? (isDesktop
+                              ? Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    _buildIdentifiersReferencesHeader(theme),
+                                    const SizedBox(height: 12),
+                                    _buildIdentifiersReferencesSummary(theme),
+                                    const SizedBox(height: 24),
+                                    Expanded(
+                                      child: Row(
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        children: [
+                                          Expanded(flex: 5, child: _buildIdentifierFormCard(theme)),
+                                          const SizedBox(width: 24),
+                                          Expanded(flex: 6, child: _buildIdentifierListPane(theme)),
+                                        ],
+                                      ),
+                                    ),
+                                  ],
+                                )
+                              : SingleChildScrollView(
+                                  child: Column(
                                     crossAxisAlignment: CrossAxisAlignment.start,
                                     children: [
-                                      Expanded(flex: 5, child: _buildIdentifierFormCard(theme)),
-                                      const SizedBox(width: 24),
-                                      Expanded(flex: 6, child: _buildIdentifierListPane(theme)),
+                                      _buildIdentifiersReferencesHeader(theme),
+                                      const SizedBox(height: 12),
+                                      _buildIdentifiersReferencesSummary(theme),
+                                      const SizedBox(height: 24),
+                                      _buildIdentifierFormCard(theme),
+                                      const SizedBox(height: 24),
+                                      _buildIdentifierListPane(theme),
                                     ],
                                   ),
-                                ),
-                              ],
-                            )
-                          : SingleChildScrollView(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  _buildIdentifiersReferencesHeader(theme),
-                                  const SizedBox(height: 12),
-                                  _buildIdentifiersReferencesSummary(theme),
-                                  const SizedBox(height: 24),
-                                  _buildIdentifierFormCard(theme),
-                                  const SizedBox(height: 24),
-                                  _buildIdentifierListPane(theme),
-                                ],
-                              ),
-                            ))),
+                                ))
+                          : (isDesktop
+                              ? Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    _buildDateTimeHeader(theme),
+                                    const SizedBox(height: 12),
+                                    _buildDateTimeSummary(theme),
+                                    const SizedBox(height: 24),
+                                    Expanded(
+                                      child: Row(
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        children: [
+                                          Expanded(flex: 5, child: _buildDateTimeFormCard(theme)),
+                                          const SizedBox(width: 24),
+                                          Expanded(flex: 6, child: _buildDateTimeListPane(theme)),
+                                        ],
+                                      ),
+                                    ),
+                                  ],
+                                )
+                              : SingleChildScrollView(
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      _buildDateTimeHeader(theme),
+                                      const SizedBox(height: 12),
+                                      _buildDateTimeSummary(theme),
+                                      const SizedBox(height: 24),
+                                      _buildDateTimeFormCard(theme),
+                                      const SizedBox(height: 24),
+                                      _buildDateTimeListPane(theme),
+                                    ],
+                                  ),
+                                )))),
             ),
           ),
         ],
@@ -1421,6 +1569,19 @@ class _ReferenceFrameDashboardState extends State<ReferenceFrameDashboard> {
             onTap: () {
               setState(() {
                 _currentScreen = 'identifiers_references';
+              });
+              if (!isDesktop) {
+                Navigator.of(context).pop();
+              }
+            },
+          ),
+          _buildSidebarItem(
+            icon: Icons.calendar_today,
+            label: 'Date & Time Types',
+            isActive: _currentScreen == 'date_time',
+            onTap: () {
+              setState(() {
+                _currentScreen = 'date_time';
               });
               if (!isDesktop) {
                 Navigator.of(context).pop();
@@ -3231,6 +3392,344 @@ class _ReferenceFrameDashboardState extends State<ReferenceFrameDashboard> {
           children: [
             const Text(
               'YANG Identifiers & OID Registries',
+              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 16),
+            isDesktop ? Expanded(child: listContent) : listContent,
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildDateTimeHeader(ThemeData theme) {
+    return Wrap(
+      crossAxisAlignment: WrapCrossAlignment.center,
+      spacing: 8,
+      runSpacing: 8,
+      children: [
+        Text(
+          'Date & Time Types Dashboard',
+          style: TextStyle(
+            fontSize: 20,
+            fontWeight: FontWeight.bold,
+            color: theme.primaryColor,
+          ),
+        ),
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+          decoration: BoxDecoration(
+            color: Colors.blue.withValues(alpha: 0.15),
+            border: Border.all(color: Colors.blue.withValues(alpha: 0.5)),
+            borderRadius: BorderRadius.circular(4),
+          ),
+          child: const Text(
+            'RFC 9911 Date-Time Specs',
+            style: TextStyle(
+              color: Colors.blue,
+              fontSize: 10,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildDateTimeSummary(ThemeData theme) {
+    final isDark = theme.brightness == Brightness.dark;
+    final cardBg = isDark ? const Color(0xFF2D2E30) : Colors.white;
+    final borderSide = BorderSide(
+      color: isDark ? const Color(0x1FFFFFFF) : const Color(0x1F000000),
+      width: 1,
+    );
+
+    int total = _dateTimeNodes.length;
+    int datetimes = _dateTimeNodes.where((n) => n.type == YangDateTimeType.dateAndTime).length;
+    int dates = _dateTimeNodes.where((n) => n.type == YangDateTimeType.date || n.type == YangDateTimeType.dateNoZone).length;
+    int times = _dateTimeNodes.where((n) => n.type == YangDateTimeType.time || n.type == YangDateTimeType.timeNoZone).length;
+
+    return Wrap(
+      spacing: 16,
+      runSpacing: 16,
+      children: [
+        _buildMiniStatusCard(theme, cardBg, borderSide, 'TOTAL NODES', '$total', Icons.calendar_today, Colors.blue),
+        _buildMiniStatusCard(theme, cardBg, borderSide, 'DATE AND TIMES', '$datetimes', Icons.schedule, Colors.teal),
+        _buildMiniStatusCard(theme, cardBg, borderSide, 'DATES', '$dates', Icons.date_range, Colors.amber),
+        _buildMiniStatusCard(theme, cardBg, borderSide, 'TIMES', '$times', Icons.hourglass_empty, Colors.purple),
+      ],
+    );
+  }
+
+  Widget _buildDateTimeFormCard(ThemeData theme) {
+    final isDark = theme.brightness == Brightness.dark;
+    final cardBg = isDark ? const Color(0xFF2D2E30) : Colors.white;
+
+    return Card(
+      color: cardBg,
+      child: SingleChildScrollView(
+        child: Padding(
+          padding: const EdgeInsets.all(24.0),
+          child: Form(
+            key: _dateTimeFormKey,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Text(
+                  'Update Date / Time String',
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                ),
+                const SizedBox(height: 16),
+                
+                // Select Node Dropdown
+                DropdownButtonFormField<YangDateTimeReference>(
+                  isExpanded: true,
+                  value: _selectedDateTimeNode,
+                  decoration: const InputDecoration(
+                    labelText: 'Target Node',
+                    border: OutlineInputBorder(),
+                  ),
+                  dropdownColor: cardBg,
+                  items: _dateTimeNodes.map((node) {
+                    return DropdownMenuItem<YangDateTimeReference>(
+                      value: node,
+                      child: Text(
+                        '${node.name} (${node.type.name})',
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    );
+                  }).toList(),
+                  onChanged: (YangDateTimeReference? val) {
+                    if (val != null) {
+                      setState(() {
+                        _selectedDateTimeNode = val;
+                        _dateTimeValueController.text = val.value;
+                        _dateTimeValueError = null;
+                      });
+                    }
+                  },
+                ),
+                const SizedBox(height: 16),
+
+                // Description and Type Info
+                if (_selectedDateTimeNode != null) ...[
+                  Container(
+                     padding: const EdgeInsets.all(12),
+                     decoration: BoxDecoration(
+                       color: theme.brightness == Brightness.dark ? Colors.white12 : Colors.black.withValues(alpha: 0.05),
+                       borderRadius: BorderRadius.circular(4),
+                     ),
+                     child: Column(
+                       crossAxisAlignment: CrossAxisAlignment.start,
+                       children: [
+                         Text(
+                           _selectedDateTimeNode!.description,
+                           style: const TextStyle(fontSize: 12, fontStyle: FontStyle.italic),
+                         ),
+                         const SizedBox(height: 8),
+                         Text(
+                           'Type: ${_selectedDateTimeNode!.type.name}',
+                           style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: theme.primaryColor),
+                         ),
+                       ],
+                     ),
+                  ),
+                  const SizedBox(height: 16),
+                ],
+
+                // New Value input field
+                TextFormField(
+                  controller: _dateTimeValueController,
+                  decoration: InputDecoration(
+                    labelText: 'New Date/Time Value',
+                    helperText: _selectedDateTimeNode == null
+                        ? 'Select a node'
+                        : 'Format: ${_selectedDateTimeNode!.type == YangDateTimeType.dateAndTime ? 'YYYY-MM-DDTHH:MM:SS(Z|offset)' : (_selectedDateTimeNode!.type == YangDateTimeType.date ? 'YYYY-MM-DD(Z|offset)' : (_selectedDateTimeNode!.type == YangDateTimeType.dateNoZone ? 'YYYY-MM-DD' : (_selectedDateTimeNode!.type == YangDateTimeType.time ? 'HH:MM:SS(Z|offset)' : 'HH:MM:SS')))}',
+                    border: const OutlineInputBorder(),
+                    errorText: _dateTimeValueError,
+                  ),
+                  onChanged: (val) {
+                    if (_dateTimeValueError != null) {
+                      setState(() {
+                        _dateTimeValueError = null;
+                      });
+                    }
+                  },
+                ),
+                const SizedBox(height: 16),
+
+                // Action Buttons Row
+                Row(
+                  children: [
+                    Expanded(
+                      child: ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: theme.primaryColor,
+                          foregroundColor: Colors.white,
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
+                        ),
+                        onPressed: _submitDateTimeUpdate,
+                        child: const Text('Update Value'),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    OutlinedButton(
+                      style: OutlinedButton.styleFrom(
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
+                      ),
+                      onPressed: _setToCurrentTime,
+                      child: const Text('Set to Current'),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildDateTimeListPane(ThemeData theme) {
+    final isDark = theme.brightness == Brightness.dark;
+    final cardBg = isDark ? const Color(0xFF2D2E30) : Colors.white;
+    final isDesktop = MediaQuery.of(context).size.width > 900;
+
+    final Widget listContent = _dateTimeNodes.isEmpty
+        ? const Center(
+            child: Padding(
+              padding: EdgeInsets.all(24.0),
+              child: Text('No nodes registered.'),
+            ),
+          )
+        : ListView.separated(
+            shrinkWrap: !isDesktop,
+            physics: isDesktop ? const ScrollPhysics() : const NeverScrollableScrollPhysics(),
+            itemCount: _dateTimeNodes.length,
+            separatorBuilder: (context, index) => const Divider(height: 16),
+            itemBuilder: (context, index) {
+              final node = _dateTimeNodes[index];
+              IconData icon;
+              Color color;
+              
+              switch (node.type) {
+                case YangDateTimeType.dateAndTime:
+                  icon = Icons.schedule;
+                  color = Colors.teal;
+                  break;
+                case YangDateTimeType.date:
+                  icon = Icons.date_range;
+                  color = Colors.amber[800] ?? Colors.amber;
+                  break;
+                case YangDateTimeType.dateNoZone:
+                  icon = Icons.calendar_today;
+                  color = Colors.blue;
+                  break;
+                case YangDateTimeType.time:
+                  icon = Icons.hourglass_empty;
+                  color = Colors.purple;
+                  break;
+                case YangDateTimeType.timeNoZone:
+                  icon = Icons.access_time;
+                  color = Colors.deepOrange;
+                  break;
+              }
+
+              return Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  // Icon
+                  Icon(
+                    icon,
+                    color: color,
+                    size: 24,
+                  ),
+                  const SizedBox(width: 12),
+                  
+                  // Details
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            Expanded(
+                              child: Text(
+                                node.name,
+                                style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                            const SizedBox(width: 8),
+                            Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                              decoration: BoxDecoration(
+                                color: color.withValues(alpha: 0.1),
+                                border: Border.all(
+                                  color: color.withValues(alpha: 0.4),
+                                ),
+                                borderRadius: BorderRadius.circular(4),
+                              ),
+                              child: Text(
+                                node.type.name,
+                                style: TextStyle(
+                                  fontSize: 9,
+                                  color: color,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          node.description,
+                          style: const TextStyle(fontSize: 11, color: Colors.grey),
+                        ),
+                        const SizedBox(height: 8),
+                        Row(
+                          children: [
+                            const Icon(Icons.info_outline, color: Colors.grey, size: 14),
+                            const SizedBox(width: 4),
+                            Expanded(
+                              child: Text(
+                                'Value: ${node.value}',
+                                style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold, fontFamily: 'monospace'),
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  IconButton(
+                    icon: const Icon(Icons.edit, size: 18),
+                    tooltip: 'Select for Update',
+                    onPressed: () {
+                      setState(() {
+                        _selectedDateTimeNode = node;
+                        _dateTimeValueController.text = node.value;
+                        _dateTimeValueError = null;
+                      });
+                    },
+                  ),
+                ],
+              );
+            },
+          );
+
+    return Card(
+      color: cardBg,
+      child: Padding(
+        padding: const EdgeInsets.all(24.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text(
+              'YANG Date & Time Registry',
               style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 16),

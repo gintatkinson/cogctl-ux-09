@@ -3,6 +3,7 @@ title: "Feature 8: Date and Time Types (Issue #19)"
 epic: "Epic 2: Common YANG Data Types (Issue #22)"
 type: "feature"
 issue: 19
+status: "completed"
 labels: ["feature", "common-yang-types", "ietf-yang-types"]
 covered-nodes: ["date-and-time", "date", "date-no-zone", "time", "time-no-zone"]
 ---
