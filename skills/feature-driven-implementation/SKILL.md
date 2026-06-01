@@ -39,7 +39,8 @@ Use this skill to execute the end-to-end implementation lifecycle for prioritize
    - **Logic & Parser Layer:** Type definitions, validation schemas, and hooks to wire the parser into the main application logic flow.
    - **UI & Presentation Layer:** The visual component, layout changes, styles, and data bindings to render the new attributes.
    - **Verification Plan:** Detailed manual validation instructions, compiler checks, and tests.
-3. Present the plan to the user and wait for explicit approval.
+3. **Initialize Solution Design Document:** Create the design solution document directly in the repository at `docs/designs/feat-<Feature_ID>-solution.md` containing the proposed architecture and BDD verification plan, then stage it (`git add`). This ensures the design is version-controlled on the feature branch from the beginning.
+4. Present the plan to the user and wait for explicit approval.
 
 ### Step 3: Execution & Build (Vertical Slice Mandate & Code Audits)
 1. **No Handover Trust:** Never assume previous phases or turns implemented a portion of the code correctly based on summaries. Explicitly open and check the source code files in all relevant directories.
@@ -61,20 +62,16 @@ Use this skill to execute the end-to-end implementation lifecycle for prioritize
 5. Apply any feedback iteratively on the feature branch.
 
 ### Step 5: Release & Closure (CRITICAL)
-1. Merge the feature branch into `master` after explicit acceptance:
-   ```bash
-   git checkout master
-   git merge feat/<N>-<short-description>
-   ```
-2. Create or update a cumulative solution walkthrough document under `docs/designs/feat-<Feature_ID>-solution.md` summarizing the changes, testing, and validations. Do not delete or overwrite sections for previously implemented sub-features or related components. Ensure the document is a cumulative record of all changes, maintaining a 100% scope perspective to deliver 0-defect verification instructions.
+1. Update the existing solution design document under `docs/designs/feat-<Feature_ID>-solution.md` summarizing the actual implemented changes, commits, testing, and validations. Do not delete or overwrite sections for previously implemented sub-features or related components. Ensure the document is a cumulative record of all changes, maintaining a 100% scope perspective to deliver 0-defect verification instructions.
    > [!IMPORTANT]
    > **USE THE FEATURE INDEX NUMBER** (e.g. 6 for Feature 6) in the solution filename, NOT the GitHub Issue Number (e.g. 17). The solution file name MUST strictly use the Feature ID (e.g. `feat-6-solution.md`).
    > 
    > **ZERO-TRUST COLLISION CHECK:** Before updating or creating this file, search the repository and Git history for the filename `feat-<Feature_ID>-solution.md` to check its existing content. If it exists, read it first and append/merge the new changes rather than overwriting. If there is a filename mismatch or conflict, alert the user and resolve the naming conflict immediately.
-3. Commit and push the solution document:
+2. Commit both the code changes and the finalized solution design document to the feature branch together, ensuring an atomic, version-controlled delivery.
+3. Merge the feature branch into `master` after explicit acceptance:
    ```bash
-   git add docs/designs/feat-<Feature_ID>-solution.md
-   git commit -m "docs: release solution walkthrough for feature #<Feature_ID>"
+   git checkout master
+   git merge feat/<N>-<short-description>
    git push origin master
    ```
 4. Close the feature issue on GitHub using `gh` CLI, embedding a comment pointing to the committed solution document:
