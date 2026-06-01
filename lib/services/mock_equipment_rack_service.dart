@@ -22,6 +22,11 @@ class MockEquipmentRackService {
         depth: 1000,
         timestamp: DateTime(2026, 6, 1, 12, 0),
         validUntil: DateTime(2027, 6, 1, 12, 0),
+        rackLocation: RackLocation(
+          locationRef: 'loc-london-hq',
+          rowNumber: 2,
+          columnNumber: 3,
+        ),
       ),
       EquipmentRack(
         id: 'Rack-Secure-High-48U',
@@ -31,13 +36,18 @@ class MockEquipmentRackService {
         depth: 1200,
         timestamp: DateTime(2026, 6, 1, 12, 0),
         validUntil: DateTime(2027, 6, 1, 12, 0),
+        rackLocation: RackLocation(
+          locationRef: 'loc-london-hq',
+          rowNumber: 4,
+          columnNumber: 5,
+        ),
       ),
     ]);
   }
 
   List<EquipmentRack> getRacks() => List.unmodifiable(_racks);
 
-  void addRack(EquipmentRack rack) {
+  void addRack(EquipmentRack rack, {Set<String> validLocationIds = const {}}) {
     EquipmentRackValidator.validate(
       id: rack.id,
       rackClass: rack.rackClass,
@@ -46,6 +56,8 @@ class MockEquipmentRackService {
       depth: rack.depth,
       timestamp: rack.timestamp,
       validUntil: rack.validUntil,
+      rackLocation: rack.rackLocation,
+      validLocationIds: validLocationIds,
     );
 
     // Check for duplicate ID
@@ -56,7 +68,7 @@ class MockEquipmentRackService {
     _racks.add(rack);
   }
 
-  void updateRack(String id, EquipmentRack updatedRack) {
+  void updateRack(String id, EquipmentRack updatedRack, {Set<String> validLocationIds = const {}}) {
     EquipmentRackValidator.validate(
       id: updatedRack.id,
       rackClass: updatedRack.rackClass,
@@ -65,6 +77,8 @@ class MockEquipmentRackService {
       depth: updatedRack.depth,
       timestamp: updatedRack.timestamp,
       validUntil: updatedRack.validUntil,
+      rackLocation: updatedRack.rackLocation,
+      validLocationIds: validLocationIds,
     );
 
     // Ensure we are not changing ID to another existing ID

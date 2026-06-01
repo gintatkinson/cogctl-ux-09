@@ -154,14 +154,16 @@ void main() {
   });
 
   group('Equipment Racks Widget UI Tests', () {
-    void setupMobileViewport(WidgetTester tester) {
+    Future<void> setupMobileViewport(WidgetTester tester) async {
       tester.view.physicalSize = const Size(900, 1600);
       tester.view.devicePixelRatio = 1.0;
+      await tester.binding.setSurfaceSize(const Size(900, 1600));
     }
 
-    void resetViewport(WidgetTester tester) {
+    Future<void> resetViewport(WidgetTester tester) async {
       tester.view.resetPhysicalSize();
       tester.view.resetDevicePixelRatio();
+      await tester.binding.setSurfaceSize(null);
     }
 
     Future<void> navigateToEquipmentRacks(WidgetTester tester) async {
@@ -174,7 +176,7 @@ void main() {
     }
 
     testWidgets('Can navigate to Equipment Racks dashboard and display racks', (WidgetTester tester) async {
-      setupMobileViewport(tester);
+      await setupMobileViewport(tester);
       addTearDown(() => resetViewport(tester));
 
       final service = MockEquipmentRackService();
@@ -196,7 +198,7 @@ void main() {
     });
 
     testWidgets('Can add a new equipment rack via form', (WidgetTester tester) async {
-      setupMobileViewport(tester);
+      await setupMobileViewport(tester);
       addTearDown(() => resetViewport(tester));
 
       final service = MockEquipmentRackService();
@@ -205,11 +207,13 @@ void main() {
       await tester.pumpWidget(const CogctlUxApp());
       await navigateToEquipmentRacks(tester);
 
+
       // Enter Rack ID
       final idField = find.ancestor(
         of: find.text('Rack ID'),
         matching: find.byType(TextField),
       ).first;
+      await tester.ensureVisible(idField);
       await tester.enterText(idField, 'Rack-Test-32U');
 
       // Enter Height
@@ -217,6 +221,7 @@ void main() {
         of: find.text('Height (mm)'),
         matching: find.byType(TextField),
       );
+      await tester.ensureVisible(heightField);
       await tester.enterText(heightField, '1400');
 
       // Enter Width
@@ -224,6 +229,7 @@ void main() {
         of: find.text('Width (mm)'),
         matching: find.byType(TextField),
       );
+      await tester.ensureVisible(widthField);
       await tester.enterText(widthField, '600');
 
       // Enter Depth
@@ -231,6 +237,7 @@ void main() {
         of: find.text('Depth (mm)'),
         matching: find.byType(TextField),
       );
+      await tester.ensureVisible(depthField);
       await tester.enterText(depthField, '1000');
 
       // Enter Timestamp
@@ -238,6 +245,7 @@ void main() {
         of: find.text('Recording Timestamp (ISO 8601)'),
         matching: find.byType(TextField),
       );
+      await tester.ensureVisible(timestampField);
       await tester.enterText(timestampField, '2026-06-01T12:00:00Z');
 
       // Enter Expiration
@@ -245,12 +253,15 @@ void main() {
         of: find.text('Expiration Timestamp (ISO 8601)'),
         matching: find.byType(TextField),
       );
+      await tester.ensureVisible(validUntilField);
       await tester.enterText(validUntilField, '2027-06-01T12:00:00Z');
 
       await tester.pump();
 
       // Tap PROVISION RACK
       final provisionBtn = find.widgetWithText(ElevatedButton, 'PROVISION RACK');
+      await tester.ensureVisible(provisionBtn);
+      await tester.pumpAndSettle();
       await tester.tap(provisionBtn);
       await tester.pumpAndSettle();
 
@@ -262,7 +273,7 @@ void main() {
     });
 
     testWidgets('Entering invalid identityref triggers form validation failure', (WidgetTester tester) async {
-      setupMobileViewport(tester);
+      await setupMobileViewport(tester);
       addTearDown(() => resetViewport(tester));
 
       final service = MockEquipmentRackService();
@@ -276,6 +287,7 @@ void main() {
         of: find.text('Rack ID'),
         matching: find.byType(TextField),
       ).first;
+      await tester.ensureVisible(idField);
       await tester.enterText(idField, 'Rack-Invalid-Class');
 
       // Enter Height
@@ -283,6 +295,7 @@ void main() {
         of: find.text('Height (mm)'),
         matching: find.byType(TextField),
       );
+      await tester.ensureVisible(heightField);
       await tester.enterText(heightField, '1400');
 
       // Enter Width
@@ -290,6 +303,7 @@ void main() {
         of: find.text('Width (mm)'),
         matching: find.byType(TextField),
       );
+      await tester.ensureVisible(widthField);
       await tester.enterText(widthField, '600');
 
       // Enter Depth
@@ -297,12 +311,19 @@ void main() {
         of: find.text('Depth (mm)'),
         matching: find.byType(TextField),
       );
+      await tester.ensureVisible(depthField);
       await tester.enterText(depthField, '1000');
 
       // Select invalid class
-      await tester.tap(find.text('rack-standard (Standard, Unsecured)'));
+      final classDropdown = find.text('rack-standard (Standard, Unsecured)');
+      await tester.ensureVisible(classDropdown);
       await tester.pumpAndSettle();
-      await tester.tap(find.text('non-descendant (INVALID CLASS HIERARCHY)').last);
+      await tester.tap(classDropdown);
+      await tester.pumpAndSettle();
+      final invalidOption = find.text('non-descendant (INVALID CLASS HIERARCHY)').last;
+      await tester.ensureVisible(invalidOption);
+      await tester.pumpAndSettle();
+      await tester.tap(invalidOption);
       await tester.pumpAndSettle();
 
       // Enter Timestamps
@@ -310,23 +331,161 @@ void main() {
         of: find.text('Recording Timestamp (ISO 8601)'),
         matching: find.byType(TextField),
       );
+      await tester.ensureVisible(timestampField);
       await tester.enterText(timestampField, '2026-06-01T12:00:00Z');
 
       final validUntilField = find.ancestor(
         of: find.text('Expiration Timestamp (ISO 8601)'),
         matching: find.byType(TextField),
       );
+      await tester.ensureVisible(validUntilField);
       await tester.enterText(validUntilField, '2027-06-01T12:00:00Z');
 
       await tester.pump();
 
       // Tap PROVISION RACK
       final provisionBtn = find.widgetWithText(ElevatedButton, 'PROVISION RACK');
+      await tester.ensureVisible(provisionBtn);
+      await tester.pumpAndSettle();
       await tester.tap(provisionBtn);
       await tester.pumpAndSettle();
 
       // Verify validation error is displayed
       expect(find.textContaining('is not a valid descendant of rack-class-type'), findsOneWidget);
     });
+
+    testWidgets('Interactive 10x10 facility floor plan grid updates coordinates on tap', (WidgetTester tester) async {
+      await setupMobileViewport(tester);
+      addTearDown(() => resetViewport(tester));
+
+      final service = MockEquipmentRackService();
+      service.reset();
+
+      await tester.pumpWidget(const CogctlUxApp());
+      await navigateToEquipmentRacks(tester);
+
+      // Verify Floor Plan is rendered
+      expect(find.text('FACILITY GRID FLOOR PLAN (10x10)'), findsOneWidget);
+      expect(find.textContaining('Grid Utilization:'), findsOneWidget);
+
+      // Locate grid-cell-3-5 key or text
+      final cellFinder = find.byKey(const Key('grid-cell-3-5'));
+      await tester.ensureVisible(cellFinder);
+      await tester.tap(cellFinder);
+      await tester.pumpAndSettle();
+
+      // Verify that coordinates have been filled in Form fields
+      expect(find.descendant(of: find.byType(TextFormField), matching: find.text('3')), findsWidgets);
+      expect(find.descendant(of: find.byType(TextFormField), matching: find.text('5')), findsWidgets);
+    });
+  });
+
+  group('Equipment Rack Location Placement Validation Tests', () {
+    test('Valid location and grid coordinate validation passes', () {
+      expect(
+        () => EquipmentRackValidator.validate(
+          id: 'Rack-Valid-Placement',
+          rackClass: 'rack-standard',
+          height: 1866,
+          width: 600,
+          depth: 1000,
+          timestamp: DateTime(2026, 6, 1, 12, 0),
+          validUntil: DateTime(2027, 6, 1, 12, 0),
+          rackLocation: RackLocation(
+            locationRef: 'London-HQ-A',
+            rowNumber: 3,
+            columnNumber: 5,
+          ),
+          validLocationIds: {'London-HQ-A', 'Paris-Branch-B'},
+        ),
+        returnsNormally,
+      );
+    });
+
+    test('Invalid location ID format throws FormatException', () {
+      expect(
+        () => EquipmentRackValidator.validate(
+          id: 'Rack-Invalid-Placement-1',
+          rackClass: 'rack-standard',
+          height: 1866,
+          width: 600,
+          depth: 1000,
+          timestamp: DateTime(2026, 6, 1, 12, 0),
+          validUntil: DateTime(2027, 6, 1, 12, 0),
+          rackLocation: RackLocation(
+            locationRef: '  ',
+            rowNumber: 3,
+            columnNumber: 5,
+          ),
+          validLocationIds: {'London-HQ-A', 'Paris-Branch-B'},
+        ),
+        throwsA(isA<FormatException>().having((e) => e.message, 'message', contains('Location reference cannot be empty'))),
+      );
+    });
+
+    test('Unregistered location ID throws FormatException', () {
+      expect(
+        () => EquipmentRackValidator.validate(
+          id: 'Rack-Invalid-Placement-2',
+          rackClass: 'rack-standard',
+          height: 1866,
+          width: 600,
+          depth: 1000,
+          timestamp: DateTime(2026, 6, 1, 12, 0),
+          validUntil: DateTime(2027, 6, 1, 12, 0),
+          rackLocation: RackLocation(
+            locationRef: 'Tokyo-DC-C',
+            rowNumber: 3,
+            columnNumber: 5,
+          ),
+          validLocationIds: {'London-HQ-A', 'Paris-Branch-B'},
+        ),
+        throwsA(isA<FormatException>().having((e) => e.message, 'message', contains("does not exist in the registry"))),
+      );
+    });
+
+    test('Out of bounds coordinate throws FormatException', () {
+      // Row must be >= 1
+      expect(
+        () => EquipmentRackValidator.validate(
+          id: 'Rack-Invalid-Placement-3',
+          rackClass: 'rack-standard',
+          height: 1866,
+          width: 600,
+          depth: 1000,
+          timestamp: DateTime(2026, 6, 1, 12, 0),
+          validUntil: DateTime(2027, 6, 1, 12, 0),
+          rackLocation: RackLocation(
+            locationRef: 'London-HQ-A',
+            rowNumber: 0,
+            columnNumber: 5,
+          ),
+          validLocationIds: {'London-HQ-A', 'Paris-Branch-B'},
+        ),
+        throwsA(isA<FormatException>().having((e) => e.message, 'message', contains('Row number must be a positive uint32 integer'))),
+      );
+
+      // Col must be positive uint32
+      expect(
+        () => EquipmentRackValidator.validate(
+          id: 'Rack-Invalid-Placement-4',
+          rackClass: 'rack-standard',
+          height: 1866,
+          width: 600,
+          depth: 1000,
+          timestamp: DateTime(2026, 6, 1, 12, 0),
+          validUntil: DateTime(2027, 6, 1, 12, 0),
+          rackLocation: RackLocation(
+            locationRef: 'London-HQ-A',
+            rowNumber: 3,
+            columnNumber: -1,
+          ),
+          validLocationIds: {'London-HQ-A', 'Paris-Branch-B'},
+        ),
+        throwsA(isA<FormatException>().having((e) => e.message, 'message', contains('Column number must be a positive uint32 integer'))),
+      );
+    });
   });
 }
+
+

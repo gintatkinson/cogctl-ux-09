@@ -299,6 +299,10 @@ class _ReferenceFrameDashboardState extends State<ReferenceFrameDashboard> {
   final _rackDepthController = TextEditingController();
   final _rackTimestampController = TextEditingController();
   final _rackValidUntilController = TextEditingController();
+  final _rackRowController = TextEditingController();
+  final _rackColController = TextEditingController();
+  String? _rackFormLocationId;
+  String? _selectedPlacementLocationId = 'loc-london-hq';
   String? _rackFormError;
   String? _rackIdError;
   String? _rackHeightError;
@@ -306,6 +310,8 @@ class _ReferenceFrameDashboardState extends State<ReferenceFrameDashboard> {
   String? _rackDepthError;
   String? _rackTimestampError;
   String? _rackValidUntilError;
+  String? _rackRowError;
+  String? _rackColError;
   bool _isEditingRack = false;
 
   @override
@@ -620,6 +626,8 @@ class _ReferenceFrameDashboardState extends State<ReferenceFrameDashboard> {
     _rackDepthController.dispose();
     _rackTimestampController.dispose();
     _rackValidUntilController.dispose();
+    _rackRowController.dispose();
+    _rackColController.dispose();
     _expiryUpdateTimer?.cancel();
     super.dispose();
   }
@@ -1706,15 +1714,17 @@ class _ReferenceFrameDashboardState extends State<ReferenceFrameDashboard> {
                                             ))
                                       : (_currentScreen == 'equipment_racks'
                                           ? (isDesktop
-                                              ? Column(
-                                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                                  children: [
-                                                    _buildEquipmentRacksHeader(theme),
-                                                    const SizedBox(height: 12),
-                                                    _buildEquipmentRacksSummary(theme),
-                                                    const SizedBox(height: 24),
-                                                    Expanded(
-                                                      child: Row(
+                                              ? SingleChildScrollView(
+                                                  child: Column(
+                                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                                    children: [
+                                                      _buildEquipmentRacksHeader(theme),
+                                                      const SizedBox(height: 12),
+                                                      _buildEquipmentRacksSummary(theme),
+                                                      const SizedBox(height: 24),
+                                                      _buildFacilityFloorPlanCard(theme),
+                                                      const SizedBox(height: 24),
+                                                      Row(
                                                         crossAxisAlignment: CrossAxisAlignment.start,
                                                         children: [
                                                           Expanded(flex: 5, child: _buildEquipmentRackFormCard(theme)),
@@ -1722,8 +1732,8 @@ class _ReferenceFrameDashboardState extends State<ReferenceFrameDashboard> {
                                                           Expanded(flex: 6, child: _buildEquipmentRackListPane(theme)),
                                                         ],
                                                       ),
-                                                    ),
-                                                  ],
+                                                    ],
+                                                  ),
                                                 )
                                               : SingleChildScrollView(
                                                   child: Column(
@@ -1732,6 +1742,8 @@ class _ReferenceFrameDashboardState extends State<ReferenceFrameDashboard> {
                                                       _buildEquipmentRacksHeader(theme),
                                                       const SizedBox(height: 12),
                                                       _buildEquipmentRacksSummary(theme),
+                                                      const SizedBox(height: 24),
+                                                      _buildFacilityFloorPlanCard(theme),
                                                       const SizedBox(height: 24),
                                                       _buildEquipmentRackFormCard(theme),
                                                       const SizedBox(height: 24),
@@ -4945,9 +4957,8 @@ class _ReferenceFrameDashboardState extends State<ReferenceFrameDashboard> {
         padding: const EdgeInsets.all(24.0),
         child: Form(
           key: _equipmentRackFormKey,
-          child: ListView(
-            shrinkWrap: true,
-            physics: const ClampingScrollPhysics(),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               Text(
                 _isEditingRack ? 'EDIT RACK PROPERTIES' : 'PROVISION NEW EQUIPMENT RACK',
@@ -5048,6 +5059,75 @@ class _ReferenceFrameDashboardState extends State<ReferenceFrameDashboard> {
                 ],
               ),
               const SizedBox(height: 16),
+
+              // Location Placement Section
+              const Text(
+                'PHYSICAL LOCATION & GRID PLACEMENT',
+                style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.grey),
+              ),
+              const SizedBox(height: 12),
+
+              // Location Dropdown
+              DropdownButtonFormField<String>(
+                isExpanded: true,
+                value: _rackFormLocationId,
+                decoration: const InputDecoration(
+                  labelText: 'Physical Location Reference',
+                  border: OutlineInputBorder(),
+                  helperText: 'Select facility to place the rack on the floor plan',
+                ),
+                items: [
+                  const DropdownMenuItem<String>(
+                    value: null,
+                    child: Text('Unassigned (None)'),
+                  ),
+                  ..._inventoryLocations.map((loc) => DropdownMenuItem<String>(
+                    value: loc.id,
+                    child: Text(
+                      '${loc.id} (${loc.type})',
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  )),
+                ],
+                onChanged: (val) {
+                  setState(() {
+                    _rackFormLocationId = val;
+                  });
+                },
+              ),
+              const SizedBox(height: 16),
+
+              // Grid Coordinates (Row & Column)
+              Row(
+                children: [
+                  Expanded(
+                    child: TextFormField(
+                      controller: _rackRowController,
+                      decoration: InputDecoration(
+                        labelText: 'Grid Row',
+                        border: const OutlineInputBorder(),
+                        errorText: _rackRowError,
+                        helperText: 'Positive integer (>= 1)',
+                      ),
+                      keyboardType: TextInputType.number,
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: TextFormField(
+                      controller: _rackColController,
+                      decoration: InputDecoration(
+                        labelText: 'Grid Column',
+                        border: const OutlineInputBorder(),
+                        errorText: _rackColError,
+                        helperText: 'Positive integer (>= 1)',
+                      ),
+                      keyboardType: TextInputType.number,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 24),
 
               // Timestamp field
               Row(
@@ -5153,6 +5233,9 @@ class _ReferenceFrameDashboardState extends State<ReferenceFrameDashboard> {
                           _rackDepthController.clear();
                           _rackTimestampController.clear();
                           _rackValidUntilController.clear();
+                          _rackRowController.clear();
+                          _rackColController.clear();
+                          _rackFormLocationId = null;
                           _selectedRackClass = 'rack-standard';
                           _rackFormError = null;
                         });
@@ -5208,7 +5291,7 @@ class _ReferenceFrameDashboardState extends State<ReferenceFrameDashboard> {
 
     final listContent = ListView.builder(
       shrinkWrap: true,
-      physics: const ClampingScrollPhysics(),
+      physics: const NeverScrollableScrollPhysics(),
       itemCount: _equipmentRacks.length,
       itemBuilder: (context, index) {
         final rack = _equipmentRacks[index];
@@ -5293,6 +5376,15 @@ class _ReferenceFrameDashboardState extends State<ReferenceFrameDashboard> {
                       _rackDepthController.text = rack.depth.toString();
                       _rackTimestampController.text = rack.timestamp.toIso8601String();
                       _rackValidUntilController.text = rack.validUntil.toIso8601String();
+                      if (rack.rackLocation != null) {
+                        _rackFormLocationId = rack.rackLocation!.locationRef;
+                        _rackRowController.text = rack.rackLocation!.rowNumber?.toString() ?? '';
+                        _rackColController.text = rack.rackLocation!.columnNumber?.toString() ?? '';
+                      } else {
+                        _rackFormLocationId = null;
+                        _rackRowController.clear();
+                        _rackColController.clear();
+                      }
                       _rackFormError = null;
                     });
                   },
@@ -5341,11 +5433,12 @@ class _ReferenceFrameDashboardState extends State<ReferenceFrameDashboard> {
             ),
             const SizedBox(height: 16),
             if (isDesktop)
-              Expanded(
+              SizedBox(
+                height: 650,
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    Expanded(flex: 5, child: listContent),
+                    Expanded(flex: 5, child: SingleChildScrollView(child: listContent)),
                     const VerticalDivider(width: 32),
                     Expanded(flex: 4, child: visualizerContent),
                   ],
@@ -5356,6 +5449,214 @@ class _ReferenceFrameDashboardState extends State<ReferenceFrameDashboard> {
               const SizedBox(height: 24),
               SizedBox(height: 400, child: visualizerContent),
             ],
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildFacilityFloorPlanCard(ThemeData theme) {
+    final isDark = theme.brightness == Brightness.dark;
+    final cardBg = isDark ? const Color(0xFF2D2E30) : Colors.white;
+
+    final activeLocationId = _selectedPlacementLocationId ?? '';
+    final placedRacks = _equipmentRacks.where((rack) =>
+        rack.rackLocation?.locationRef == activeLocationId &&
+        rack.rackLocation?.rowNumber != null &&
+        rack.rackLocation?.columnNumber != null).toList();
+
+    final gridMap = <String, EquipmentRack>{};
+    for (final rack in placedRacks) {
+      final row = rack.rackLocation!.rowNumber!;
+      final col = rack.rackLocation!.columnNumber!;
+      gridMap['$row,$col'] = rack;
+    }
+
+    int occupiedCount = placedRacks.length;
+    double utilization = (occupiedCount / 100) * 100;
+
+    return Card(
+      color: cardBg,
+      child: Padding(
+        padding: const EdgeInsets.all(24.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Wrap(
+              alignment: WrapAlignment.spaceBetween,
+              crossAxisAlignment: WrapCrossAlignment.center,
+              spacing: 16,
+              runSpacing: 16,
+              children: [
+                const Text(
+                  'FACILITY GRID FLOOR PLAN (10x10)',
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                ),
+                Container(
+                  width: 250,
+                  child: DropdownButtonFormField<String>(
+                    key: const Key('facility-selector-dropdown'),
+                    isExpanded: true,
+                    value: _selectedPlacementLocationId,
+                    decoration: const InputDecoration(
+                      labelText: 'Select Facility Location',
+                      border: OutlineInputBorder(),
+                      contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                    ),
+                    items: _inventoryLocations.map((loc) => DropdownMenuItem<String>(
+                      value: loc.id,
+                      child: Text(
+                        '${loc.id} (${loc.type})',
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    )).toList(),
+                    onChanged: (val) {
+                      setState(() {
+                        _selectedPlacementLocationId = val;
+                      });
+                    },
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
+            Wrap(
+              spacing: 16,
+              runSpacing: 8,
+              crossAxisAlignment: WrapCrossAlignment.center,
+              children: [
+                Text(
+                  'Grid Utilization: $occupiedCount / 100 cells occupied (${utilization.toStringAsFixed(0)}%)',
+                  style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
+                ),
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Container(width: 12, height: 12, color: Colors.blueAccent),
+                    const SizedBox(width: 4),
+                    const Text('Standard', style: TextStyle(fontSize: 12)),
+                  ],
+                ),
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Container(width: 12, height: 12, color: Colors.redAccent),
+                    const SizedBox(width: 4),
+                    const Text('Secure', style: TextStyle(fontSize: 12)),
+                  ],
+                ),
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Container(width: 12, height: 12, color: isDark ? Colors.black38 : Colors.grey[200]),
+                    const SizedBox(width: 4),
+                    const Text('Empty (Click to Select)', style: TextStyle(fontSize: 12)),
+                  ],
+                ),
+              ],
+            ),
+            const SizedBox(height: 20),
+            Center(
+              child: SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                child: Container(
+                  width: 440,
+                  height: 440,
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: isDark ? const Color(0xFF1E1E24) : Colors.grey[50],
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(color: isDark ? Colors.white10 : Colors.black12),
+                  ),
+                  child: GridView.builder(
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
+                    gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: 10,
+                      crossAxisSpacing: 4,
+                      mainAxisSpacing: 4,
+                    ),
+                    itemCount: 100,
+                    itemBuilder: (context, index) {
+                      final row = (index ~/ 10) + 1;
+                      final col = (index % 10) + 1;
+                      final key = '$row,$col';
+                      final rack = gridMap[key];
+
+                      final isSelectedCell = _rackRowController.text == row.toString() &&
+                                             _rackColController.text == col.toString() &&
+                                             _rackFormLocationId == activeLocationId;
+
+                      Color cellColor;
+                      Widget cellContent;
+
+                      if (rack != null) {
+                        final isSecure = rack.rackClass.startsWith('rack-secure');
+                        cellColor = isSecure ? Colors.redAccent : Colors.blueAccent;
+                        cellContent = Tooltip(
+                          message: 'Rack ID: ${rack.id}\nClass: ${rack.rackClass}\nGrid: Row $row, Col $col',
+                          child: Center(
+                            child: Text(
+                              rack.id.length > 5 ? rack.id.substring(0, 5) : rack.id,
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 8,
+                                fontWeight: FontWeight.bold,
+                              ),
+                              textAlign: TextAlign.center,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                        );
+                      } else {
+                        cellColor = isSelectedCell 
+                            ? Colors.teal.withValues(alpha: 0.3) 
+                            : (isDark ? Colors.black38 : Colors.grey[200]!);
+                        cellContent = Center(
+                          child: Text(
+                            '$row,$col',
+                            style: TextStyle(
+                              color: isDark ? Colors.white24 : Colors.black26,
+                              fontSize: 8,
+                            ),
+                          ),
+                        );
+                      }
+
+                      return InkWell(
+                        key: Key('grid-cell-$row-$col'),
+                        onTap: () {
+                          setState(() {
+                            _rackRowController.text = row.toString();
+                            _rackColController.text = col.toString();
+                            _rackFormLocationId = activeLocationId;
+                          });
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text('Auto-filled coordinates to Row $row, Column $col at facility $activeLocationId'),
+                              duration: const Duration(seconds: 1),
+                            ),
+                          );
+                        },
+                        child: Container(
+                          decoration: BoxDecoration(
+                            color: cellColor,
+                            borderRadius: BorderRadius.circular(4),
+                            border: Border.all(
+                              color: isSelectedCell 
+                                  ? Colors.teal 
+                                  : (isDark ? Colors.white10 : Colors.black12),
+                              width: isSelectedCell ? 2 : 1,
+                            ),
+                          ),
+                          child: cellContent,
+                        ),
+                      );
+                    },
+                  ),
+                ),
+              ),
+            ),
           ],
         ),
       ),
@@ -5388,6 +5689,8 @@ class _ReferenceFrameDashboardState extends State<ReferenceFrameDashboard> {
       _rackDepthError = null;
       _rackTimestampError = null;
       _rackValidUntilError = null;
+      _rackRowError = null;
+      _rackColError = null;
     });
 
     final id = _rackIdController.text.trim();
@@ -5397,6 +5700,9 @@ class _ReferenceFrameDashboardState extends State<ReferenceFrameDashboard> {
     final depthText = _rackDepthController.text.trim();
     final timestampText = _rackTimestampController.text.trim();
     final validUntilText = _rackValidUntilController.text.trim();
+    final locationRef = _rackFormLocationId;
+    final rowText = _rackRowController.text.trim();
+    final colText = _rackColController.text.trim();
 
     bool hasError = false;
 
@@ -5480,7 +5786,40 @@ class _ReferenceFrameDashboardState extends State<ReferenceFrameDashboard> {
       }
     }
 
+    int? rowNumber;
+    if (rowText.isNotEmpty) {
+      final parsed = int.tryParse(rowText);
+      if (parsed == null || parsed <= 0 || parsed > 4294967295) {
+        setState(() => _rackRowError = 'Must be a positive uint32 integer (>= 1)');
+        hasError = true;
+      } else {
+        rowNumber = parsed;
+      }
+    }
+
+    int? columnNumber;
+    if (colText.isNotEmpty) {
+      final parsed = int.tryParse(colText);
+      if (parsed == null || parsed <= 0 || parsed > 4294967295) {
+        setState(() => _rackColError = 'Must be a positive uint32 integer (>= 1)');
+        hasError = true;
+      } else {
+        columnNumber = parsed;
+      }
+    }
+
     if (hasError) return;
+
+    RackLocation? rackLocation;
+    if (locationRef != null && locationRef.isNotEmpty) {
+      rackLocation = RackLocation(
+        locationRef: locationRef,
+        rowNumber: rowNumber,
+        columnNumber: columnNumber,
+      );
+    }
+
+    final validLocationIds = _inventoryLocations.map((loc) => loc.id).toSet();
 
     try {
       if (_isEditingRack && _selectedEquipmentRack != null) {
@@ -5492,8 +5831,13 @@ class _ReferenceFrameDashboardState extends State<ReferenceFrameDashboard> {
           depth: depth,
           timestamp: timestamp!,
           validUntil: validUntil!,
+          rackLocation: rackLocation,
         );
-        _equipmentRackService.updateRack(_selectedEquipmentRack!.id, updatedRack);
+        _equipmentRackService.updateRack(
+          _selectedEquipmentRack!.id,
+          updatedRack,
+          validLocationIds: validLocationIds,
+        );
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('Successfully updated rack ${_selectedEquipmentRack!.id}'),
@@ -5509,8 +5853,9 @@ class _ReferenceFrameDashboardState extends State<ReferenceFrameDashboard> {
           depth: depth,
           timestamp: timestamp!,
           validUntil: validUntil!,
+          rackLocation: rackLocation,
         );
-        _equipmentRackService.addRack(newRack);
+        _equipmentRackService.addRack(newRack, validLocationIds: validLocationIds);
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('Successfully added rack $id'),
@@ -5526,8 +5871,11 @@ class _ReferenceFrameDashboardState extends State<ReferenceFrameDashboard> {
       _rackDepthController.clear();
       _rackTimestampController.clear();
       _rackValidUntilController.clear();
+      _rackRowController.clear();
+      _rackColController.clear();
       setState(() {
         _selectedRackClass = 'rack-standard';
+        _rackFormLocationId = null;
         _isEditingRack = false;
       });
       _refreshEquipmentRackList();
@@ -5548,6 +5896,9 @@ class _ReferenceFrameDashboardState extends State<ReferenceFrameDashboard> {
         } else {
           _selectedInventoryLocation = null;
         }
+      }
+      if ((_selectedPlacementLocationId == null || _selectedPlacementLocationId!.isEmpty) && _inventoryLocations.isNotEmpty) {
+        _selectedPlacementLocationId = _inventoryLocations.first.id;
       }
     });
   }
