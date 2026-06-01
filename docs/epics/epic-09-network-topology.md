@@ -22,6 +22,9 @@ This Epic covers the digital engineering reverse-engineering of the IETF YANG mo
 ### Associated User Stories
 - [ ] #76 - [User Story 27: Network Link and TP Connectivity (Issue #76)](https://github.com/gintatkinson/cogctl-ux-09/blob/main/docs/user-stories/us-27-network-link-tp-connectivity.md)
 - [ ] #89 - [User Story 31: Node Termination Point Configuration](https://github.com/gintatkinson/cogctl-ux-09/blob/main/docs/user-stories/us-31-termination-points.md)
+- [ ] #91 - [User Story 32: Linking Source and Destination Node Interfaces](https://github.com/gintatkinson/cogctl-ux-09/blob/main/docs/user-stories/us-32-link-endpoints.md)
+- [ ] #92 - [User Story 33: Mapping Layered Network Links to Underlays](https://github.com/gintatkinson/cogctl-ux-09/blob/main/docs/user-stories/us-33-link-underlays.md)
+- [ ] #93 - [User Story 34: Auditing Link Loop Recursions and Integrity](https://github.com/gintatkinson/cogctl-ux-09/blob/main/docs/user-stories/us-34-link-loops.md)
 ## 3. Architecture and System Interaction Diagrams
 ```mermaid
 classDiagram
