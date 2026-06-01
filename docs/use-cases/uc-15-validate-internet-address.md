@@ -25,9 +25,9 @@ labels: ["use-case", "ietf-inet-types"]
   - The System blocks configuration and returns an error explaining the constraint violation.
 
 ## Required User Stories
-- [x] #84 - [User Story 28: IP Address and Prefix Types](https://github.com/gintatkinson/cogctl-ux-09/blob/main/docs/user-stories/us-28-ip-address-prefix.md)
-- [x] #85 - [User Story 29: Internet Domain Names and URIs](https://github.com/gintatkinson/cogctl-ux-09/blob/main/docs/user-stories/us-29-domain-names-uri.md)
-- [x] #86 - [User Story 30: IP Protocol Fields and Autonomous Systems](https://github.com/gintatkinson/cogctl-ux-09/blob/main/docs/user-stories/us-30-protocol-fields-as.md)
+- [ ] #84 - [User Story 28: IP Address and Prefix Types](https://github.com/gintatkinson/cogctl-ux-09/blob/main/docs/user-stories/us-28-ip-address-prefix.md)
+- [ ] #85 - [User Story 29: Internet Domain Names and URIs](https://github.com/gintatkinson/cogctl-ux-09/blob/main/docs/user-stories/us-29-domain-names-uri.md)
+- [ ] #86 - [User Story 30: IP Protocol Fields and Autonomous Systems](https://github.com/gintatkinson/cogctl-ux-09/blob/main/docs/user-stories/us-30-protocol-fields-as.md)
 
 ## Source References
 YANG Schema: [ietf-inet-types.yang](https://github.com/YangModels/yang/blob/main/standard/ietf/RFC/ietf-inet-types%402013-07-15.yang)

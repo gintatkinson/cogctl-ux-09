@@ -18,12 +18,12 @@ This Epic covers the digital engineering reverse-engineering of the IETF YANG mo
 ## Associated Use Cases & User Stories
 
 ### Associated Use Cases
-- [x] #87 - [Use Case 15: Validate Internet Address and Protocol Types](https://github.com/gintatkinson/cogctl-ux-09/blob/main/docs/use-cases/uc-15-validate-internet-address.md)
+- [ ] #87 - [Use Case 15: Validate Internet Address and Protocol Types](https://github.com/gintatkinson/cogctl-ux-09/blob/main/docs/use-cases/uc-15-validate-internet-address.md)
 
 ### Associated User Stories
-- [x] #84 - [User Story 28: IP Address and Prefix Types](https://github.com/gintatkinson/cogctl-ux-09/blob/main/docs/user-stories/us-28-ip-address-prefix.md)
-- [x] #85 - [User Story 29: Internet Domain Names and URIs](https://github.com/gintatkinson/cogctl-ux-09/blob/main/docs/user-stories/us-29-domain-names-uri.md)
-- [x] #86 - [User Story 30: IP Protocol Fields and Autonomous Systems](https://github.com/gintatkinson/cogctl-ux-09/blob/main/docs/user-stories/us-30-protocol-fields-as.md)
+- [ ] #84 - [User Story 28: IP Address and Prefix Types](https://github.com/gintatkinson/cogctl-ux-09/blob/main/docs/user-stories/us-28-ip-address-prefix.md)
+- [ ] #85 - [User Story 29: Internet Domain Names and URIs](https://github.com/gintatkinson/cogctl-ux-09/blob/main/docs/user-stories/us-29-domain-names-uri.md)
+- [ ] #86 - [User Story 30: IP Protocol Fields and Autonomous Systems](https://github.com/gintatkinson/cogctl-ux-09/blob/main/docs/user-stories/us-30-protocol-fields-as.md)
 ## 3. Architecture and System Interaction Diagrams
 ```mermaid
 classDiagram

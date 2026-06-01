@@ -20,7 +20,7 @@ spec_source: "RFC 9911 Section 4"
 > Identifiers are used to represent structural references (OIDs) and naming labels (YANG identifiers). They must follow strict syntactic schemas to guarantee interoperability and correct node reference.
 
 ## Required Features Matrix
-- [ ] #18 - [Feature 7: Identifiers and Object References](https://github.com/gintatkinson/cogctl-ux-09/blob/feat/epic-2-common-types/docs/features/feat-07-identifiers-references.md)
+- [x] #18 - [Feature 7: Identifiers and Object References](https://github.com/gintatkinson/cogctl-ux-09/blob/feat/epic-2-common-types/docs/features/feat-07-identifiers-references.md)
 
 ## Source References
 YANG Schema: [ietf-yang-types.yang](https://github.com/YangModels/yang/blob/main/standard/ietf/RFC/ietf-yang-types%402025-12-22.yang)
