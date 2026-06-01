@@ -314,6 +314,20 @@ class _ReferenceFrameDashboardState extends State<ReferenceFrameDashboard> {
   String? _rackColError;
   bool _isEditingRack = false;
 
+  // Feature 16: Electrical & Chassis attributes state
+  final _rackMaxVoltageController = TextEditingController(text: '240');
+  final _rackMaxAllocatedPowerController = TextEditingController(text: '6000');
+  String? _rackMaxVoltageError;
+  String? _rackMaxAllocatedPowerError;
+  List<RackContainedChassis> _editingRackContainedChassis = [];
+
+  // Chassis placement controls inside rack detail
+  final _rackChassisUController = TextEditingController();
+  final _rackChassisPowerController = TextEditingController();
+  String? _rackChassisNeRef;
+  String? _rackChassisComponentRef;
+  String? _rackChassisError;
+
   @override
   void initState() {
     super.initState();
@@ -628,6 +642,10 @@ class _ReferenceFrameDashboardState extends State<ReferenceFrameDashboard> {
     _rackValidUntilController.dispose();
     _rackRowController.dispose();
     _rackColController.dispose();
+    _rackMaxVoltageController.dispose();
+    _rackMaxAllocatedPowerController.dispose();
+    _rackChassisUController.dispose();
+    _rackChassisPowerController.dispose();
     _expiryUpdateTimer?.cancel();
     super.dispose();
   }
@@ -5127,6 +5145,38 @@ class _ReferenceFrameDashboardState extends State<ReferenceFrameDashboard> {
                   ),
                 ],
               ),
+              const SizedBox(height: 16),
+
+              // Feature 16: Electrical parameters
+              Row(
+                children: [
+                  Expanded(
+                    child: TextFormField(
+                      controller: _rackMaxVoltageController,
+                      decoration: InputDecoration(
+                        labelText: 'Max Voltage (V)',
+                        border: const OutlineInputBorder(),
+                        errorText: _rackMaxVoltageError,
+                        helperText: 'Standard: 240V or 480V',
+                      ),
+                      keyboardType: TextInputType.number,
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: TextFormField(
+                      controller: _rackMaxAllocatedPowerController,
+                      decoration: InputDecoration(
+                        labelText: 'Max Allocated Power (W)',
+                        border: const OutlineInputBorder(),
+                        errorText: _rackMaxAllocatedPowerError,
+                        helperText: 'E.g., 6000W or 12000W',
+                      ),
+                      keyboardType: TextInputType.number,
+                    ),
+                  ),
+                ],
+              ),
               const SizedBox(height: 24),
 
               // Timestamp field
@@ -5190,6 +5240,241 @@ class _ReferenceFrameDashboardState extends State<ReferenceFrameDashboard> {
                     ),
                   ),
                 ],
+              ),
+              const SizedBox(height: 24),
+
+              const Divider(height: 32),
+              const Text(
+                'RACK-CONTAINED CHASSIS & POWER BUDGETS',
+                style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 12),
+
+              // Render current list of chassis in the rack
+              if (_editingRackContainedChassis.isEmpty)
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 8.0),
+                  child: Text(
+                    'No chassis mounted in this rack.',
+                    style: TextStyle(fontStyle: FontStyle.italic, color: isDark ? Colors.white60 : Colors.black54),
+                  ),
+                )
+              else
+                ListView.builder(
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  itemCount: _editingRackContainedChassis.length,
+                  itemBuilder: (context, index) {
+                    final chassis = _editingRackContainedChassis[index];
+                    return Card(
+                      margin: const EdgeInsets.symmetric(vertical: 4),
+                      color: isDark ? const Color(0xFF1E1E24) : const Color(0xFFF1F3F4),
+                      child: ListTile(
+                        dense: true,
+                        title: Text('Slot U${chassis.relativePosition}: ${chassis.neRef} / ${chassis.componentRef}'),
+                        subtitle: Text('Power Draw: ${chassis.powerConsumption} W'),
+                        trailing: IconButton(
+                          key: ValueKey('delete-chassis-$index'),
+                          icon: const Icon(Icons.delete, color: Colors.redAccent, size: 18),
+                          onPressed: () {
+                            setState(() {
+                              _editingRackContainedChassis.removeAt(index);
+                            });
+                          },
+                        ),
+                      ),
+                    );
+                  },
+                ),
+              const SizedBox(height: 12),
+
+              // Sub-form to mount a chassis
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  border: Border.all(color: isDark ? Colors.white10 : Colors.black12),
+                  borderRadius: BorderRadius.circular(4),
+                  color: isDark ? const Color(0xFF242526) : const Color(0xFFFAFAFA),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    const Text(
+                      'Mount New Chassis',
+                      style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
+                    ),
+                    const SizedBox(height: 8),
+                    Row(
+                      children: [
+                        Expanded(
+                          flex: 2,
+                          child: TextFormField(
+                            key: const ValueKey('rack-chassis-u-field'),
+                            controller: _rackChassisUController,
+                            decoration: const InputDecoration(
+                              labelText: 'U-Slot (1-255)',
+                              border: OutlineInputBorder(),
+                              isDense: true,
+                            ),
+                            keyboardType: TextInputType.number,
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          flex: 3,
+                          child: TextFormField(
+                            key: const ValueKey('rack-chassis-power-field'),
+                            controller: _rackChassisPowerController,
+                            decoration: const InputDecoration(
+                              labelText: 'Power Draw (W)',
+                              border: OutlineInputBorder(),
+                              isDense: true,
+                            ),
+                            keyboardType: TextInputType.number,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 8),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: DropdownButtonFormField<String>(
+                            key: const ValueKey('rack-chassis-ne-dropdown'),
+                            isExpanded: true,
+                            initialValue: _rackChassisNeRef,
+                            decoration: const InputDecoration(
+                              labelText: 'Network Element Ref',
+                              border: OutlineInputBorder(),
+                              isDense: true,
+                            ),
+                            items: [
+                              const DropdownMenuItem<String>(
+                                value: null,
+                                child: Text('Select NE'),
+                              ),
+                              ..._networkInventoryService.getNetworkElements().map((ne) => DropdownMenuItem<String>(
+                                value: ne.neId,
+                                child: Text(ne.neId),
+                              )),
+                            ],
+                            onChanged: (val) {
+                              setState(() {
+                                _rackChassisNeRef = val;
+                                _rackChassisComponentRef = null;
+                              });
+                            },
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: DropdownButtonFormField<String>(
+                            key: const ValueKey('rack-chassis-component-dropdown'),
+                            isExpanded: true,
+                            initialValue: _rackChassisComponentRef,
+                            decoration: const InputDecoration(
+                              labelText: 'Component Ref',
+                              border: OutlineInputBorder(),
+                              isDense: true,
+                            ),
+                            items: [
+                              const DropdownMenuItem<String>(
+                                value: null,
+                                child: Text('Select Component'),
+                              ),
+                              if (_rackChassisNeRef != null)
+                                ...(_networkInventoryService.getNetworkElement(_rackChassisNeRef!)?.componentIds ?? [])
+                                    .map((compId) => DropdownMenuItem<String>(
+                                          value: compId,
+                                          child: Text(compId),
+                                        )),
+                            ],
+                            onChanged: (val) {
+                              setState(() {
+                                _rackChassisComponentRef = val;
+                              });
+                            },
+                          ),
+                        ),
+                      ],
+                    ),
+                    if (_rackChassisError != null) ...[
+                      const SizedBox(height: 8),
+                      Text(
+                        _rackChassisError!,
+                        style: const TextStyle(color: Colors.red, fontSize: 11, fontWeight: FontWeight.bold),
+                      ),
+                    ],
+                    const SizedBox(height: 8),
+                    ElevatedButton.icon(
+                      key: const ValueKey('mount-chassis-button'),
+                      icon: const Icon(Icons.add, size: 16),
+                      label: const Text('Mount Chassis to Slot'),
+                      onPressed: () {
+                        final uText = _rackChassisUController.text.trim();
+                        final pText = _rackChassisPowerController.text.trim();
+                        final neRef = _rackChassisNeRef;
+                        final compRef = _rackChassisComponentRef;
+
+                        if (uText.isEmpty || pText.isEmpty || neRef == null || compRef == null) {
+                          setState(() {
+                            _rackChassisError = 'Please fill all chassis fields.';
+                          });
+                          return;
+                        }
+
+                        final slot = int.tryParse(uText);
+                        if (slot == null || slot < 1 || slot > 255) {
+                          setState(() {
+                            _rackChassisError = 'U-Slot must be between 1 and 255.';
+                          });
+                          return;
+                        }
+
+                        final power = int.tryParse(pText);
+                        if (power == null || power < 0 || power > 65535) {
+                          setState(() {
+                            _rackChassisError = 'Power must be between 0 and 65535 W.';
+                          });
+                          return;
+                        }
+
+                        // Validate U-slot conflict
+                        if (_editingRackContainedChassis.any((c) => c.relativePosition == slot)) {
+                          setState(() {
+                            _rackChassisError = 'Chassis slot conflict at U-slot position $slot.';
+                          });
+                          return;
+                        }
+
+                        // Validate power limit constraint
+                        final currentTotalPower = _editingRackContainedChassis.fold<int>(0, (sum, c) => sum + c.powerConsumption);
+                        final maxPowerText = _rackMaxAllocatedPowerController.text.trim();
+                        final maxPower = int.tryParse(maxPowerText) ?? 0;
+                        if (currentTotalPower + power > maxPower) {
+                          setState(() {
+                            _rackChassisError = 'Mounting this chassis exceeds max allocated power limit of $maxPower W.';
+                          });
+                          return;
+                        }
+
+                        setState(() {
+                          _editingRackContainedChassis.add(RackContainedChassis(
+                            relativePosition: slot,
+                            neRef: neRef,
+                            componentRef: compRef,
+                            powerConsumption: power,
+                          ));
+                          _rackChassisUController.clear();
+                          _rackChassisPowerController.clear();
+                          _rackChassisNeRef = null;
+                          _rackChassisComponentRef = null;
+                          _rackChassisError = null;
+                        });
+                      },
+                    ),
+                  ],
+                ),
               ),
               const SizedBox(height: 24),
 
@@ -5385,6 +5670,9 @@ class _ReferenceFrameDashboardState extends State<ReferenceFrameDashboard> {
                         _rackRowController.clear();
                         _rackColController.clear();
                       }
+                      _rackMaxVoltageController.text = rack.maxVoltage.toString();
+                      _rackMaxAllocatedPowerController.text = rack.maxAllocatedPower.toString();
+                      _editingRackContainedChassis = List.from(rack.containedChassis);
                       _rackFormError = null;
                     });
                   },
@@ -5691,6 +5979,8 @@ class _ReferenceFrameDashboardState extends State<ReferenceFrameDashboard> {
       _rackValidUntilError = null;
       _rackRowError = null;
       _rackColError = null;
+      _rackMaxVoltageError = null;
+      _rackMaxAllocatedPowerError = null;
     });
 
     final id = _rackIdController.text.trim();
@@ -5703,6 +5993,8 @@ class _ReferenceFrameDashboardState extends State<ReferenceFrameDashboard> {
     final locationRef = _rackFormLocationId;
     final rowText = _rackRowController.text.trim();
     final colText = _rackColController.text.trim();
+    final maxVoltageText = _rackMaxVoltageController.text.trim();
+    final maxAllocatedPowerText = _rackMaxAllocatedPowerController.text.trim();
 
     bool hasError = false;
 
@@ -5808,6 +6100,28 @@ class _ReferenceFrameDashboardState extends State<ReferenceFrameDashboard> {
       }
     }
 
+    int maxVoltage = 240;
+    if (maxVoltageText.isNotEmpty) {
+      final parsed = int.tryParse(maxVoltageText);
+      if (parsed == null || parsed < 0 || parsed > 65535) {
+        setState(() => _rackMaxVoltageError = 'Must be a positive integer between 0 and 65535');
+        hasError = true;
+      } else {
+        maxVoltage = parsed;
+      }
+    }
+
+    int maxAllocatedPower = 6000;
+    if (maxAllocatedPowerText.isNotEmpty) {
+      final parsed = int.tryParse(maxAllocatedPowerText);
+      if (parsed == null || parsed < 0 || parsed > 65535) {
+        setState(() => _rackMaxAllocatedPowerError = 'Must be a positive integer between 0 and 65535');
+        hasError = true;
+      } else {
+        maxAllocatedPower = parsed;
+      }
+    }
+
     if (hasError) return;
 
     RackLocation? rackLocation;
@@ -5832,6 +6146,9 @@ class _ReferenceFrameDashboardState extends State<ReferenceFrameDashboard> {
           timestamp: timestamp!,
           validUntil: validUntil!,
           rackLocation: rackLocation,
+          maxVoltage: maxVoltage,
+          maxAllocatedPower: maxAllocatedPower,
+          containedChassis: List.from(_editingRackContainedChassis),
         );
         _equipmentRackService.updateRack(
           _selectedEquipmentRack!.id,
@@ -5854,6 +6171,9 @@ class _ReferenceFrameDashboardState extends State<ReferenceFrameDashboard> {
           timestamp: timestamp!,
           validUntil: validUntil!,
           rackLocation: rackLocation,
+          maxVoltage: maxVoltage,
+          maxAllocatedPower: maxAllocatedPower,
+          containedChassis: List.from(_editingRackContainedChassis),
         );
         _equipmentRackService.addRack(newRack, validLocationIds: validLocationIds);
         ScaffoldMessenger.of(context).showSnackBar(
@@ -5873,7 +6193,10 @@ class _ReferenceFrameDashboardState extends State<ReferenceFrameDashboard> {
       _rackValidUntilController.clear();
       _rackRowController.clear();
       _rackColController.clear();
+      _rackMaxVoltageController.text = '240';
+      _rackMaxAllocatedPowerController.text = '6000';
       setState(() {
+        _editingRackContainedChassis = [];
         _selectedRackClass = 'rack-standard';
         _rackFormLocationId = null;
         _isEditingRack = false;
@@ -7181,6 +7504,10 @@ class USlotGridVisualizer extends StatelessWidget {
     final cardBg = isDark ? const Color(0xFF1E1E2E) : const Color(0xFFF1F3F4);
     final slotBg = isDark ? const Color(0xFF2D2D3F) : const Color(0xFFE8EAED);
 
+    final int totalPower = rack.containedChassis.fold<int>(0, (sum, c) => sum + c.powerConsumption);
+    final double powerRatio = rack.maxAllocatedPower > 0 ? (totalPower / rack.maxAllocatedPower) : 0.0;
+    final bool isOverpowered = totalPower > rack.maxAllocatedPower;
+
     return Container(
       decoration: BoxDecoration(
         color: cardBg,
@@ -7231,6 +7558,51 @@ class USlotGridVisualizer extends StatelessWidget {
             ],
           ),
           const Divider(height: 16),
+
+          // Electricity indicators
+          Padding(
+            padding: const EdgeInsets.only(bottom: 12),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      'Power: $totalPower W / ${rack.maxAllocatedPower} W',
+                      style: TextStyle(
+                        fontSize: 11,
+                        fontWeight: FontWeight.bold,
+                        color: isOverpowered ? Colors.red : (isDark ? Colors.white70 : Colors.black87),
+                      ),
+                    ),
+                    Text(
+                      'Voltage: ${rack.maxVoltage} V',
+                      style: const TextStyle(fontSize: 11, fontWeight: FontWeight.bold),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 6),
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(4),
+                  child: LinearProgressIndicator(
+                    value: powerRatio.clamp(0.0, 1.0),
+                    backgroundColor: isDark ? Colors.white10 : Colors.black12,
+                    color: isOverpowered ? Colors.red : Colors.green,
+                    minHeight: 8,
+                  ),
+                ),
+                if (isOverpowered) ...[
+                  const SizedBox(height: 4),
+                  const Text(
+                    '⚠️ POWER CAPACITY EXCEEDED!',
+                    style: TextStyle(color: Colors.red, fontSize: 10, fontWeight: FontWeight.bold),
+                  ),
+                ],
+              ],
+            ),
+          ),
+
           // Scrollable Rack representation
           Expanded(
             child: Container(
@@ -7245,39 +7617,28 @@ class USlotGridVisualizer extends StatelessWidget {
                 itemBuilder: (context, index) {
                   final uIndex = units - index; // Numbered top to bottom
                   
-                  // Mock some server modules
-                  bool isFilled = false;
-                  Color moduleColor = Colors.transparent;
-                  String moduleLabel = '';
-                  IconData? moduleIcon;
-
-                  if (uIndex == 1 || uIndex == 2) {
-                    isFilled = true;
-                    moduleColor = Colors.amber.withValues(alpha: 0.2);
-                    moduleLabel = 'Core Switch (2U)';
-                    moduleIcon = Icons.settings_ethernet;
-                  } else if (uIndex == 5) {
-                    isFilled = true;
-                    moduleColor = Colors.purple.withValues(alpha: 0.2);
-                    moduleLabel = 'Quantum KMS (1U)';
-                    moduleIcon = Icons.vpn_key;
-                  } else if (uIndex >= 10 && uIndex <= 13) {
-                    isFilled = true;
-                    moduleColor = Colors.teal.withValues(alpha: 0.2);
-                    moduleLabel = uIndex == 13 ? 'Cognitive Compute Node (4U)' : '';
-                    moduleIcon = uIndex == 13 ? Icons.dns : null;
-                  } else if (uIndex == 20 || uIndex == 21) {
-                    isFilled = true;
-                    moduleColor = Colors.blue.withValues(alpha: 0.2);
-                    moduleLabel = uIndex == 21 ? 'Primary Power Unit (2U)' : '';
-                    moduleIcon = uIndex == 21 ? Icons.power : null;
+                  RackContainedChassis? chassis;
+                  try {
+                    chassis = rack.containedChassis.firstWhere((c) => c.relativePosition == uIndex);
+                  } catch (_) {
+                    chassis = null;
                   }
+
+                  final bool isFilled = chassis != null;
+                  final Color moduleColor = isFilled 
+                      ? Colors.teal.withValues(alpha: 0.2) 
+                      : slotBg;
+                  final String moduleLabel = isFilled 
+                      ? '${chassis.neRef} / ${chassis.componentRef} (${chassis.powerConsumption} W)' 
+                      : 'Slot U$uIndex: Empty';
+                  final IconData? moduleIcon = isFilled ? Icons.dns : null;
 
                   return Container(
                     height: 24,
+                    key: ValueKey('rack-slot-$uIndex'),
                     margin: const EdgeInsets.symmetric(vertical: 1.5),
                     decoration: BoxDecoration(
-                      color: isFilled ? moduleColor : slotBg,
+                      color: moduleColor,
                       borderRadius: BorderRadius.circular(2),
                       border: Border.all(
                         color: isFilled ? cabinetColor.withValues(alpha: 0.7) : Colors.transparent,
@@ -7361,4 +7722,5 @@ class USlotGridVisualizer extends StatelessWidget {
       ),
     );
   }
+
 }

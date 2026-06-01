@@ -1,4 +1,5 @@
 import '../models/equipment_rack.dart';
+import 'mock_network_inventory_service.dart';
 
 class MockEquipmentRackService {
   static final MockEquipmentRackService _instance = MockEquipmentRackService._internal();
@@ -27,6 +28,22 @@ class MockEquipmentRackService {
           rowNumber: 2,
           columnNumber: 3,
         ),
+        maxVoltage: 240,
+        maxAllocatedPower: 6000,
+        containedChassis: [
+          RackContainedChassis(
+            relativePosition: 10,
+            neRef: 'ne-A',
+            componentRef: 'comp-1',
+            powerConsumption: 1200,
+          ),
+          RackContainedChassis(
+            relativePosition: 12,
+            neRef: 'ne-A',
+            componentRef: 'comp-2',
+            powerConsumption: 1500,
+          ),
+        ],
       ),
       EquipmentRack(
         id: 'Rack-Secure-High-48U',
@@ -41,6 +58,9 @@ class MockEquipmentRackService {
           rowNumber: 4,
           columnNumber: 5,
         ),
+        maxVoltage: 480,
+        maxAllocatedPower: 12000,
+        containedChassis: [],
       ),
     ]);
   }
@@ -48,6 +68,11 @@ class MockEquipmentRackService {
   List<EquipmentRack> getRacks() => List.unmodifiable(_racks);
 
   void addRack(EquipmentRack rack, {Set<String> validLocationIds = const {}}) {
+    final netService = MockNetworkInventoryService();
+    final Map<String, List<String>> neCompMap = {
+      for (var ne in netService.getNetworkElements()) ne.neId: ne.componentIds
+    };
+
     EquipmentRackValidator.validate(
       id: rack.id,
       rackClass: rack.rackClass,
@@ -58,6 +83,10 @@ class MockEquipmentRackService {
       validUntil: rack.validUntil,
       rackLocation: rack.rackLocation,
       validLocationIds: validLocationIds,
+      maxVoltage: rack.maxVoltage,
+      maxAllocatedPower: rack.maxAllocatedPower,
+      containedChassis: rack.containedChassis,
+      validNeComponents: neCompMap,
     );
 
     // Check for duplicate ID
@@ -69,6 +98,11 @@ class MockEquipmentRackService {
   }
 
   void updateRack(String id, EquipmentRack updatedRack, {Set<String> validLocationIds = const {}}) {
+    final netService = MockNetworkInventoryService();
+    final Map<String, List<String>> neCompMap = {
+      for (var ne in netService.getNetworkElements()) ne.neId: ne.componentIds
+    };
+
     EquipmentRackValidator.validate(
       id: updatedRack.id,
       rackClass: updatedRack.rackClass,
@@ -79,6 +113,10 @@ class MockEquipmentRackService {
       validUntil: updatedRack.validUntil,
       rackLocation: updatedRack.rackLocation,
       validLocationIds: validLocationIds,
+      maxVoltage: updatedRack.maxVoltage,
+      maxAllocatedPower: updatedRack.maxAllocatedPower,
+      containedChassis: updatedRack.containedChassis,
+      validNeComponents: neCompMap,
     );
 
     // Ensure we are not changing ID to another existing ID

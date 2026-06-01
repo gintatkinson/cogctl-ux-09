@@ -36,6 +36,50 @@ class RackLocation {
   }
 }
 
+class RackContainedChassis {
+  final int relativePosition; // uint8
+  final String neRef;
+  final String componentRef;
+  final int powerConsumption; // in Watts
+
+  RackContainedChassis({
+    required this.relativePosition,
+    required this.neRef,
+    required this.componentRef,
+    required this.powerConsumption,
+  });
+
+  RackContainedChassis copyWith({
+    int? relativePosition,
+    String? neRef,
+    String? componentRef,
+    int? powerConsumption,
+  }) {
+    return RackContainedChassis(
+      relativePosition: relativePosition ?? this.relativePosition,
+      neRef: neRef ?? this.neRef,
+      componentRef: componentRef ?? this.componentRef,
+      powerConsumption: powerConsumption ?? this.powerConsumption,
+    );
+  }
+
+  Map<String, dynamic> toJson() => {
+        'relative-position': relativePosition,
+        'ne-ref': neRef,
+        'component-ref': componentRef,
+        'power-consumption': powerConsumption,
+      };
+
+  factory RackContainedChassis.fromJson(Map<String, dynamic> json) {
+    return RackContainedChassis(
+      relativePosition: json['relative-position'] as int,
+      neRef: json['ne-ref'] as String,
+      componentRef: json['component-ref'] as String,
+      powerConsumption: json['power-consumption'] as int,
+    );
+  }
+}
+
 class EquipmentRack {
   final String id;
   final String rackClass;
@@ -45,6 +89,9 @@ class EquipmentRack {
   final DateTime timestamp;
   final DateTime validUntil;
   final RackLocation? rackLocation;
+  final int maxVoltage; // in Volts (uint16)
+  final int maxAllocatedPower; // in Watts (uint16)
+  final List<RackContainedChassis> containedChassis;
 
   EquipmentRack({
     required this.id,
@@ -55,6 +102,9 @@ class EquipmentRack {
     required this.timestamp,
     required this.validUntil,
     this.rackLocation,
+    this.maxVoltage = 0,
+    this.maxAllocatedPower = 0,
+    this.containedChassis = const [],
   });
 
   EquipmentRack copyWith({
@@ -66,6 +116,9 @@ class EquipmentRack {
     DateTime? timestamp,
     DateTime? validUntil,
     RackLocation? Function()? rackLocation,
+    int? maxVoltage,
+    int? maxAllocatedPower,
+    List<RackContainedChassis>? containedChassis,
   }) {
     return EquipmentRack(
       id: id ?? this.id,
@@ -76,6 +129,9 @@ class EquipmentRack {
       timestamp: timestamp ?? this.timestamp,
       validUntil: validUntil ?? this.validUntil,
       rackLocation: rackLocation != null ? rackLocation() : this.rackLocation,
+      maxVoltage: maxVoltage ?? this.maxVoltage,
+      maxAllocatedPower: maxAllocatedPower ?? this.maxAllocatedPower,
+      containedChassis: containedChassis ?? this.containedChassis,
     );
   }
 
@@ -88,6 +144,9 @@ class EquipmentRack {
         'timestamp': timestamp.toIso8601String(),
         'valid-until': validUntil.toIso8601String(),
         if (rackLocation != null) 'rack-location': rackLocation!.toJson(),
+        'max-voltage': maxVoltage,
+        'max-allocated-power': maxAllocatedPower,
+        'contained-chassis': containedChassis.map((c) => c.toJson()).toList(),
       };
 
   factory EquipmentRack.fromJson(Map<String, dynamic> json) {
@@ -102,6 +161,12 @@ class EquipmentRack {
       rackLocation: json['rack-location'] != null
           ? RackLocation.fromJson(json['rack-location'] as Map<String, dynamic>)
           : null,
+      maxVoltage: json['max-voltage'] as int? ?? 0,
+      maxAllocatedPower: json['max-allocated-power'] as int? ?? 0,
+      containedChassis: (json['contained-chassis'] as List<dynamic>?)
+              ?.map((c) => RackContainedChassis.fromJson(c as Map<String, dynamic>))
+              .toList() ??
+          const [],
     );
   }
 }
@@ -124,6 +189,10 @@ class EquipmentRackValidator {
     required DateTime validUntil,
     RackLocation? rackLocation,
     Set<String> validLocationIds = const {},
+    int maxVoltage = 0,
+    int maxAllocatedPower = 0,
+    List<RackContainedChassis> containedChassis = const [],
+    Map<String, List<String>> validNeComponents = const {},
   }) {
     final trimmedId = id.trim();
     if (trimmedId.isEmpty) {
@@ -150,6 +219,47 @@ class EquipmentRackValidator {
 
     if (!validUntil.isAfter(timestamp)) {
       throw const FormatException("Rack valid-until timestamp must be after recording timestamp");
+    }
+
+    if (maxVoltage < 0 || maxVoltage > 65535) {
+      throw const FormatException("Max voltage must be a uint16 integer (0-65535)");
+    }
+
+    if (maxAllocatedPower < 0 || maxAllocatedPower > 65535) {
+      throw const FormatException("Max allocated power must be a uint16 integer (0-65535)");
+    }
+
+    // Validate contained chassis
+    final Set<int> positions = {};
+    int totalPower = 0;
+    for (final chassis in containedChassis) {
+      if (chassis.relativePosition < 1 || chassis.relativePosition > 255) {
+        throw FormatException("Chassis relative position must be a uint8 integer (1-255)");
+      }
+
+      if (positions.contains(chassis.relativePosition)) {
+        throw FormatException("Chassis slot conflict at U-slot position ${chassis.relativePosition}");
+      }
+      positions.add(chassis.relativePosition);
+
+      totalPower += chassis.powerConsumption;
+
+      // Validate referential integrity
+      if (validNeComponents.isNotEmpty) {
+        if (!validNeComponents.containsKey(chassis.neRef)) {
+          throw FormatException("Network Element '${chassis.neRef}' does not exist in inventory");
+        }
+        final components = validNeComponents[chassis.neRef] ?? [];
+        if (!components.contains(chassis.componentRef)) {
+          throw FormatException(
+              "Component '${chassis.componentRef}' does not exist in Network Element '${chassis.neRef}'");
+        }
+      }
+    }
+
+    if (totalPower > maxAllocatedPower) {
+      throw FormatException(
+          "Total power consumption ($totalPower W) exceeds rack max allocated power ($maxAllocatedPower W)");
     }
 
     if (rackLocation != null) {
