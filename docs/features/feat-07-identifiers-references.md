@@ -3,6 +3,7 @@ title: "Feature 7: Identifiers and Object References (Issue #18)"
 epic: "Epic 2: Common YANG Data Types (Issue #22)"
 type: "feature"
 issue: 18
+status: "completed"
 labels: ["feature", "common-yang-types", "ietf-yang-types"]
 covered-nodes: ["object-identifier", "object-identifier-128", "yang-identifier"]
 ---

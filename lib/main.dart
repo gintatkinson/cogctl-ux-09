@@ -5,6 +5,8 @@ import 'models/geo_location.dart';
 import 'services/mock_location_service.dart';
 import 'models/counter_gauge.dart';
 import 'services/mock_counter_gauge_service.dart';
+import 'models/identifiers_references.dart';
+import 'services/mock_identifiers_references_service.dart';
 
 
 void main() {
@@ -203,11 +205,20 @@ class _ReferenceFrameDashboardState extends State<ReferenceFrameDashboard> {
   bool _discontinuityChecked = false;
   String? _counterGaugeValueError;
 
+  // Identifiers & References state
+  final MockIdentifiersReferencesService _identifiersService = MockIdentifiersReferencesService();
+  List<YangIdentifierReference> _identifierNodes = [];
+  YangIdentifierReference? _selectedIdentifierNode;
+  final _identifiersFormKey = GlobalKey<FormState>();
+  final _identifierValueController = TextEditingController();
+  String? _identifierValueError;
+
   @override
   void initState() {
     super.initState();
     _refreshList();
     _refreshCounterGaugeList();
+    _refreshIdentifierList();
 
     _expiryUpdateTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
       if (mounted) {
@@ -502,6 +513,7 @@ class _ReferenceFrameDashboardState extends State<ReferenceFrameDashboard> {
     _timestampController.dispose();
     _validUntilController.dispose();
     _counterGaugeValueController.dispose();
+    _identifierValueController.dispose();
     _expiryUpdateTimer?.cancel();
     super.dispose();
   }
@@ -564,6 +576,59 @@ class _ReferenceFrameDashboardState extends State<ReferenceFrameDashboard> {
     } catch (e) {
       setState(() {
         _counterGaugeValueError = e.toString().replaceFirst('FormatException: ', '');
+      });
+    }
+  }
+
+  void _refreshIdentifierList() {
+    setState(() {
+      _identifierNodes = _identifiersService.getNodes();
+      if (_selectedIdentifierNode != null) {
+        final existingIndex = _identifierNodes.indexWhere((n) => n.id == _selectedIdentifierNode!.id);
+        if (existingIndex != -1) {
+          _selectedIdentifierNode = _identifierNodes[existingIndex];
+        } else if (_identifierNodes.isNotEmpty) {
+          _selectedIdentifierNode = _identifierNodes.first;
+        }
+      } else if (_identifierNodes.isNotEmpty) {
+        _selectedIdentifierNode = _identifierNodes.first;
+        _identifierValueController.text = _selectedIdentifierNode!.value;
+      }
+    });
+  }
+
+  void _submitIdentifierUpdate() {
+    if (_selectedIdentifierNode == null) return;
+    
+    final text = _identifierValueController.text.trim();
+    if (text.isEmpty) {
+      setState(() {
+        _identifierValueError = 'Value cannot be empty';
+      });
+      return;
+    }
+
+    try {
+      _identifiersService.updateNodeValue(
+        _selectedIdentifierNode!.id,
+        text,
+      );
+      
+      setState(() {
+        _identifierValueError = null;
+      });
+
+      _refreshIdentifierList();
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Successfully updated ${_selectedIdentifierNode!.name} to $text'),
+          backgroundColor: Colors.green,
+        ),
+      );
+    } catch (e) {
+      setState(() {
+        _identifierValueError = e.toString().replaceFirst('FormatException: ', '');
       });
     }
   }
@@ -1010,7 +1075,9 @@ class _ReferenceFrameDashboardState extends State<ReferenceFrameDashboard> {
                   Text(
                     _currentScreen == 'reference_frames'
                         ? 'RFC 9179 Geo-Location Specs'
-                        : 'RFC 9911 Counters & Gauges',
+                        : (_currentScreen == 'counters_gauges'
+                            ? 'RFC 9911 Counters & Gauges'
+                            : 'RFC 9911 Identifiers & Refs'),
                     style: TextStyle(fontWeight: FontWeight.w400, fontSize: 16, color: Colors.white.withValues(alpha: 0.9)),
                   ),
                 ],
@@ -1018,7 +1085,9 @@ class _ReferenceFrameDashboardState extends State<ReferenceFrameDashboard> {
             : Text(
                 _currentScreen == 'reference_frames'
                     ? 'RFC 9179 Geo-Location Specs'
-                    : 'RFC 9911 Counters & Gauges',
+                    : (_currentScreen == 'counters_gauges'
+                        ? 'RFC 9911 Counters & Gauges'
+                        : 'RFC 9911 Identifiers & Refs'),
                 style: TextStyle(fontWeight: FontWeight.w500, fontSize: 16, color: Colors.white.withValues(alpha: 0.9)),
               ),
         actions: [
@@ -1102,40 +1171,75 @@ class _ReferenceFrameDashboardState extends State<ReferenceFrameDashboard> {
                             ],
                           ),
                         ))
-                  : (isDesktop
-                      ? Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            _buildCountersGaugesHeader(theme),
-                            const SizedBox(height: 12),
-                            _buildCountersGaugesSummary(theme),
-                            const SizedBox(height: 24),
-                            Expanded(
-                              child: Row(
+                  : (_currentScreen == 'counters_gauges'
+                      ? (isDesktop
+                          ? Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                _buildCountersGaugesHeader(theme),
+                                const SizedBox(height: 12),
+                                _buildCountersGaugesSummary(theme),
+                                const SizedBox(height: 24),
+                                Expanded(
+                                  child: Row(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Expanded(flex: 5, child: _buildCounterGaugeFormCard(theme)),
+                                      const SizedBox(width: 24),
+                                      Expanded(flex: 6, child: _buildCounterGaugeListPane(theme)),
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            )
+                          : SingleChildScrollView(
+                              child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  Expanded(flex: 5, child: _buildCounterGaugeFormCard(theme)),
-                                  const SizedBox(width: 24),
-                                  Expanded(flex: 6, child: _buildCounterGaugeListPane(theme)),
+                                  _buildCountersGaugesHeader(theme),
+                                  const SizedBox(height: 12),
+                                  _buildCountersGaugesSummary(theme),
+                                  const SizedBox(height: 24),
+                                  _buildCounterGaugeFormCard(theme),
+                                  const SizedBox(height: 24),
+                                  _buildCounterGaugeListPane(theme),
                                 ],
                               ),
-                            ),
-                          ],
-                        )
-                      : SingleChildScrollView(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              _buildCountersGaugesHeader(theme),
-                              const SizedBox(height: 12),
-                              _buildCountersGaugesSummary(theme),
-                              const SizedBox(height: 24),
-                              _buildCounterGaugeFormCard(theme),
-                              const SizedBox(height: 24),
-                              _buildCounterGaugeListPane(theme),
-                            ],
-                          ),
-                        )),
+                            ))
+                      : (isDesktop
+                          ? Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                _buildIdentifiersReferencesHeader(theme),
+                                const SizedBox(height: 12),
+                                _buildIdentifiersReferencesSummary(theme),
+                                const SizedBox(height: 24),
+                                Expanded(
+                                  child: Row(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Expanded(flex: 5, child: _buildIdentifierFormCard(theme)),
+                                      const SizedBox(width: 24),
+                                      Expanded(flex: 6, child: _buildIdentifierListPane(theme)),
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            )
+                          : SingleChildScrollView(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  _buildIdentifiersReferencesHeader(theme),
+                                  const SizedBox(height: 12),
+                                  _buildIdentifiersReferencesSummary(theme),
+                                  const SizedBox(height: 24),
+                                  _buildIdentifierFormCard(theme),
+                                  const SizedBox(height: 24),
+                                  _buildIdentifierListPane(theme),
+                                ],
+                              ),
+                            ))),
             ),
           ),
         ],
@@ -1304,6 +1408,19 @@ class _ReferenceFrameDashboardState extends State<ReferenceFrameDashboard> {
             onTap: () {
               setState(() {
                 _currentScreen = 'counters_gauges';
+              });
+              if (!isDesktop) {
+                Navigator.of(context).pop();
+              }
+            },
+          ),
+          _buildSidebarItem(
+            icon: Icons.fingerprint,
+            label: 'Identifiers & Refs',
+            isActive: _currentScreen == 'identifiers_references',
+            onTap: () {
+              setState(() {
+                _currentScreen = 'identifiers_references';
               });
               if (!isDesktop) {
                 Navigator.of(context).pop();
@@ -2793,6 +2910,327 @@ class _ReferenceFrameDashboardState extends State<ReferenceFrameDashboard> {
           children: [
             const Text(
               'YANG Node Registries',
+              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 16),
+            isDesktop ? Expanded(child: listContent) : listContent,
+          ],
+        ),
+      ),
+    );
+  }
+  Widget _buildIdentifiersReferencesHeader(ThemeData theme) {
+    return Wrap(
+      crossAxisAlignment: WrapCrossAlignment.center,
+      spacing: 8,
+      runSpacing: 8,
+      children: [
+        Text(
+          'Identifiers & References Dashboard',
+          style: TextStyle(
+            fontSize: 20,
+            fontWeight: FontWeight.bold,
+            color: theme.primaryColor,
+          ),
+        ),
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+          decoration: BoxDecoration(
+            color: Colors.blue.withValues(alpha: 0.15),
+            border: Border.all(color: Colors.blue.withValues(alpha: 0.5)),
+            borderRadius: BorderRadius.circular(4),
+          ),
+          child: const Text(
+            'RFC 9911 / RFC 7950',
+            style: TextStyle(
+              color: Colors.blue,
+              fontSize: 10,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildIdentifiersReferencesSummary(ThemeData theme) {
+    final isDark = theme.brightness == Brightness.dark;
+    final cardBg = isDark ? const Color(0xFF2D2E30) : Colors.white;
+    final borderSide = BorderSide(
+      color: isDark ? const Color(0x1FFFFFFF) : const Color(0x1F000000),
+      width: 1,
+    );
+
+    int total = _identifierNodes.length;
+    int oids = _identifierNodes.where((n) => n.type == YangIdentifierType.objectIdentifier).length;
+    int oids128 = _identifierNodes.where((n) => n.type == YangIdentifierType.objectIdentifier128).length;
+    int yangIds = _identifierNodes.where((n) => n.type == YangIdentifierType.yangIdentifier).length;
+
+    return Wrap(
+      spacing: 16,
+      runSpacing: 16,
+      children: [
+        _buildMiniStatusCard(theme, cardBg, borderSide, 'TOTAL NODES', '$total', Icons.fingerprint, Colors.blue),
+        _buildMiniStatusCard(theme, cardBg, borderSide, 'OBJECT IDENTIFIERS', '$oids', Icons.category, Colors.teal),
+        _buildMiniStatusCard(theme, cardBg, borderSide, 'OIDs (128 LIMIT)', '$oids128', Icons.data_usage, Colors.amber),
+        _buildMiniStatusCard(theme, cardBg, borderSide, 'YANG IDENTIFIERS', '$yangIds', Icons.code, Colors.purple),
+      ],
+    );
+  }
+
+  Widget _buildIdentifierFormCard(ThemeData theme) {
+    final isDark = theme.brightness == Brightness.dark;
+    final cardBg = isDark ? const Color(0xFF2D2E30) : Colors.white;
+
+    return Card(
+      color: cardBg,
+      child: SingleChildScrollView(
+        child: Padding(
+          padding: const EdgeInsets.all(24.0),
+          child: Form(
+            key: _identifiersFormKey,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Text(
+                  'Update Identifier String',
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                ),
+                const SizedBox(height: 16),
+                
+                // Select Node Dropdown
+                DropdownButtonFormField<YangIdentifierReference>(
+                  isExpanded: true,
+                  value: _selectedIdentifierNode,
+                  decoration: const InputDecoration(
+                    labelText: 'Target Node',
+                    border: OutlineInputBorder(),
+                  ),
+                  dropdownColor: cardBg,
+                  items: _identifierNodes.map((node) {
+                    return DropdownMenuItem<YangIdentifierReference>(
+                      value: node,
+                      child: Text(
+                        '${node.name} (${node.type.name})',
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    );
+                  }).toList(),
+                  onChanged: (YangIdentifierReference? val) {
+                    if (val != null) {
+                      setState(() {
+                        _selectedIdentifierNode = val;
+                        _identifierValueController.text = val.value;
+                        _identifierValueError = null;
+                      });
+                    }
+                  },
+                ),
+                const SizedBox(height: 16),
+
+                // Description and Type Info
+                if (_selectedIdentifierNode != null) ...[
+                  Container(
+                     padding: const EdgeInsets.all(12),
+                     decoration: BoxDecoration(
+                       color: theme.brightness == Brightness.dark ? Colors.white12 : Colors.black.withValues(alpha: 0.05),
+                       borderRadius: BorderRadius.circular(4),
+                     ),
+                     child: Column(
+                       crossAxisAlignment: CrossAxisAlignment.start,
+                       children: [
+                         Text(
+                           _selectedIdentifierNode!.description,
+                           style: const TextStyle(fontSize: 12, fontStyle: FontStyle.italic),
+                         ),
+                         const SizedBox(height: 8),
+                         Text(
+                           'Type: ${_selectedIdentifierNode!.type.name}',
+                           style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: theme.primaryColor),
+                         ),
+                       ],
+                     ),
+                  ),
+                  const SizedBox(height: 16),
+                ],
+
+                // New Value input field
+                TextFormField(
+                  controller: _identifierValueController,
+                  decoration: InputDecoration(
+                    labelText: 'New Identifier Value',
+                    helperText: _selectedIdentifierNode?.type == YangIdentifierType.yangIdentifier
+                        ? 'Valid YANG 1.1 identifier format (starts with letter/underscore)'
+                        : 'Valid OID dotted-decimal sequence (e.g. 1.3.6.1.4.1)',
+                    border: const OutlineInputBorder(),
+                    errorText: _identifierValueError,
+                  ),
+                  onChanged: (val) {
+                    if (_identifierValueError != null) {
+                      setState(() {
+                        _identifierValueError = null;
+                      });
+                    }
+                  },
+                ),
+                const SizedBox(height: 16),
+
+                // Submit Buttons Row
+                Row(
+                  children: [
+                    Expanded(
+                      child: ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: theme.primaryColor,
+                          foregroundColor: Colors.white,
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
+                        ),
+                        onPressed: _submitIdentifierUpdate,
+                        child: const Text('Update Identifier'),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildIdentifierListPane(ThemeData theme) {
+    final isDark = theme.brightness == Brightness.dark;
+    final cardBg = isDark ? const Color(0xFF2D2E30) : Colors.white;
+    final isDesktop = MediaQuery.of(context).size.width > 900;
+
+    final Widget listContent = _identifierNodes.isEmpty
+        ? const Center(
+            child: Padding(
+              padding: EdgeInsets.all(24.0),
+              child: Text('No nodes registered.'),
+            ),
+          )
+        : ListView.separated(
+            shrinkWrap: !isDesktop,
+            physics: isDesktop ? const ScrollPhysics() : const NeverScrollableScrollPhysics(),
+            itemCount: _identifierNodes.length,
+            separatorBuilder: (context, index) => const Divider(height: 16),
+            itemBuilder: (context, index) {
+              final node = _identifierNodes[index];
+              IconData icon;
+              Color color;
+              
+              switch (node.type) {
+                case YangIdentifierType.objectIdentifier:
+                  icon = Icons.category;
+                  color = Colors.teal;
+                  break;
+                case YangIdentifierType.objectIdentifier128:
+                  icon = Icons.data_usage;
+                  color = Colors.amber[800] ?? Colors.amber;
+                  break;
+                case YangIdentifierType.yangIdentifier:
+                  icon = Icons.code;
+                  color = Colors.purple;
+                  break;
+              }
+
+              return Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  // Icon
+                  Icon(
+                    icon,
+                    color: color,
+                    size: 24,
+                  ),
+                  const SizedBox(width: 12),
+                  
+                  // Details
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            Expanded(
+                              child: Text(
+                                node.name,
+                                style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                            const SizedBox(width: 8),
+                            Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                              decoration: BoxDecoration(
+                                color: color.withValues(alpha: 0.1),
+                                border: Border.all(
+                                  color: color.withValues(alpha: 0.4),
+                                ),
+                                borderRadius: BorderRadius.circular(4),
+                              ),
+                              child: Text(
+                                node.type.name,
+                                style: TextStyle(
+                                  fontSize: 9,
+                                  color: color,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          node.description,
+                          style: const TextStyle(fontSize: 11, color: Colors.grey),
+                        ),
+                        const SizedBox(height: 8),
+                        Row(
+                          children: [
+                            const Icon(Icons.info_outline, color: Colors.grey, size: 14),
+                            const SizedBox(width: 4),
+                            Expanded(
+                              child: Text(
+                                'Value: ${node.value}',
+                                style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold, fontFamily: 'monospace'),
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  IconButton(
+                    icon: const Icon(Icons.edit, size: 18),
+                    tooltip: 'Select for Update',
+                    onPressed: () {
+                      setState(() {
+                        _selectedIdentifierNode = node;
+                        _identifierValueController.text = node.value;
+                        _identifierValueError = null;
+                      });
+                    },
+                  ),
+                ],
+              );
+            },
+          );
+
+    return Card(
+      color: cardBg,
+      child: Padding(
+        padding: const EdgeInsets.all(24.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text(
+              'YANG Identifiers & OID Registries',
               style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 16),
