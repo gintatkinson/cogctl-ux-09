@@ -20,7 +20,6 @@ This Epic covers the digital engineering reverse-engineering of the IETF YANG mo
 
 ### Associated User Stories
 - [ ] #75 - [User Story 26: Multi-Layer Network Mapping (Issue #75)](https://github.com/gintatkinson/cogctl-ux-09/blob/main/docs/user-stories/us-26-multi-layer-network-topology.md)
-
 ## 3. Architecture and System Interaction Diagrams
 ```mermaid
 classDiagram

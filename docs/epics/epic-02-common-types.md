@@ -23,7 +23,7 @@ This Epic covers the standard common data types defined in RFC 9911 (`ietf-yang-
 - [ ] #28 - [Use Case 4: Validate Common YANG Types (Issue #28)](https://github.com/gintatkinson/cogctl-ux-09/blob/main/docs/use-cases/uc-04-validate-common-types.md)
 
 ### Associated User Stories
-- [ ] #23 - [User Story 6: Numeric Counters and Gauges (Issue #23)](https://github.com/gintatkinson/cogctl-ux-09/blob/main/docs/user-stories/us-06-counters-gauges.md)
+- [x] #23 - [User Story 6: Numeric Counters and Gauges (Issue #23)](https://github.com/gintatkinson/cogctl-ux-09/blob/main/docs/user-stories/us-06-counters-gauges.md)
 - [ ] #24 - [User Story 7: Identifiers and Object References (Issue #24)](https://github.com/gintatkinson/cogctl-ux-09/blob/main/docs/user-stories/us-07-identifiers-references.md)
 - [ ] #25 - [User Story 8: Date and Time Types (Issue #25)](https://github.com/gintatkinson/cogctl-ux-09/blob/main/docs/user-stories/us-08-date-time.md)
 - [ ] #26 - [User Story 9: Time Durations (Issue #26)](https://github.com/gintatkinson/cogctl-ux-09/blob/main/docs/user-stories/us-09-time-durations.md)

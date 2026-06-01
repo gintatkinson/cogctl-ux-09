@@ -386,6 +386,8 @@ def main():
             if issue_num:
                 _, completed = update_checklist_in_file(filepath, issue_dict)
                 is_open = issue_dict[issue_num]["state"].upper() == "OPEN"
+                if is_open:
+                    sync_issue_body_to_github(issue_num, filepath, issue_type="User Story")
                 if completed and is_open:
                     close_issue_on_github(
                         issue_num,
@@ -411,6 +413,8 @@ def main():
             if issue_num:
                 _, completed = update_checklist_in_file(filepath, issue_dict)
                 is_open = issue_dict[issue_num]["state"].upper() == "OPEN"
+                if is_open:
+                    sync_issue_body_to_github(issue_num, filepath, issue_type="Use Case")
                 if completed and is_open:
                     close_issue_on_github(
                         issue_num,

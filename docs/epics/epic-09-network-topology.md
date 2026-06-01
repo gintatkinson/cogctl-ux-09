@@ -20,7 +20,6 @@ This Epic covers the digital engineering reverse-engineering of the IETF YANG mo
 
 ### Associated User Stories
 - [ ] #76 - [User Story 27: Network Link and TP Connectivity (Issue #76)](https://github.com/gintatkinson/cogctl-ux-09/blob/main/docs/user-stories/us-27-network-link-tp-connectivity.md)
-
 ## 3. Architecture and System Interaction Diagrams
 ```mermaid
 classDiagram
