@@ -13,6 +13,12 @@ import 'models/time_duration.dart';
 import 'services/mock_time_duration_service.dart';
 import 'models/address_tag.dart';
 import 'services/mock_address_tag_service.dart';
+import 'models/inventory_location.dart';
+import 'services/mock_inventory_location_service.dart';
+import 'models/network_element.dart';
+import 'services/mock_network_inventory_service.dart';
+import 'models/equipment_rack.dart';
+import 'services/mock_equipment_rack_service.dart';
 
 
 void main() {
@@ -243,6 +249,65 @@ class _ReferenceFrameDashboardState extends State<ReferenceFrameDashboard> {
   final _addressTagValueController = TextEditingController();
   String? _addressTagValueError;
 
+  // Hierarchical Locations state
+  final MockInventoryLocationService _inventoryLocationService = MockInventoryLocationService();
+  List<InventoryLocation> _inventoryLocations = [];
+  InventoryLocation? _selectedInventoryLocation;
+  final _inventoryLocationFormKey = GlobalKey<FormState>();
+  final _locationIdController = TextEditingController();
+  final _locationTypeController = TextEditingController();
+  final _locationTimestampController = TextEditingController();
+  final _locationValidUntilController = TextEditingController();
+  final _locationAddressController = TextEditingController();
+  final _locationPostalCodeController = TextEditingController();
+  final _locationStateController = TextEditingController();
+  final _locationCityController = TextEditingController();
+  final _locationCountryCodeController = TextEditingController();
+  String? _selectedLocationParentId;
+  String? _locationFormError;
+  String? _locationTimestampError;
+  String? _locationValidUntilError;
+  String? _locationIdError;
+  String? _locationTypeError;
+  String? _locationCountryCodeError;
+  bool _isEditingLocation = false;
+
+  // Feature 13 state (Direct contained chassis & Network inventory)
+  final MockNetworkInventoryService _networkInventoryService = MockNetworkInventoryService();
+  List<ContainedChassis> _editingContainedChassis = [];
+  final _chassisIdController = TextEditingController();
+  String? _chassisNeRef;
+  String? _chassisComponentRef;
+  String? _chassisError;
+
+  // NE manager helper inputs
+  final _newNeIdController = TextEditingController();
+  final _newComponentIdController = TextEditingController();
+  String? _selectedNeForNewComponent;
+  String? _neManagerError;
+  bool _isNeManagerExpanded = false;
+
+  // Feature 14 Equipment Racks state
+  final MockEquipmentRackService _equipmentRackService = MockEquipmentRackService();
+  List<EquipmentRack> _equipmentRacks = [];
+  EquipmentRack? _selectedEquipmentRack;
+  final _equipmentRackFormKey = GlobalKey<FormState>();
+  final _rackIdController = TextEditingController();
+  String? _selectedRackClass = 'rack-standard';
+  final _rackHeightController = TextEditingController();
+  final _rackWidthController = TextEditingController();
+  final _rackDepthController = TextEditingController();
+  final _rackTimestampController = TextEditingController();
+  final _rackValidUntilController = TextEditingController();
+  String? _rackFormError;
+  String? _rackIdError;
+  String? _rackHeightError;
+  String? _rackWidthError;
+  String? _rackDepthError;
+  String? _rackTimestampError;
+  String? _rackValidUntilError;
+  bool _isEditingRack = false;
+
   @override
   void initState() {
     super.initState();
@@ -252,6 +317,8 @@ class _ReferenceFrameDashboardState extends State<ReferenceFrameDashboard> {
     _refreshDateTimeList();
     _refreshTimeDurationList();
     _refreshAddressTagList();
+    _refreshInventoryLocationList();
+    _refreshEquipmentRackList();
 
     _expiryUpdateTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
       if (mounted) {
@@ -547,6 +614,12 @@ class _ReferenceFrameDashboardState extends State<ReferenceFrameDashboard> {
     _validUntilController.dispose();
     _counterGaugeValueController.dispose();
     _identifierValueController.dispose();
+    _rackIdController.dispose();
+    _rackHeightController.dispose();
+    _rackWidthController.dispose();
+    _rackDepthController.dispose();
+    _rackTimestampController.dispose();
+    _rackValidUntilController.dispose();
     _expiryUpdateTimer?.cancel();
     super.dispose();
   }
@@ -895,6 +968,15 @@ class _ReferenceFrameDashboardState extends State<ReferenceFrameDashboard> {
     _validUntilController.clear();
     _dateTimeValueController.clear();
     _addressTagValueController.clear();
+    _locationIdController.clear();
+    _locationTypeController.clear();
+    _locationTimestampController.clear();
+    _locationValidUntilController.clear();
+    _locationAddressController.clear();
+    _locationPostalCodeController.clear();
+    _locationStateController.clear();
+    _locationCityController.clear();
+    _locationCountryCodeController.clear();
     setState(() {
       _coordinateMode = 'Ellipsoidal';
       _selectedNetworkDomain = 'Terrestrial Fiber (L0-L4)';
@@ -919,6 +1001,15 @@ class _ReferenceFrameDashboardState extends State<ReferenceFrameDashboard> {
       _computedHeading = null;
       _dateTimeValueError = null;
       _addressTagValueError = null;
+      _selectedLocationParentId = null;
+      _locationFormError = null;
+      _locationTimestampError = null;
+      _locationValidUntilError = null;
+      _locationIdError = null;
+      _locationTypeError = null;
+      _locationCountryCodeError = null;
+      _isEditingLocation = false;
+      _selectedInventoryLocation = null;
     });
   }
 
@@ -1330,7 +1421,11 @@ class _ReferenceFrameDashboardState extends State<ReferenceFrameDashboard> {
                                     ? 'RFC 9911 Date & Time Types'
                                     : (_currentScreen == 'time_durations'
                                         ? 'RFC 9911 Time Durations'
-                                        : 'RFC 9911 Addresses & Tags')))),
+                                        : (_currentScreen == 'addresses_tags'
+                                            ? 'RFC 9911 Addresses & Tags'
+                                            : (_currentScreen == 'equipment_racks'
+                                                ? 'Equipment Racks Specs'
+                                                : 'IETF NI-Location Hierarchies')))))),
                     style: TextStyle(fontWeight: FontWeight.w400, fontSize: 16, color: Colors.white.withValues(alpha: 0.9)),
                   ),
                 ],
@@ -1346,7 +1441,11 @@ class _ReferenceFrameDashboardState extends State<ReferenceFrameDashboard> {
                                 ? 'RFC 9911 Date & Time Types'
                                 : (_currentScreen == 'time_durations'
                                     ? 'RFC 9911 Time Durations'
-                                    : 'RFC 9911 Addresses & Tags')))),
+                                    : (_currentScreen == 'addresses_tags'
+                                        ? 'RFC 9911 Addresses & Tags'
+                                        : (_currentScreen == 'equipment_racks'
+                                            ? 'Equipment Racks Specs'
+                                            : 'IETF NI-Location Hierarchies')))))) ,
                 style: TextStyle(fontWeight: FontWeight.w500, fontSize: 16, color: Colors.white.withValues(alpha: 0.9)),
               ),
         actions: [
@@ -1570,40 +1669,114 @@ class _ReferenceFrameDashboardState extends State<ReferenceFrameDashboard> {
                                             ],
                                           ),
                                         ))
-                                  : (isDesktop
-                                      ? Column(
-                                          crossAxisAlignment: CrossAxisAlignment.start,
-                                          children: [
-                                            _buildAddressTagHeader(theme),
-                                            const SizedBox(height: 12),
-                                            _buildAddressTagSummary(theme),
-                                            const SizedBox(height: 24),
-                                            Expanded(
-                                              child: Row(
+                                  : (_currentScreen == 'addresses_tags'
+                                      ? (isDesktop
+                                          ? Column(
+                                              crossAxisAlignment: CrossAxisAlignment.start,
+                                              children: [
+                                                _buildAddressTagHeader(theme),
+                                                const SizedBox(height: 12),
+                                                _buildAddressTagSummary(theme),
+                                                const SizedBox(height: 24),
+                                                Expanded(
+                                                  child: Row(
+                                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                                    children: [
+                                                      Expanded(flex: 5, child: _buildAddressTagFormCard(theme)),
+                                                      const SizedBox(width: 24),
+                                                      Expanded(flex: 6, child: _buildAddressTagListPane(theme)),
+                                                    ],
+                                                  ),
+                                                ),
+                                              ],
+                                            )
+                                          : SingleChildScrollView(
+                                              child: Column(
                                                 crossAxisAlignment: CrossAxisAlignment.start,
                                                 children: [
-                                                  Expanded(flex: 5, child: _buildAddressTagFormCard(theme)),
-                                                  const SizedBox(width: 24),
-                                                  Expanded(flex: 6, child: _buildAddressTagListPane(theme)),
+                                                  _buildAddressTagHeader(theme),
+                                                  const SizedBox(height: 12),
+                                                  _buildAddressTagSummary(theme),
+                                                  const SizedBox(height: 24),
+                                                  _buildAddressTagFormCard(theme),
+                                                  const SizedBox(height: 24),
+                                                  _buildAddressTagListPane(theme),
                                                 ],
                                               ),
-                                            ),
-                                          ],
-                                        )
-                                      : SingleChildScrollView(
-                                          child: Column(
-                                            crossAxisAlignment: CrossAxisAlignment.start,
-                                            children: [
-                                              _buildAddressTagHeader(theme),
-                                              const SizedBox(height: 12),
-                                              _buildAddressTagSummary(theme),
-                                              const SizedBox(height: 24),
-                                              _buildAddressTagFormCard(theme),
-                                              const SizedBox(height: 24),
-                                              _buildAddressTagListPane(theme),
-                                            ],
-                                          ),
-                                        )))))),
+                                            ))
+                                      : (_currentScreen == 'equipment_racks'
+                                          ? (isDesktop
+                                              ? Column(
+                                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                                  children: [
+                                                    _buildEquipmentRacksHeader(theme),
+                                                    const SizedBox(height: 12),
+                                                    _buildEquipmentRacksSummary(theme),
+                                                    const SizedBox(height: 24),
+                                                    Expanded(
+                                                      child: Row(
+                                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                                        children: [
+                                                          Expanded(flex: 5, child: _buildEquipmentRackFormCard(theme)),
+                                                          const SizedBox(width: 24),
+                                                          Expanded(flex: 6, child: _buildEquipmentRackListPane(theme)),
+                                                        ],
+                                                      ),
+                                                    ),
+                                                  ],
+                                                )
+                                              : SingleChildScrollView(
+                                                  child: Column(
+                                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                                    children: [
+                                                      _buildEquipmentRacksHeader(theme),
+                                                      const SizedBox(height: 12),
+                                                      _buildEquipmentRacksSummary(theme),
+                                                      const SizedBox(height: 24),
+                                                      _buildEquipmentRackFormCard(theme),
+                                                      const SizedBox(height: 24),
+                                                      _buildEquipmentRackListPane(theme),
+                                                    ],
+                                                  ),
+                                                ))
+                                          : (isDesktop
+                                              ? Column(
+                                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                                  children: [
+                                                    _buildInventoryLocationHeader(theme),
+                                                    const SizedBox(height: 12),
+                                                    _buildInventoryLocationSummary(theme),
+                                                    const SizedBox(height: 16),
+                                                    _buildNetworkInventoryManager(theme),
+                                                    const SizedBox(height: 16),
+                                                    Expanded(
+                                                      child: Row(
+                                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                                        children: [
+                                                          Expanded(flex: 5, child: _buildInventoryLocationFormCard(theme)),
+                                                          const SizedBox(width: 24),
+                                                          Expanded(flex: 6, child: _buildInventoryLocationListPane(theme)),
+                                                        ],
+                                                      ),
+                                                    ),
+                                                  ],
+                                                )
+                                              : SingleChildScrollView(
+                                                  child: Column(
+                                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                                    children: [
+                                                      _buildInventoryLocationHeader(theme),
+                                                      const SizedBox(height: 12),
+                                                      _buildInventoryLocationSummary(theme),
+                                                      const SizedBox(height: 16),
+                                                      _buildNetworkInventoryManager(theme),
+                                                      const SizedBox(height: 16),
+                                                      _buildInventoryLocationFormCard(theme),
+                                                      const SizedBox(height: 24),
+                                                      _buildInventoryLocationListPane(theme),
+                                                    ],
+                                                  ),
+                                                )))))))),
             ),
           ),
         ],
@@ -1824,6 +1997,32 @@ class _ReferenceFrameDashboardState extends State<ReferenceFrameDashboard> {
             onTap: () {
               setState(() {
                 _currentScreen = 'addresses_tags';
+              });
+              if (!isDesktop) {
+                Navigator.of(context).pop();
+              }
+            },
+          ),
+          _buildSidebarItem(
+            icon: Icons.account_tree,
+            label: 'Inventory Locations',
+            isActive: _currentScreen == 'inventory_locations',
+            onTap: () {
+              setState(() {
+                _currentScreen = 'inventory_locations';
+              });
+              if (!isDesktop) {
+                Navigator.of(context).pop();
+              }
+            },
+          ),
+          _buildSidebarItem(
+            icon: Icons.grid_view,
+            label: 'Equipment Racks',
+            isActive: _currentScreen == 'equipment_racks',
+            onTap: () {
+              setState(() {
+                _currentScreen = 'equipment_racks';
               });
               if (!isDesktop) {
                 Navigator.of(context).pop();
@@ -4676,6 +4875,1849 @@ class _ReferenceFrameDashboardState extends State<ReferenceFrameDashboard> {
       ),
     );
   }
+
+  Widget _buildEquipmentRacksHeader(ThemeData theme) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Equipment Racks & Bounds',
+          style: theme.textTheme.headlineMedium?.copyWith(
+            fontWeight: FontWeight.bold,
+            color: theme.primaryColor,
+          ),
+        ),
+        const SizedBox(height: 4),
+        Text(
+          'Physical Dimensions, Identityref Security Classification & Temporal Bounds Registry',
+          style: theme.textTheme.bodyMedium?.copyWith(
+            color: theme.textTheme.bodyMedium?.color?.withValues(alpha: 0.7),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildEquipmentRacksSummary(ThemeData theme) {
+    final isDark = theme.brightness == Brightness.dark;
+    final cardBg = isDark ? const Color(0xFF2D2E30) : Colors.white;
+    final borderSide = BorderSide(
+      color: isDark ? const Color(0x1FFFFFFF) : const Color(0x1F000000),
+      width: 1,
+    );
+
+    final total = _equipmentRacks.length;
+    final standard = _equipmentRacks.where((r) => r.rackClass == 'rack-standard').length;
+    final secure = total - standard;
+    
+    double avgHeight = 0;
+    double avgWidth = 0;
+    double avgDepth = 0;
+    if (total > 0) {
+      avgHeight = _equipmentRacks.map((r) => r.height).reduce((a, b) => a + b) / total;
+      avgWidth = _equipmentRacks.map((r) => r.width).reduce((a, b) => a + b) / total;
+      avgDepth = _equipmentRacks.map((r) => r.depth).reduce((a, b) => a + b) / total;
+    }
+
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 24.0),
+      child: Wrap(
+        spacing: 16,
+        runSpacing: 16,
+        children: [
+          _buildMiniStatusCard(theme, cardBg, borderSide, 'TOTAL RACKS', '$total', Icons.grid_view, Colors.blue),
+          _buildMiniStatusCard(theme, cardBg, borderSide, 'STANDARD GENERAL', '$standard', Icons.check_circle_outline, Colors.cyan),
+          _buildMiniStatusCard(theme, cardBg, borderSide, 'SECURED CABINETS', '$secure', Icons.security, Colors.redAccent),
+          _buildMiniStatusCard(theme, cardBg, borderSide, 'AVG HEIGHT (mm)', '${avgHeight.toStringAsFixed(0)}', Icons.height, Colors.amber),
+          _buildMiniStatusCard(theme, cardBg, borderSide, 'AVG WIDTH/DEPTH', '${avgWidth.toStringAsFixed(0)} / ${avgDepth.toStringAsFixed(0)}', Icons.settings_overscan, Colors.teal),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildEquipmentRackFormCard(ThemeData theme) {
+    final isDark = theme.brightness == Brightness.dark;
+    final cardBg = isDark ? const Color(0xFF2D2E30) : Colors.white;
+
+    return Card(
+      color: cardBg,
+      child: Padding(
+        padding: const EdgeInsets.all(24.0),
+        child: Form(
+          key: _equipmentRackFormKey,
+          child: ListView(
+            shrinkWrap: true,
+            physics: const ClampingScrollPhysics(),
+            children: [
+              Text(
+                _isEditingRack ? 'EDIT RACK PROPERTIES' : 'PROVISION NEW EQUIPMENT RACK',
+                style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 16),
+              
+              // ID Field (Disabled if editing)
+              TextFormField(
+                controller: _rackIdController,
+                enabled: !_isEditingRack,
+                decoration: InputDecoration(
+                  labelText: 'Rack ID',
+                  border: const OutlineInputBorder(),
+                  errorText: _rackIdError,
+                ),
+              ),
+              const SizedBox(height: 16),
+
+              // Classification Identity Dropdown
+              DropdownButtonFormField<String>(
+                value: _selectedRackClass,
+                decoration: const InputDecoration(
+                  labelText: 'Rack Classification (identityref)',
+                  border: OutlineInputBorder(),
+                ),
+                items: const [
+                  DropdownMenuItem(
+                    value: 'rack-standard',
+                    child: Text('rack-standard (Standard, Unsecured)'),
+                  ),
+                  DropdownMenuItem(
+                    value: 'rack-secure-baseline',
+                    child: Text('rack-secure-baseline (Baseline lockable)'),
+                  ),
+                  DropdownMenuItem(
+                    value: 'rack-secure-medium',
+                    child: Text('rack-secure-medium (Medium security)'),
+                  ),
+                  DropdownMenuItem(
+                    value: 'rack-secure-high',
+                    child: Text('rack-secure-high (High security biometric)'),
+                  ),
+                  DropdownMenuItem(
+                    value: 'non-descendant',
+                    child: Text('non-descendant (INVALID CLASS HIERARCHY)'),
+                  ),
+                ],
+                onChanged: (val) {
+                  setState(() {
+                    _selectedRackClass = val;
+                  });
+                },
+              ),
+              const SizedBox(height: 16),
+
+              // Physical dimensions
+              Row(
+                children: [
+                  Expanded(
+                    child: TextFormField(
+                      controller: _rackHeightController,
+                      decoration: InputDecoration(
+                        labelText: 'Height (mm)',
+                        border: const OutlineInputBorder(),
+                        errorText: _rackHeightError,
+                        helperText: 'Standard: 1866mm (42U)',
+                      ),
+                      keyboardType: TextInputType.number,
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: TextFormField(
+                      controller: _rackWidthController,
+                      decoration: InputDecoration(
+                        labelText: 'Width (mm)',
+                        border: const OutlineInputBorder(),
+                        errorText: _rackWidthError,
+                        helperText: 'Standard: 600mm',
+                      ),
+                      keyboardType: TextInputType.number,
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: TextFormField(
+                      controller: _rackDepthController,
+                      decoration: InputDecoration(
+                        labelText: 'Depth (mm)',
+                        border: const OutlineInputBorder(),
+                        errorText: _rackDepthError,
+                        helperText: 'Standard: 1000mm',
+                      ),
+                      keyboardType: TextInputType.number,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 16),
+
+              // Timestamp field
+              Row(
+                children: [
+                  Expanded(
+                    child: TextFormField(
+                      controller: _rackTimestampController,
+                      decoration: InputDecoration(
+                        labelText: 'Recording Timestamp (ISO 8601)',
+                        border: const OutlineInputBorder(),
+                        errorText: _rackTimestampError,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  SizedBox(
+                    height: 56,
+                    child: OutlinedButton(
+                      onPressed: () {
+                        setState(() {
+                          _rackTimestampController.text = DateTime.now().toUtc().toIso8601String();
+                        });
+                      },
+                      style: OutlinedButton.styleFrom(
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
+                      ),
+                      child: const Text('SET NOW'),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 16),
+
+              // Valid Until field
+              Row(
+                children: [
+                  Expanded(
+                    child: TextFormField(
+                      controller: _rackValidUntilController,
+                      decoration: InputDecoration(
+                        labelText: 'Expiration Timestamp (ISO 8601)',
+                        border: const OutlineInputBorder(),
+                        errorText: _rackValidUntilError,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  SizedBox(
+                    height: 56,
+                    child: OutlinedButton(
+                      onPressed: () {
+                        setState(() {
+                          _rackValidUntilController.text = DateTime.now().toUtc().add(const Duration(days: 365)).toIso8601String();
+                        });
+                      },
+                      style: OutlinedButton.styleFrom(
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
+                      ),
+                      child: const Text('+1 YEAR'),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 24),
+
+              // Error messages from backend / validator
+              if (_rackFormError != null) ...[
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: Colors.red.withValues(alpha: 0.15),
+                    border: Border.all(color: Colors.red.withValues(alpha: 0.3)),
+                    borderRadius: BorderRadius.circular(4),
+                  ),
+                  child: Row(
+                    children: [
+                      const Icon(Icons.error, color: Colors.red),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Text(
+                          _rackFormError!,
+                          style: const TextStyle(color: Colors.red, fontSize: 13, fontWeight: FontWeight.bold),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 20),
+              ],
+
+              // Actions
+              Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  if (_isEditingRack) ...[
+                    OutlinedButton(
+                      onPressed: () {
+                        setState(() {
+                          _isEditingRack = false;
+                          _rackIdController.clear();
+                          _rackHeightController.clear();
+                          _rackWidthController.clear();
+                          _rackDepthController.clear();
+                          _rackTimestampController.clear();
+                          _rackValidUntilController.clear();
+                          _selectedRackClass = 'rack-standard';
+                          _rackFormError = null;
+                        });
+                      },
+                      style: OutlinedButton.styleFrom(
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
+                      ),
+                      child: const Text('CANCEL'),
+                    ),
+                    const SizedBox(width: 12),
+                  ],
+                  ElevatedButton(
+                    onPressed: _submitEquipmentRackSave,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: theme.primaryColor,
+                      foregroundColor: Colors.white,
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
+                    ),
+                    child: Text(_isEditingRack ? 'UPDATE PROPERTIES' : 'PROVISION RACK'),
+                  ),
+                ],
+              ),
+
+              const SizedBox(height: 16),
+              const Divider(),
+              const SizedBox(height: 8),
+              OutlinedButton.icon(
+                onPressed: () {
+                  setState(() {
+                    _equipmentRackService.reset();
+                    _refreshEquipmentRackList();
+                  });
+                },
+                icon: const Icon(Icons.restore),
+                label: const Text('RESET SYSTEM RACKS DEFAULTS'),
+                style: OutlinedButton.styleFrom(
+                  foregroundColor: Colors.redAccent,
+                  side: const BorderSide(color: Colors.redAccent),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildEquipmentRackListPane(ThemeData theme) {
+    final isDark = theme.brightness == Brightness.dark;
+    final cardBg = isDark ? const Color(0xFF2D2E30) : Colors.white;
+    final isDesktop = MediaQuery.of(context).size.width > 900;
+
+    final listContent = ListView.builder(
+      shrinkWrap: true,
+      physics: const ClampingScrollPhysics(),
+      itemCount: _equipmentRacks.length,
+      itemBuilder: (context, index) {
+        final rack = _equipmentRacks[index];
+        final isSelected = _selectedEquipmentRack?.id == rack.id;
+        
+        Color securityColor;
+        switch (rack.rackClass) {
+          case 'rack-secure-baseline':
+            securityColor = Colors.green;
+            break;
+          case 'rack-secure-medium':
+            securityColor = Colors.orange;
+            break;
+          case 'rack-secure-high':
+            securityColor = Colors.red;
+            break;
+          default:
+            securityColor = const Color(0xFF3367D6);
+        }
+
+        return Padding(
+          padding: const EdgeInsets.only(bottom: 8),
+          child: Material(
+            color: isSelected 
+                ? securityColor.withValues(alpha: 0.1) 
+                : (isDark ? const Color(0xFF1E1E24) : const Color(0xFFF8F9FA)),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(4),
+              side: BorderSide(
+                color: isSelected ? securityColor : (isDark ? Colors.white10 : Colors.black12),
+                width: isSelected ? 1.5 : 1.0,
+              ),
+            ),
+            child: ListTile(
+            contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            title: Row(
+              children: [
+                Icon(Icons.grid_view, color: securityColor, size: 18),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    rack.id,
+                    style: const TextStyle(fontWeight: FontWeight.bold),
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+              ],
+            ),
+            subtitle: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const SizedBox(height: 4),
+                Text(
+                  'Class: ${rack.rackClass}',
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: isDark ? Colors.white60 : Colors.black54,
+                  ),
+                ),
+                Text(
+                  'Dimensions: ${rack.height} x ${rack.width} x ${rack.depth} mm (${(rack.height / 44.45).round()}U)',
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: isDark ? Colors.white60 : Colors.black54,
+                  ),
+                ),
+              ],
+            ),
+            trailing: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                IconButton(
+                  icon: const Icon(Icons.edit, size: 18),
+                  onPressed: () {
+                    setState(() {
+                      _isEditingRack = true;
+                      _selectedEquipmentRack = rack;
+                      _rackIdController.text = rack.id;
+                      _selectedRackClass = rack.rackClass;
+                      _rackHeightController.text = rack.height.toString();
+                      _rackWidthController.text = rack.width.toString();
+                      _rackDepthController.text = rack.depth.toString();
+                      _rackTimestampController.text = rack.timestamp.toIso8601String();
+                      _rackValidUntilController.text = rack.validUntil.toIso8601String();
+                      _rackFormError = null;
+                    });
+                  },
+                ),
+                IconButton(
+                  icon: const Icon(Icons.delete, size: 18, color: Colors.redAccent),
+                  onPressed: () {
+                    setState(() {
+                      _equipmentRackService.deleteRack(rack.id);
+                      _refreshEquipmentRackList();
+                    });
+                  },
+                ),
+              ],
+            ),
+            onTap: () {
+              setState(() {
+                _selectedEquipmentRack = rack;
+              });
+            },
+          ),
+        ),
+      );
+    },
+    );
+
+    final visualizerContent = _selectedEquipmentRack != null
+        ? USlotGridVisualizer(
+            rack: _selectedEquipmentRack!,
+            isDark: isDark,
+          )
+        : const Center(
+            child: Text('No Rack Selected'),
+          );
+
+    return Card(
+      color: cardBg,
+      child: Padding(
+        padding: const EdgeInsets.all(24.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            const Text(
+              'EQUIPMENT RACKS REGISTRY & U-SLOTS VISUALIZER',
+              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 16),
+            if (isDesktop)
+              Expanded(
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Expanded(flex: 5, child: listContent),
+                    const VerticalDivider(width: 32),
+                    Expanded(flex: 4, child: visualizerContent),
+                  ],
+                ),
+              )
+            else ...[
+              listContent,
+              const SizedBox(height: 24),
+              SizedBox(height: 400, child: visualizerContent),
+            ],
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _refreshEquipmentRackList() {
+    setState(() {
+      _equipmentRacks = _equipmentRackService.getRacks();
+      if (_selectedEquipmentRack != null) {
+        final existingIndex = _equipmentRacks.indexWhere((r) => r.id == _selectedEquipmentRack!.id);
+        if (existingIndex != -1) {
+          _selectedEquipmentRack = _equipmentRacks[existingIndex];
+        } else {
+          _selectedEquipmentRack = null;
+        }
+      }
+      if (_selectedEquipmentRack == null && _equipmentRacks.isNotEmpty) {
+        _selectedEquipmentRack = _equipmentRacks.first;
+      }
+    });
+  }
+
+  void _submitEquipmentRackSave() {
+    setState(() {
+      _rackFormError = null;
+      _rackIdError = null;
+      _rackHeightError = null;
+      _rackWidthError = null;
+      _rackDepthError = null;
+      _rackTimestampError = null;
+      _rackValidUntilError = null;
+    });
+
+    final id = _rackIdController.text.trim();
+    final rackClass = _selectedRackClass ?? 'rack-standard';
+    final heightText = _rackHeightController.text.trim();
+    final widthText = _rackWidthController.text.trim();
+    final depthText = _rackDepthController.text.trim();
+    final timestampText = _rackTimestampController.text.trim();
+    final validUntilText = _rackValidUntilController.text.trim();
+
+    bool hasError = false;
+
+    if (!_isEditingRack && id.isEmpty) {
+      setState(() => _rackIdError = 'ID cannot be empty');
+      hasError = true;
+    }
+
+    int height = 0;
+    if (heightText.isEmpty) {
+      setState(() => _rackHeightError = 'Height is required');
+      hasError = true;
+    } else {
+      final parsed = int.tryParse(heightText);
+      if (parsed == null || parsed <= 0 || parsed > 65535) {
+        setState(() => _rackHeightError = 'Must be a positive integer between 1 and 65535');
+        hasError = true;
+      } else {
+        height = parsed;
+      }
+    }
+
+    int width = 0;
+    if (widthText.isEmpty) {
+      setState(() => _rackWidthError = 'Width is required');
+      hasError = true;
+    } else {
+      final parsed = int.tryParse(widthText);
+      if (parsed == null || parsed <= 0 || parsed > 65535) {
+        setState(() => _rackWidthError = 'Must be a positive integer between 1 and 65535');
+        hasError = true;
+      } else {
+        width = parsed;
+      }
+    }
+
+    int depth = 0;
+    if (depthText.isEmpty) {
+      setState(() => _rackDepthError = 'Depth is required');
+      hasError = true;
+    } else {
+      final parsed = int.tryParse(depthText);
+      if (parsed == null || parsed <= 0 || parsed > 65535) {
+        setState(() => _rackDepthError = 'Must be a positive integer between 1 and 65535');
+        hasError = true;
+      } else {
+        depth = parsed;
+      }
+    }
+
+    DateTime? timestamp;
+    if (timestampText.isEmpty) {
+      setState(() => _rackTimestampError = 'Timestamp is required');
+      hasError = true;
+    } else {
+      try {
+        timestamp = DateTime.parse(timestampText);
+      } catch (e) {
+        setState(() => _rackTimestampError = 'Invalid format. Use YYYY-MM-DD HH:MM:SS');
+        hasError = true;
+      }
+    }
+
+    DateTime? validUntil;
+    if (validUntilText.isEmpty) {
+      setState(() => _rackValidUntilError = 'Valid Until is required');
+      hasError = true;
+    } else {
+      try {
+        validUntil = DateTime.parse(validUntilText);
+      } catch (e) {
+        setState(() => _rackValidUntilError = 'Invalid format. Use YYYY-MM-DD HH:MM:SS');
+        hasError = true;
+      }
+    }
+
+    if (!hasError && timestamp != null && validUntil != null) {
+      if (!validUntil.isAfter(timestamp)) {
+        setState(() => _rackValidUntilError = 'Valid-until must be after timestamp');
+        hasError = true;
+      }
+    }
+
+    if (hasError) return;
+
+    try {
+      if (_isEditingRack && _selectedEquipmentRack != null) {
+        final updatedRack = EquipmentRack(
+          id: _selectedEquipmentRack!.id,
+          rackClass: rackClass,
+          height: height,
+          width: width,
+          depth: depth,
+          timestamp: timestamp!,
+          validUntil: validUntil!,
+        );
+        _equipmentRackService.updateRack(_selectedEquipmentRack!.id, updatedRack);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Successfully updated rack ${_selectedEquipmentRack!.id}'),
+            backgroundColor: Colors.green,
+          ),
+        );
+      } else {
+        final newRack = EquipmentRack(
+          id: id,
+          rackClass: rackClass,
+          height: height,
+          width: width,
+          depth: depth,
+          timestamp: timestamp!,
+          validUntil: validUntil!,
+        );
+        _equipmentRackService.addRack(newRack);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Successfully added rack $id'),
+            backgroundColor: Colors.green,
+          ),
+        );
+      }
+
+      // Reset form and refresh list
+      _rackIdController.clear();
+      _rackHeightController.clear();
+      _rackWidthController.clear();
+      _rackDepthController.clear();
+      _rackTimestampController.clear();
+      _rackValidUntilController.clear();
+      setState(() {
+        _selectedRackClass = 'rack-standard';
+        _isEditingRack = false;
+      });
+      _refreshEquipmentRackList();
+    } catch (e) {
+      setState(() {
+        _rackFormError = e.toString().replaceFirst('FormatException: ', '');
+      });
+    }
+  }
+
+  void _refreshInventoryLocationList() {
+    setState(() {
+      _inventoryLocations = _inventoryLocationService.getLocations();
+      if (_selectedInventoryLocation != null) {
+        final existingIndex = _inventoryLocations.indexWhere((l) => l.id == _selectedInventoryLocation!.id);
+        if (existingIndex != -1) {
+          _selectedInventoryLocation = _inventoryLocations[existingIndex];
+        } else {
+          _selectedInventoryLocation = null;
+        }
+      }
+    });
+  }
+
+  void _submitInventoryLocationSave() {
+    setState(() {
+      _locationFormError = null;
+      _locationIdError = null;
+      _locationTypeError = null;
+      _locationTimestampError = null;
+      _locationValidUntilError = null;
+      _locationCountryCodeError = null;
+    });
+
+    final id = _locationIdController.text.trim();
+    final type = _locationTypeController.text.trim();
+    final parent = _selectedLocationParentId;
+    final timestampText = _locationTimestampController.text.trim();
+    final validUntilText = _locationValidUntilController.text.trim();
+    final address = _locationAddressController.text.trim();
+    final postalCode = _locationPostalCodeController.text.trim();
+    final stateStr = _locationStateController.text.trim();
+    final city = _locationCityController.text.trim();
+    final countryCode = _locationCountryCodeController.text.trim();
+
+    bool hasError = false;
+
+    if (!_isEditingLocation && id.isEmpty) {
+      setState(() => _locationIdError = 'ID cannot be empty');
+      hasError = true;
+    }
+    if (type.isEmpty) {
+      setState(() => _locationTypeError = 'Type cannot be empty');
+      hasError = true;
+    }
+
+    DateTime? timestamp;
+    if (timestampText.isEmpty) {
+      setState(() => _locationTimestampError = 'Timestamp is required');
+      hasError = true;
+    } else {
+      try {
+        timestamp = DateTime.parse(timestampText);
+      } catch (e) {
+        setState(() => _locationTimestampError = 'Invalid format. Use YYYY-MM-DD HH:MM:SS');
+        hasError = true;
+      }
+    }
+
+    DateTime? validUntil;
+    if (validUntilText.isNotEmpty) {
+      try {
+        validUntil = DateTime.parse(validUntilText);
+      } catch (e) {
+        setState(() => _locationValidUntilError = 'Invalid format. Use YYYY-MM-DD HH:MM:SS');
+        hasError = true;
+      }
+    }
+
+    PhysicalAddress? physicalAddress;
+    if (address.isNotEmpty || postalCode.isNotEmpty || stateStr.isNotEmpty || city.isNotEmpty || countryCode.isNotEmpty) {
+      if (countryCode.isEmpty) {
+        setState(() => _locationCountryCodeError = 'Country code is required if address is provided');
+        hasError = true;
+      } else {
+        try {
+          InventoryLocationValidator.validateCountryCode(countryCode);
+        } catch (e) {
+          setState(() => _locationCountryCodeError = e.toString().replaceFirst('FormatException: ', ''));
+          hasError = true;
+        }
+      }
+      if (!hasError) {
+        physicalAddress = PhysicalAddress(
+          address: address,
+          postalCode: postalCode,
+          state: stateStr,
+          city: city,
+          countryCode: countryCode,
+        );
+      }
+    }
+
+    if (hasError) return;
+
+    try {
+      if (_isEditingLocation && _selectedInventoryLocation != null) {
+        _inventoryLocationService.updateLocation(
+          _selectedInventoryLocation!.id,
+          type: type,
+          parent: parent,
+          timestamp: timestamp!,
+          validUntil: validUntil,
+          physicalAddress: physicalAddress,
+          containedChassis: _editingContainedChassis,
+        );
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Successfully updated location ${_selectedInventoryLocation!.id}'),
+            backgroundColor: Colors.green,
+          ),
+        );
+      } else {
+        final newLoc = InventoryLocation(
+          id: id,
+          type: type,
+          parent: parent,
+          timestamp: timestamp!,
+          validUntil: validUntil,
+          physicalAddress: physicalAddress,
+          containedChassis: _editingContainedChassis,
+        );
+        _inventoryLocationService.addLocation(newLoc);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Successfully added location $id'),
+            backgroundColor: Colors.green,
+          ),
+        );
+      }
+
+      // Reset form and refresh list
+      _locationIdController.clear();
+      _locationTypeController.clear();
+      _locationTimestampController.clear();
+      _locationValidUntilController.clear();
+      _locationAddressController.clear();
+      _locationPostalCodeController.clear();
+      _locationStateController.clear();
+      _locationCityController.clear();
+      _locationCountryCodeController.clear();
+      _chassisIdController.clear();
+      setState(() {
+        _editingContainedChassis = [];
+        _chassisNeRef = null;
+        _chassisComponentRef = null;
+        _chassisError = null;
+        _selectedLocationParentId = null;
+        _isEditingLocation = false;
+        _selectedInventoryLocation = null;
+        _locationCountryCodeError = null;
+      });
+      _refreshInventoryLocationList();
+    } catch (e) {
+      setState(() {
+        _locationFormError = e.toString().replaceFirst('FormatException: ', '');
+      });
+    }
+  }
+
+  List<Map<String, dynamic>> _buildFlattenedTree() {
+    final Map<String?, List<InventoryLocation>> parentToChildren = {};
+    for (final loc in _inventoryLocations) {
+      parentToChildren.putIfAbsent(loc.parent, () => []).add(loc);
+    }
+
+    final List<Map<String, dynamic>> result = [];
+    final Set<String> visited = {};
+
+    void traverse(String? parentId, int depth) {
+      final children = parentToChildren[parentId] ?? [];
+      children.sort((a, b) => a.id.compareTo(b.id));
+      for (final child in children) {
+        if (visited.contains(child.id)) continue;
+        visited.add(child.id);
+        result.add({
+          'location': child,
+          'depth': depth,
+        });
+        traverse(child.id, depth + 1);
+      }
+    }
+
+    final allIds = _inventoryLocations.map((l) => l.id).toSet();
+    final roots = _inventoryLocations.where((l) => l.parent == null || !allIds.contains(l.parent)).toList();
+    roots.sort((a, b) => a.id.compareTo(b.id));
+
+    for (final root in roots) {
+      if (visited.contains(root.id)) continue;
+      visited.add(root.id);
+      result.add({
+        'location': root,
+        'depth': 0,
+      });
+      traverse(root.id, 1);
+    }
+
+    for (final loc in _inventoryLocations) {
+      if (!visited.contains(loc.id)) {
+        result.add({
+          'location': loc,
+          'depth': 0,
+        });
+      }
+    }
+
+    return result;
+  }
+
+  Widget _buildNetworkInventoryManager(ThemeData theme) {
+    final isDark = theme.brightness == Brightness.dark;
+    final cardBg = isDark ? const Color(0xFF2D2E30) : Colors.white;
+    final neList = _networkInventoryService.getNetworkElements();
+
+    return Card(
+      color: cardBg,
+      child: ExpansionTile(
+        title: Row(
+          children: [
+            Icon(Icons.inventory, color: theme.primaryColor, size: 20),
+            const SizedBox(width: 8),
+            const Text(
+              'Network Inventory Manager (YANG Data Source)',
+              style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+            ),
+          ],
+        ),
+        initiallyExpanded: _isNeManagerExpanded,
+        onExpansionChanged: (val) {
+          setState(() {
+            _isNeManagerExpanded = val;
+          });
+        },
+        children: [
+          Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Error display
+                if (_neManagerError != null) ...[
+                  Text(
+                    _neManagerError!,
+                    style: const TextStyle(color: Colors.red, fontSize: 12),
+                  ),
+                  const SizedBox(height: 8),
+                ],
+                // Add Network Element Form
+                Row(
+                  children: [
+                    Expanded(
+                      child: TextFormField(
+                        controller: _newNeIdController,
+                        decoration: const InputDecoration(
+                          labelText: 'New Network Element ID (ne-id)',
+                          border: OutlineInputBorder(),
+                          contentPadding: EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    ElevatedButton(
+                      onPressed: () {
+                        final neId = _newNeIdController.text.trim();
+                        if (neId.isEmpty) {
+                          setState(() => _neManagerError = 'NE ID is required.');
+                          return;
+                        }
+                        try {
+                          _networkInventoryService.addNetworkElement(
+                            MockNetworkElement(neId: neId, componentIds: []),
+                          );
+                          setState(() {
+                            _newNeIdController.clear();
+                            _neManagerError = null;
+                          });
+                        } catch (e) {
+                          setState(() => _neManagerError = e.toString().replaceFirst('FormatException: ', ''));
+                        }
+                      },
+                      child: const Text('Add NE'),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 16),
+                const Text(
+                  'Registered Network Elements & Components:',
+                  style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
+                ),
+                const SizedBox(height: 8),
+                if (neList.isEmpty)
+                  const Text(
+                    'No network elements in inventory.',
+                    style: TextStyle(fontStyle: FontStyle.italic, fontSize: 12),
+                  )
+                else
+                  ...neList.map((ne) {
+                    final isAddingComp = _selectedNeForNewComponent == ne.neId;
+
+                    return Card(
+                      color: isDark ? const Color(0xFF343537) : Colors.grey.shade50,
+                      margin: const EdgeInsets.only(bottom: 8),
+                      child: Padding(
+                        padding: const EdgeInsets.all(12.0),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Row(
+                                  children: [
+                                    const Icon(Icons.router, size: 16, color: Colors.blueGrey),
+                                    const SizedBox(width: 6),
+                                    Text(
+                                      ne.neId,
+                                      style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+                                    ),
+                                  ],
+                                ),
+                                Row(
+                                  children: [
+                                    TextButton.icon(
+                                      icon: const Icon(Icons.add, size: 14),
+                                      label: const Text('Add Component', style: TextStyle(fontSize: 11)),
+                                      onPressed: () {
+                                        setState(() {
+                                          if (isAddingComp) {
+                                            _selectedNeForNewComponent = null;
+                                          } else {
+                                            _selectedNeForNewComponent = ne.neId;
+                                          }
+                                          _newComponentIdController.clear();
+                                          _neManagerError = null;
+                                        });
+                                      },
+                                    ),
+                                    const SizedBox(width: 8),
+                                    IconButton(
+                                      icon: const Icon(Icons.delete, size: 16, color: Colors.red),
+                                      tooltip: 'Delete NE',
+                                      onPressed: () {
+                                        setState(() {
+                                          _networkInventoryService.deleteNetworkElement(ne.neId);
+                                          _neManagerError = null;
+                                        });
+                                      },
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            ),
+                            if (ne.componentIds.isEmpty)
+                              const Padding(
+                                padding: EdgeInsets.only(top: 4.0),
+                                child: Text(
+                                  'No components in this network element.',
+                                  style: TextStyle(fontStyle: FontStyle.italic, fontSize: 11, color: Colors.grey),
+                                ),
+                              )
+                            else
+                              Wrap(
+                                spacing: 8,
+                                runSpacing: 4,
+                                children: ne.componentIds.map((comp) {
+                                  return Chip(
+                                    label: Text(comp, style: const TextStyle(fontSize: 11)),
+                                    padding: EdgeInsets.zero,
+                                    materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                                    onDeleted: () {
+                                      setState(() {
+                                        _networkInventoryService.deleteComponent(ne.neId, comp);
+                                        _neManagerError = null;
+                                      });
+                                    },
+                                  );
+                                }).toList(),
+                              ),
+                            if (isAddingComp) ...[
+                              const SizedBox(height: 8),
+                              Row(
+                                children: [
+                                  Expanded(
+                                    child: TextFormField(
+                                      controller: _newComponentIdController,
+                                      decoration: const InputDecoration(
+                                        labelText: 'New Component ID (component-id)',
+                                        border: OutlineInputBorder(),
+                                        contentPadding: EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                                      ),
+                                    ),
+                                  ),
+                                  const SizedBox(width: 8),
+                                  ElevatedButton(
+                                    onPressed: () {
+                                      final compId = _newComponentIdController.text.trim();
+                                      if (compId.isEmpty) {
+                                        setState(() => _neManagerError = 'Component ID is required.');
+                                        return;
+                                      }
+                                      try {
+                                        _networkInventoryService.addComponent(ne.neId, compId);
+                                        setState(() {
+                                          _newComponentIdController.clear();
+                                          _selectedNeForNewComponent = null;
+                                          _neManagerError = null;
+                                        });
+                                      } catch (e) {
+                                        setState(() => _neManagerError = e.toString().replaceFirst('FormatException: ', ''));
+                                      }
+                                    },
+                                    child: const Text('Add'),
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ],
+                        ),
+                      ),
+                    );
+                  }),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildInventoryLocationHeader(ThemeData theme) {
+    return Wrap(
+      crossAxisAlignment: WrapCrossAlignment.center,
+      spacing: 8,
+      runSpacing: 8,
+      children: [
+        Text(
+          'Inventory Locations Dashboard',
+          style: TextStyle(
+            fontSize: 20,
+            fontWeight: FontWeight.bold,
+            color: theme.primaryColor,
+          ),
+        ),
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+          decoration: BoxDecoration(
+            color: Colors.blue.withValues(alpha: 0.15),
+            border: Border.all(color: Colors.blue.withValues(alpha: 0.5)),
+            borderRadius: BorderRadius.circular(4),
+          ),
+          child: const Text(
+            'IETF NI-Location Specs',
+            style: TextStyle(
+              color: Colors.blue,
+              fontSize: 10,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildInventoryLocationSummary(ThemeData theme) {
+    final isDark = theme.brightness == Brightness.dark;
+    final cardBg = isDark ? const Color(0xFF2D2E30) : Colors.white;
+    final borderSide = BorderSide(
+      color: isDark ? const Color(0x1FFFFFFF) : const Color(0x1F000000),
+      width: 1,
+    );
+
+    int total = _inventoryLocations.length;
+    int active = _inventoryLocations.where((l) => !l.isExpired).length;
+    int expired = _inventoryLocations.where((l) => l.isExpired).length;
+
+    return Wrap(
+      spacing: 16,
+      runSpacing: 16,
+      children: [
+        _buildMiniStatusCard(theme, cardBg, borderSide, 'TOTAL LOCATIONS', '$total', Icons.account_tree, Colors.blue),
+        _buildMiniStatusCard(theme, cardBg, borderSide, 'ACTIVE HIERARCHIES', '$active', Icons.check_circle_outline, Colors.green),
+        _buildMiniStatusCard(theme, cardBg, borderSide, 'EXPIRED NODES', '$expired', Icons.error_outline, Colors.red),
+      ],
+    );
+  }
+
+  Widget _buildInventoryLocationFormCard(ThemeData theme) {
+    final isDark = theme.brightness == Brightness.dark;
+    final cardBg = isDark ? const Color(0xFF2D2E30) : Colors.white;
+
+    // Filter potential parent locations to avoid circular loops
+    final potentialParents = _inventoryLocations.where((loc) {
+      if (!_isEditingLocation || _selectedInventoryLocation == null) return true;
+      // Do not allow setting itself or any nested child as parent
+      if (loc.id == _selectedInventoryLocation!.id) return false;
+      try {
+        InventoryLocationValidator.detectCircularLoop(_selectedInventoryLocation!.id, loc.id, _inventoryLocations);
+        return true;
+      } catch (_) {
+        return false;
+      }
+    }).toList();
+
+    return Card(
+      color: cardBg,
+      child: SingleChildScrollView(
+        child: Padding(
+          padding: const EdgeInsets.all(24.0),
+          child: Form(
+            key: _inventoryLocationFormKey,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      _isEditingLocation ? 'Edit Location' : 'Create Location',
+                      style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                    ),
+                    if (_isEditingLocation)
+                      TextButton(
+                        onPressed: () {
+                          setState(() {
+                            _isEditingLocation = false;
+                            _selectedInventoryLocation = null;
+                            _locationIdController.clear();
+                            _locationTypeController.clear();
+                            _locationTimestampController.clear();
+                            _locationValidUntilController.clear();
+                            _locationAddressController.clear();
+                            _locationPostalCodeController.clear();
+                            _locationStateController.clear();
+                            _locationCityController.clear();
+                            _locationCountryCodeController.clear();
+                            _chassisIdController.clear();
+                            _editingContainedChassis = [];
+                            _chassisNeRef = null;
+                            _chassisComponentRef = null;
+                            _chassisError = null;
+                            _selectedLocationParentId = null;
+                            _locationFormError = null;
+                            _locationCountryCodeError = null;
+                          });
+                        },
+                        child: const Text('Cancel Edit'),
+                      ),
+                  ],
+                ),
+                const SizedBox(height: 16),
+                if (_locationFormError != null) ...[
+                  Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.all(12),
+                    margin: const EdgeInsets.only(bottom: 16),
+                    decoration: BoxDecoration(
+                      color: Colors.red.withValues(alpha: 0.15),
+                      border: Border.all(color: Colors.red.withValues(alpha: 0.5)),
+                      borderRadius: BorderRadius.circular(4),
+                    ),
+                    child: Text(
+                      _locationFormError!,
+                      style: const TextStyle(color: Colors.red, fontSize: 13, fontWeight: FontWeight.bold),
+                    ),
+                  ),
+                ],
+                TextFormField(
+                  controller: _locationIdController,
+                  enabled: !_isEditingLocation,
+                  decoration: InputDecoration(
+                    labelText: 'Location ID (Unique)',
+                    border: const OutlineInputBorder(),
+                    errorText: _locationIdError,
+                  ),
+                ),
+                const SizedBox(height: 16),
+                TextFormField(
+                  controller: _locationTypeController,
+                  decoration: InputDecoration(
+                    labelText: 'Type (e.g. site, room, floor)',
+                    border: const OutlineInputBorder(),
+                    errorText: _locationTypeError,
+                  ),
+                ),
+                const SizedBox(height: 16),
+                DropdownButtonFormField<String>(
+                  key: const Key('parentLocationDropdown'),
+                  isExpanded: true,
+                  value: _selectedLocationParentId,
+                  decoration: const InputDecoration(
+                    labelText: 'Parent Location (Optional)',
+                    border: OutlineInputBorder(),
+                  ),
+                  dropdownColor: cardBg,
+                  items: [
+                    const DropdownMenuItem<String>(
+                      value: null,
+                      child: Text('None (Root Node)'),
+                    ),
+                    ...potentialParents.map((loc) {
+                      return DropdownMenuItem<String>(
+                        value: loc.id,
+                        child: Text('${loc.id} (${loc.type})'),
+                      );
+                    }),
+                  ],
+                  onChanged: (String? val) {
+                    setState(() {
+                      _selectedLocationParentId = val;
+                    });
+                  },
+                ),
+                const SizedBox(height: 16),
+                TextFormField(
+                  controller: _locationTimestampController,
+                  decoration: InputDecoration(
+                    labelText: 'Record Timestamp',
+                    helperText: 'Format: YYYY-MM-DD HH:MM:SS',
+                    border: const OutlineInputBorder(),
+                    errorText: _locationTimestampError,
+                  ),
+                ),
+                const SizedBox(height: 16),
+                TextFormField(
+                  controller: _locationValidUntilController,
+                  decoration: InputDecoration(
+                    labelText: 'Valid Until (Optional Expiration)',
+                    helperText: 'Format: YYYY-MM-DD HH:MM:SS',
+                    border: const OutlineInputBorder(),
+                    errorText: _locationValidUntilError,
+                  ),
+                ),
+                const SizedBox(height: 16),
+                const Text(
+                  'Physical Address (Optional)',
+                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+                ),
+                const SizedBox(height: 8),
+                TextFormField(
+                  controller: _locationAddressController,
+                  decoration: const InputDecoration(
+                    labelText: 'Street Address',
+                    border: OutlineInputBorder(),
+                  ),
+                ),
+                const SizedBox(height: 16),
+                Row(
+                  children: [
+                    Expanded(
+                      child: TextFormField(
+                        controller: _locationCityController,
+                        decoration: const InputDecoration(
+                          labelText: 'City',
+                          border: OutlineInputBorder(),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: TextFormField(
+                        controller: _locationStateController,
+                        decoration: const InputDecoration(
+                          labelText: 'State/Region',
+                          border: OutlineInputBorder(),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 16),
+                Row(
+                  children: [
+                    Expanded(
+                      child: TextFormField(
+                        controller: _locationPostalCodeController,
+                        decoration: const InputDecoration(
+                          labelText: 'Postal/ZIP Code',
+                          border: OutlineInputBorder(),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: TextFormField(
+                        controller: _locationCountryCodeController,
+                        decoration: InputDecoration(
+                          labelText: 'Country Code (ISO-2)',
+                          helperText: 'e.g. US, GB',
+                          border: const OutlineInputBorder(),
+                          errorText: _locationCountryCodeError,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                const Divider(height: 32),
+                const Text(
+                  'Contained Chassis Configurations',
+                  style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+                ),
+                const SizedBox(height: 8),
+                if (_editingContainedChassis.isEmpty)
+                  const Padding(
+                    padding: EdgeInsets.symmetric(vertical: 8.0),
+                    child: Text(
+                      'No chassis directly contained in this location.',
+                      style: TextStyle(fontStyle: FontStyle.italic, color: Colors.grey, fontSize: 12),
+                    ),
+                  )
+                else
+                  ..._editingContainedChassis.map((chassis) {
+                    return Container(
+                      margin: const EdgeInsets.only(bottom: 8),
+                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                      decoration: BoxDecoration(
+                        color: theme.brightness == Brightness.dark
+                            ? const Color(0xFF3D3E40)
+                            : Colors.grey.shade100,
+                        border: Border.all(color: theme.dividerColor),
+                        borderRadius: BorderRadius.circular(4),
+                      ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Expanded(
+                            child: Text(
+                              'Chassis #${chassis.chassisId} (NE: ${chassis.neRef}, Component: ${chassis.componentRef})',
+                              style: const TextStyle(fontSize: 12),
+                            ),
+                          ),
+                          IconButton(
+                            icon: const Icon(Icons.delete, size: 16, color: Colors.red),
+                            onPressed: () {
+                              setState(() {
+                                _editingContainedChassis.remove(chassis);
+                              });
+                            },
+                          ),
+                        ],
+                      ),
+                    );
+                  }),
+                const SizedBox(height: 12),
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    border: Border.all(color: theme.dividerColor.withValues(alpha: 0.5)),
+                    borderRadius: BorderRadius.circular(4),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text(
+                        'Add Contained Chassis Instance',
+                        style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
+                      ),
+                      const SizedBox(height: 8),
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Expanded(
+                            child: TextFormField(
+                              controller: _chassisIdController,
+                              keyboardType: TextInputType.number,
+                              decoration: const InputDecoration(
+                                labelText: 'Chassis ID',
+                                border: OutlineInputBorder(),
+                                contentPadding: EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 8),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: DropdownButtonFormField<String>(
+                              key: ValueKey('neRefDropdown_${_chassisNeRef ?? "none"}'),
+                              value: _chassisNeRef,
+                              isExpanded: true,
+                              decoration: const InputDecoration(
+                                labelText: 'Network Element Ref',
+                                border: OutlineInputBorder(),
+                                contentPadding: EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                              ),
+                              items: _networkInventoryService.getNetworkElements().map((ne) {
+                                return DropdownMenuItem<String>(
+                                  value: ne.neId,
+                                  child: Text(ne.neId),
+                                );
+                              }).toList(),
+                              onChanged: (val) {
+                                setState(() {
+                                  _chassisNeRef = val;
+                                  _chassisComponentRef = null;
+                                });
+                              },
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: DropdownButtonFormField<String>(
+                              key: ValueKey('compRefDropdown_${_chassisComponentRef ?? "none"}_ne_${_chassisNeRef ?? "none"}'),
+                              value: _chassisComponentRef,
+                              isExpanded: true,
+                              decoration: const InputDecoration(
+                                labelText: 'Component Ref',
+                                border: OutlineInputBorder(),
+                                contentPadding: EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                              ),
+                              items: _chassisNeRef == null
+                                  ? []
+                                  : (_networkInventoryService.getNetworkElement(_chassisNeRef!)?.componentIds ?? []).map((comp) {
+                                      return DropdownMenuItem<String>(
+                                        value: comp,
+                                        child: Text(comp),
+                                      );
+                                    }).toList(),
+                              onChanged: (val) {
+                                setState(() {
+                                  _chassisComponentRef = val;
+                                });
+                              },
+                            ),
+                          ),
+                        ],
+                      ),
+                      if (_chassisError != null) ...[
+                        const SizedBox(height: 8),
+                        Text(
+                          _chassisError!,
+                          style: const TextStyle(color: Colors.red, fontSize: 11),
+                        ),
+                      ],
+                      const SizedBox(height: 8),
+                      Align(
+                        alignment: Alignment.centerRight,
+                        child: ElevatedButton.icon(
+                          onPressed: () {
+                            final idStr = _chassisIdController.text.trim();
+                            if (idStr.isEmpty) {
+                              setState(() => _chassisError = 'Chassis ID is required.');
+                              return;
+                            }
+                            final parsedId = int.tryParse(idStr);
+                            if (parsedId == null) {
+                              setState(() => _chassisError = 'Chassis ID must be a numeric integer.');
+                              return;
+                            }
+                            if (_chassisNeRef == null) {
+                              setState(() => _chassisError = 'Network Element Ref is required.');
+                              return;
+                            }
+                            if (_chassisComponentRef == null) {
+                              setState(() => _chassisError = 'Component Ref is required.');
+                              return;
+                            }
+                            final newChassis = ContainedChassis(
+                              chassisId: parsedId,
+                              neRef: _chassisNeRef!,
+                              componentRef: _chassisComponentRef!,
+                            );
+                            try {
+                              InventoryLocationValidator.validateContainedChassis(newChassis, _editingContainedChassis);
+                              setState(() {
+                                _editingContainedChassis.add(newChassis);
+                                _chassisIdController.clear();
+                                _chassisNeRef = null;
+                                _chassisComponentRef = null;
+                                _chassisError = null;
+                              });
+                            } catch (e) {
+                              setState(() => _chassisError = e.toString().replaceFirst('FormatException: ', ''));
+                            }
+                          },
+                          icon: const Icon(Icons.add, size: 14),
+                          label: const Text('Add to Location', style: TextStyle(fontSize: 11)),
+                          style: ElevatedButton.styleFrom(
+                            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 24),
+                Row(
+                  children: [
+                    Expanded(
+                      child: ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: theme.primaryColor,
+                          foregroundColor: Colors.white,
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
+                        ),
+                        onPressed: _submitInventoryLocationSave,
+                        child: Text(_isEditingLocation ? 'Update Location' : 'Create Location'),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildInventoryLocationListPane(ThemeData theme) {
+    final isDark = theme.brightness == Brightness.dark;
+    final cardBg = isDark ? const Color(0xFF2D2E30) : Colors.white;
+    final isDesktop = MediaQuery.of(context).size.width > 900;
+
+    final treeNodes = _buildFlattenedTree();
+
+    final Widget listContent = treeNodes.isEmpty
+        ? const Center(
+            child: Padding(
+              padding: EdgeInsets.all(24.0),
+              child: Text('No locations registered.'),
+            ),
+          )
+        : ListView.separated(
+            shrinkWrap: !isDesktop,
+            physics: isDesktop ? const ScrollPhysics() : const NeverScrollableScrollPhysics(),
+            itemCount: treeNodes.length,
+            separatorBuilder: (context, index) => const Divider(height: 8),
+            itemBuilder: (context, index) {
+              final nodeData = treeNodes[index];
+              final InventoryLocation loc = nodeData['location'];
+              final int depth = nodeData['depth'];
+
+              IconData icon;
+              Color color;
+              switch (loc.type.toLowerCase()) {
+                case 'site':
+                  icon = Icons.business;
+                  color = Colors.teal;
+                  break;
+                case 'building':
+                  icon = Icons.apartment;
+                  color = Colors.blue;
+                  break;
+                case 'floor':
+                  icon = Icons.layers;
+                  color = Colors.indigo;
+                  break;
+                case 'room':
+                  icon = Icons.meeting_room;
+                  color = Colors.purple;
+                  break;
+                case 'rackspace':
+                  icon = Icons.dns;
+                  color = Colors.orange;
+                  break;
+                default:
+                  icon = Icons.place;
+                  color = Colors.grey;
+                  break;
+              }
+
+              final bool expired = loc.isExpired;
+
+              return Padding(
+                padding: EdgeInsets.only(left: depth * 20.0),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Icon(
+                      depth == 0 ? icon : Icons.subdirectory_arrow_right,
+                      color: expired ? Colors.grey : color,
+                      size: 20,
+                    ),
+                    const SizedBox(width: 8),
+                    if (depth > 0) ...[
+                      Icon(icon, color: expired ? Colors.grey : color, size: 16),
+                      const SizedBox(width: 8),
+                    ],
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            children: [
+                              Expanded(
+                                child: Text(
+                                  loc.id,
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 13,
+                                    decoration: expired ? TextDecoration.lineThrough : null,
+                                  ),
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ),
+                              const SizedBox(width: 8),
+                              Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                decoration: BoxDecoration(
+                                  color: (expired ? Colors.red : Colors.green).withValues(alpha: 0.1),
+                                  border: Border.all(
+                                    color: (expired ? Colors.red : Colors.green).withValues(alpha: 0.4),
+                                  ),
+                                  borderRadius: BorderRadius.circular(4),
+                                ),
+                                child: Text(
+                                  expired ? 'EXPIRED' : 'ACTIVE',
+                                  style: TextStyle(
+                                    fontSize: 8,
+                                    color: expired ? Colors.red : Colors.green,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 2),
+                          Text(
+                            'Type: ${loc.type} | Parent: ${loc.parent ?? "None"}',
+                            style: const TextStyle(fontSize: 11, color: Colors.grey),
+                          ),
+                          const SizedBox(height: 2),
+                          Text(
+                            'Recorded: ${loc.timestamp.toIso8601String().substring(0, 19).replaceFirst("T", " ")}' +
+                                (loc.validUntil != null
+                                    ? ' | Valid Until: ${loc.validUntil!.toIso8601String().substring(0, 19).replaceFirst("T", " ")}'
+                                    : ''),
+                            style: const TextStyle(fontSize: 10, color: Colors.grey),
+                          ),
+                          if (loc.physicalAddress != null) ...[
+                            const SizedBox(height: 4),
+                            Row(
+                              children: [
+                                const Icon(Icons.location_on, size: 12, color: Colors.blueGrey),
+                                const SizedBox(width: 4),
+                                Expanded(
+                                  child: Text(
+                                    loc.physicalAddress!.toPostalLabel(),
+                                    style: const TextStyle(fontSize: 10, color: Colors.blueGrey, fontStyle: FontStyle.italic),
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ),
+                                const SizedBox(width: 8),
+                                InkWell(
+                                  onTap: () {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(
+                                        content: Text('Map Link: ${loc.physicalAddress!.toMapSearchQuery()}'),
+                                        duration: const Duration(seconds: 4),
+                                      ),
+                                    );
+                                  },
+                                  child: const Text(
+                                    'View Map',
+                                    style: TextStyle(
+                                      fontSize: 10,
+                                      color: Colors.blue,
+                                      decoration: TextDecoration.underline,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
+                          if (loc.containedChassis.isNotEmpty) ...[
+                            const SizedBox(height: 6),
+                            ...loc.containedChassis.map((chassis) {
+                              final ne = _networkInventoryService.getNetworkElement(chassis.neRef);
+                              final hasNe = ne != null;
+                              final hasComp = ne != null && ne.componentIds.contains(chassis.componentRef);
+                              final bool isDangling = !hasNe || !hasComp;
+
+                              return Padding(
+                                padding: const EdgeInsets.only(top: 2.0),
+                                child: Row(
+                                  children: [
+                                    const Icon(Icons.dns_outlined, size: 12, color: Colors.blueGrey),
+                                    const SizedBox(width: 4),
+                                    Flexible(
+                                      child: Text(
+                                        'Chassis #${chassis.chassisId} (NE: ${chassis.neRef}, Component: ${chassis.componentRef})',
+                                        style: TextStyle(
+                                          fontSize: 10,
+                                          color: isDangling ? Colors.red : Colors.blueGrey,
+                                        ),
+                                        overflow: TextOverflow.ellipsis,
+                                      ),
+                                    ),
+                                    if (isDangling) ...[
+                                      const SizedBox(width: 6),
+                                      Flexible(
+                                        child: Container(
+                                          padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 1),
+                                          decoration: BoxDecoration(
+                                            color: Colors.red.withValues(alpha: 0.1),
+                                            border: Border.all(color: Colors.red.withValues(alpha: 0.5)),
+                                            borderRadius: BorderRadius.circular(2),
+                                          ),
+                                          child: const Text(
+                                            '⚠️ Dangling Pointer: Invalid NE/Component Reference',
+                                            style: TextStyle(
+                                              fontSize: 8,
+                                              color: Colors.red,
+                                              fontWeight: FontWeight.bold,
+                                            ),
+                                            overflow: TextOverflow.ellipsis,
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ],
+                                ),
+                              );
+                            }),
+                          ],
+                        ],
+                      ),
+                    ),
+                    IconButton(
+                      icon: const Icon(Icons.edit, size: 16),
+                      tooltip: 'Edit Location',
+                      onPressed: () {
+                        setState(() {
+                          _selectedInventoryLocation = loc;
+                          _locationIdController.text = loc.id;
+                          _locationTypeController.text = loc.type;
+                          _selectedLocationParentId = loc.parent;
+                          _locationTimestampController.text =
+                              loc.timestamp.toIso8601String().substring(0, 19).replaceFirst("T", " ");
+                          _locationValidUntilController.text = loc.validUntil != null
+                              ? loc.validUntil!.toIso8601String().substring(0, 19).replaceFirst("T", " ")
+                              : '';
+                          if (loc.physicalAddress != null) {
+                            _locationAddressController.text = loc.physicalAddress!.address;
+                            _locationPostalCodeController.text = loc.physicalAddress!.postalCode;
+                            _locationStateController.text = loc.physicalAddress!.state;
+                            _locationCityController.text = loc.physicalAddress!.city;
+                            _locationCountryCodeController.text = loc.physicalAddress!.countryCode;
+                          } else {
+                            _locationAddressController.clear();
+                            _locationPostalCodeController.clear();
+                            _locationStateController.clear();
+                            _locationCityController.clear();
+                            _locationCountryCodeController.clear();
+                          }
+                          _editingContainedChassis = List<ContainedChassis>.from(loc.containedChassis);
+                          _isEditingLocation = true;
+                          _locationFormError = null;
+                          _locationCountryCodeError = null;
+                        });
+                      },
+                    ),
+                  ],
+                ),
+              );
+            },
+          );
+
+    return Card(
+      color: cardBg,
+      child: Padding(
+        padding: const EdgeInsets.all(24.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text(
+              'YANG Hierarchical Locations Registry',
+              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 16),
+            isDesktop ? Expanded(child: listContent) : listContent,
+          ],
+        ),
+      ),
+    );
+  }
 }
 
 class SparklineWidget extends StatelessWidget {
@@ -4745,4 +6787,229 @@ class _SparklinePainter extends CustomPainter {
   @override
   bool shouldRepaint(covariant _SparklinePainter oldDelegate) =>
       oldDelegate.history != history || oldDelegate.color != color;
+}
+
+class USlotGridVisualizer extends StatelessWidget {
+  final EquipmentRack rack;
+  final bool isDark;
+
+  const USlotGridVisualizer({
+    super.key,
+    required this.rack,
+    required this.isDark,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final int units = (rack.height / 44.45).round().clamp(1, 48);
+    
+    // Choose cabinet color based on class
+    Color cabinetColor;
+    String securityLabel;
+    IconData lockIcon;
+    switch (rack.rackClass) {
+      case 'rack-secure-baseline':
+        cabinetColor = Colors.green;
+        securityLabel = 'SECURE BASELINE';
+        lockIcon = Icons.lock_open;
+        break;
+      case 'rack-secure-medium':
+        cabinetColor = Colors.orange;
+        securityLabel = 'SECURE MEDIUM';
+        lockIcon = Icons.lock;
+        break;
+      case 'rack-secure-high':
+        cabinetColor = Colors.red;
+        securityLabel = 'SECURE HIGH';
+        lockIcon = Icons.gpp_bad; // Bio/high security
+        break;
+      default:
+        cabinetColor = const Color(0xFF3367D6);
+        securityLabel = 'STANDARD';
+        lockIcon = Icons.lock_open;
+    }
+
+    final cardBg = isDark ? const Color(0xFF1E1E2E) : const Color(0xFFF1F3F4);
+    final slotBg = isDark ? const Color(0xFF2D2D3F) : const Color(0xFFE8EAED);
+
+    return Container(
+      decoration: BoxDecoration(
+        color: cardBg,
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: cabinetColor.withValues(alpha: 0.5), width: 2),
+        boxShadow: [
+          BoxShadow(
+            color: cabinetColor.withValues(alpha: 0.1),
+            blurRadius: 10,
+            spreadRadius: 2,
+          ),
+        ],
+      ),
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          // Header info
+          Wrap(
+            alignment: WrapAlignment.spaceBetween,
+            crossAxisAlignment: WrapCrossAlignment.center,
+            spacing: 8,
+            runSpacing: 4,
+            children: [
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(lockIcon, color: cabinetColor, size: 20),
+                  const SizedBox(width: 8),
+                  Flexible(
+                    child: Text(
+                      securityLabel,
+                      style: TextStyle(
+                        color: cabinetColor,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 12,
+                        letterSpacing: 1.2,
+                      ),
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                ],
+              ),
+              Text(
+                '${units}U CABINET',
+                style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
+              ),
+            ],
+          ),
+          const Divider(height: 16),
+          // Scrollable Rack representation
+          Expanded(
+            child: Container(
+              decoration: BoxDecoration(
+                color: isDark ? const Color(0xFF0F0F1A) : const Color(0xFFDCDCDC),
+                borderRadius: BorderRadius.circular(4),
+                border: Border.all(color: cabinetColor, width: 3),
+              ),
+              child: ListView.builder(
+                padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
+                itemCount: units,
+                itemBuilder: (context, index) {
+                  final uIndex = units - index; // Numbered top to bottom
+                  
+                  // Mock some server modules
+                  bool isFilled = false;
+                  Color moduleColor = Colors.transparent;
+                  String moduleLabel = '';
+                  IconData? moduleIcon;
+
+                  if (uIndex == 1 || uIndex == 2) {
+                    isFilled = true;
+                    moduleColor = Colors.amber.withValues(alpha: 0.2);
+                    moduleLabel = 'Core Switch (2U)';
+                    moduleIcon = Icons.settings_ethernet;
+                  } else if (uIndex == 5) {
+                    isFilled = true;
+                    moduleColor = Colors.purple.withValues(alpha: 0.2);
+                    moduleLabel = 'Quantum KMS (1U)';
+                    moduleIcon = Icons.vpn_key;
+                  } else if (uIndex >= 10 && uIndex <= 13) {
+                    isFilled = true;
+                    moduleColor = Colors.teal.withValues(alpha: 0.2);
+                    moduleLabel = uIndex == 13 ? 'Cognitive Compute Node (4U)' : '';
+                    moduleIcon = uIndex == 13 ? Icons.dns : null;
+                  } else if (uIndex == 20 || uIndex == 21) {
+                    isFilled = true;
+                    moduleColor = Colors.blue.withValues(alpha: 0.2);
+                    moduleLabel = uIndex == 21 ? 'Primary Power Unit (2U)' : '';
+                    moduleIcon = uIndex == 21 ? Icons.power : null;
+                  }
+
+                  return Container(
+                    height: 24,
+                    margin: const EdgeInsets.symmetric(vertical: 1.5),
+                    decoration: BoxDecoration(
+                      color: isFilled ? moduleColor : slotBg,
+                      borderRadius: BorderRadius.circular(2),
+                      border: Border.all(
+                        color: isFilled ? cabinetColor.withValues(alpha: 0.7) : Colors.transparent,
+                        width: 1,
+                      ),
+                    ),
+                    child: Row(
+                      children: [
+                        // Slot Label
+                        Container(
+                          width: 36,
+                          alignment: Alignment.center,
+                          decoration: BoxDecoration(
+                            border: Border(
+                              right: BorderSide(
+                                color: isDark ? Colors.white24 : Colors.black26,
+                                width: 1,
+                              ),
+                            ),
+                          ),
+                          child: Text(
+                            'U$uIndex',
+                            style: TextStyle(
+                              fontSize: 10,
+                              fontWeight: FontWeight.bold,
+                              color: isDark ? Colors.white60 : Colors.black54,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        // Module details
+                        if (moduleIcon != null) ...[
+                          Icon(moduleIcon, size: 12, color: cabinetColor),
+                          const SizedBox(width: 6),
+                        ],
+                        Expanded(
+                          child: Text(
+                            moduleLabel,
+                            style: TextStyle(
+                              fontSize: 10,
+                              fontWeight: isFilled ? FontWeight.bold : FontWeight.normal,
+                              color: isDark ? Colors.white70 : Colors.black87,
+                            ),
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                      ],
+                    ),
+                  );
+                },
+              ),
+            ),
+          ),
+          const SizedBox(height: 12),
+          // Dimensions tags
+          Wrap(
+            alignment: WrapAlignment.spaceEvenly,
+            spacing: 4,
+            runSpacing: 4,
+            children: [
+              _buildDimBadge('H: ${rack.height}mm'),
+              _buildDimBadge('W: ${rack.width}mm'),
+              _buildDimBadge('D: ${rack.depth}mm'),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildDimBadge(String text) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      decoration: BoxDecoration(
+        color: Colors.blueGrey.withValues(alpha: 0.15),
+        borderRadius: BorderRadius.circular(4),
+      ),
+      child: Text(
+        text,
+        style: const TextStyle(fontSize: 10, fontWeight: FontWeight.w500),
+      ),
+    );
+  }
 }
