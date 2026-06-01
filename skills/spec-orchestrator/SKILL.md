@@ -42,7 +42,7 @@ Before beginning orchestration, verify you have:
    ```bash
    ./skills/spec-orchestrator/verify_model_coverage.py
    ```
-3. **Execution**: The backlog script queries GitHub issues, resolves checklist checkboxes in the local files, and automatically closes completed Epics, User Stories, and Use Cases. The coverage script verifies that every single node/typedef from the raw YANG schemas is exhaustively documented in the feature specs.
+3. **Execution**: The backlog script parses local specification documents, constructs the traceability relationship graph, and automatically injects/updates the `## Associated Use Cases & User Stories` checklists inside each Epic's markdown file using absolute URLs. It then queries GitHub issues, resolves checklist checkboxes in the local files, and automatically closes completed Epics, User Stories, and Use Cases. The coverage script verifies that every single node/typedef from the raw YANG schemas is exhaustively documented in the feature specs.
 4. **Validation Gate**: Both scripts must execute successfully with exit code 0. Ensure that all completed tasks have been correctly updated/synced to GitHub, and that the overall model coverage is verified at exactly 100%.
 
 ## Phase 5: Final Reporting

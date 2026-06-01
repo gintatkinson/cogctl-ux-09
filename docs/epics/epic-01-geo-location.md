@@ -17,6 +17,20 @@ This Epic covers the digital engineering reverse-engineering of RFC 9179 (Geogra
 - [x] #4 - [Feature 4: Motion Velocity Vector](https://github.com/gintatkinson/cogctl-ux-09/blob/feat/1-reference-frame/docs/features/feat-04-velocity-vector.md)
 - [x] #5 - [Feature 5: Temporal Validity & Expiry](https://github.com/gintatkinson/cogctl-ux-09/blob/feat/1-reference-frame/docs/features/feat-05-temporal-validity.md)
 
+## Associated Use Cases & User Stories
+
+### Associated Use Cases
+- [x] #12 - [Use Case 1: Register Geographic Location (Issue #12)](https://github.com/gintatkinson/cogctl-ux-09/blob/feat/6-counters-gauges/docs/use-cases/uc-01-register-geo-location.md)
+- [x] #13 - [Use Case 2: Query Motion Coordinates & Velocity Trajectory (Issue #13)](https://github.com/gintatkinson/cogctl-ux-09/blob/feat/6-counters-gauges/docs/use-cases/uc-02-query-motion-coordinates.md)
+- [x] #14 - [Use Case 3: Validate Expiry & Temporal State (Issue #14)](https://github.com/gintatkinson/cogctl-ux-09/blob/feat/6-counters-gauges/docs/use-cases/uc-03-validate-expiry.md)
+
+### Associated User Stories
+- [x] #7 - [User Story 1: WGS-84 Earth Location Compatibility (Issue #7)](https://github.com/gintatkinson/cogctl-ux-09/blob/feat/6-counters-gauges/docs/user-stories/us-01-earth-wgs84.md)
+- [x] #8 - [User Story 2: Lunar Location (Issue #8)](https://github.com/gintatkinson/cogctl-ux-09/blob/feat/6-counters-gauges/docs/user-stories/us-02-lunar-location.md)
+- [x] #9 - [User Story 3: Moving Object Velocity Telemetry (Issue #9)](https://github.com/gintatkinson/cogctl-ux-09/blob/feat/6-counters-gauges/docs/user-stories/us-03-moving-object.md)
+- [x] #10 - [User Story 4: Alternate System Reference Frame (Issue #10)](https://github.com/gintatkinson/cogctl-ux-09/blob/feat/6-counters-gauges/docs/user-stories/us-04-alternate-system.md)
+- [x] #11 - [User Story 5: Temporal Validity Expiry Check (Issue #11)](https://github.com/gintatkinson/cogctl-ux-09/blob/feat/6-counters-gauges/docs/user-stories/us-05-temporal-expiry.md)
+
 ## 3. Architecture and System Interaction Diagrams
 ```mermaid
 classDiagram

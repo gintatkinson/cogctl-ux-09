@@ -46,6 +46,90 @@ def get_all_issues():
         raise Exception(f"Failed to fetch issues: {res.stderr.strip()}")
     return json.loads(res.stdout)
 
+def parse_markdown_file(filepath):
+    try:
+        with open(filepath, "r", encoding="utf-8", errors="ignore") as f:
+            content = f.read()
+        
+        # Parse frontmatter
+        title_match = re.search(r'^title:\s*(["\']?)(.*?)\1\s*$', content, re.MULTILINE)
+        issue_match = re.search(r'^issue:\s*(\d+)', content, re.MULTILINE)
+        type_match = re.search(r'^type:\s*(["\']?)(.*?)\1\s*$', content, re.MULTILINE)
+        
+        title = title_match.group(2).strip() if title_match else None
+        issue = int(issue_match.group(1)) if issue_match else None
+        doc_type = type_match.group(2).strip() if type_match else None
+        
+        # Parse checklist issue links: e.g. - [ ] #123 or - [x] #123
+        dep_issues = []
+        matches = re.findall(r'-\s*\[[ xX]\]\s*#(\d+)\b', content)
+        for m in matches:
+            dep_issues.append(int(m))
+            
+        return {
+            "title": title,
+            "issue": issue,
+            "type": doc_type,
+            "dependencies": dep_issues,
+            "filepath": filepath
+        }
+    except Exception as e:
+        print(f"Error parsing {filepath}: {e}")
+        return None
+
+def get_github_repo_url(cwd=None):
+    try:
+        url = subprocess.check_output(["git", "remote", "get-url", "origin"], cwd=cwd, text=True).strip()
+        if url.startswith("git@"):
+            url = url.replace(":", "/").replace("git@", "https://")
+        if url.endswith(".git"):
+            url = url[:-4]
+        return url
+    except Exception:
+        return "https://github.com/gintatkinson/cogctl-ux-09"
+
+def get_current_branch(cwd=None):
+    try:
+        return subprocess.check_output(["git", "rev-parse", "--abbrev-ref", "HEAD"], cwd=cwd, text=True).strip()
+    except Exception:
+        return "main"
+
+def inject_associated_section(content, associated_ucs, associated_uss, repo_url, branch, project_root):
+    # Format the lists
+    uc_lines = []
+    for uc in sorted(associated_ucs, key=lambda x: x["issue"]):
+        rel_path = os.path.relpath(uc["filepath"], project_root)
+        url = f"{repo_url}/blob/{branch}/{rel_path}"
+        uc_lines.append(f"- [ ] #{uc['issue']} - [{uc['title']}]({url})")
+        
+    us_lines = []
+    for us in sorted(associated_uss, key=lambda x: x["issue"]):
+        rel_path = os.path.relpath(us["filepath"], project_root)
+        url = f"{repo_url}/blob/{branch}/{rel_path}"
+        us_lines.append(f"- [ ] #{us['issue']} - [{us['title']}]({url})")
+
+    # Combine into the section text
+    section_title = "## Associated Use Cases & User Stories"
+    section_body = f"\n{section_title}\n"
+    if uc_lines:
+        section_body += "\n### Associated Use Cases\n" + "\n".join(uc_lines) + "\n"
+    if us_lines:
+        section_body += "\n### Associated User Stories\n" + "\n".join(us_lines) + "\n"
+    
+    # Check if section already exists
+    existing_match = re.search(r'^##\s+Associated Use Cases\s*&\s*User Stories.*?(?=\n##\s|\Z)', content, re.DOTALL | re.MULTILINE | re.IGNORECASE)
+    if existing_match:
+        content = content.replace(existing_match.group(0), section_body.strip())
+    else:
+        req_match = re.search(r'^##\s+2\.\s+Requirements\s*&\s*Checklist.*?(?=\n##\s|\Z)', content, re.DOTALL | re.MULTILINE | re.IGNORECASE)
+        if req_match:
+            content = content.replace(req_match.group(0), req_match.group(0).rstrip() + "\n" + section_body)
+        else:
+            content = content.rstrip() + "\n\n" + section_body
+            
+    return content
+
+
 def update_checklist_in_file(filepath, issue_dict):
     with open(filepath, "r", encoding="utf-8") as f:
         content = f.read()
@@ -166,6 +250,76 @@ def main():
         sys.exit(1)
 
     print(f"Scanning backlog files in {docs_dir}...")
+
+    # Build Epic-to-UC/US relationship maps and inject them into Epic markdown files
+    epics = {}
+    epics_dir = os.path.join(docs_dir, "epics")
+    if os.path.exists(epics_dir):
+        for filename in os.listdir(epics_dir):
+            if filename.endswith(".md"):
+                p = parse_markdown_file(os.path.join(epics_dir, filename))
+                if p and p["issue"]:
+                    epics[p["issue"]] = p
+
+    features = {}
+    feature_to_epic = {}
+    features_dir = os.path.join(docs_dir, "features")
+    if os.path.exists(features_dir):
+        for filename in os.listdir(features_dir):
+            if filename.endswith(".md"):
+                p = parse_markdown_file(os.path.join(features_dir, filename))
+                if p and p["issue"]:
+                    features[p["issue"]] = p
+                    for epic_issue, epic_data in epics.items():
+                        if p["issue"] in epic_data["dependencies"]:
+                            feature_to_epic[p["issue"]] = epic_issue
+
+    user_stories = {}
+    story_to_epics = {}
+    stories_dir = os.path.join(docs_dir, "user-stories")
+    if os.path.exists(stories_dir):
+        for filename in os.listdir(stories_dir):
+            if filename.endswith(".md"):
+                p = parse_markdown_file(os.path.join(stories_dir, filename))
+                if p and p["issue"]:
+                    user_stories[p["issue"]] = p
+                    associated = set()
+                    for feat in p["dependencies"]:
+                        if feat in feature_to_epic:
+                            associated.add(feature_to_epic[feat])
+                    story_to_epics[p["issue"]] = associated
+
+    use_cases = {}
+    case_to_epics = {}
+    usecases_dir = os.path.join(docs_dir, "use-cases")
+    if os.path.exists(usecases_dir):
+        for filename in os.listdir(usecases_dir):
+            if filename.endswith(".md"):
+                p = parse_markdown_file(os.path.join(usecases_dir, filename))
+                if p and p["issue"]:
+                    use_cases[p["issue"]] = p
+                    associated = set()
+                    for us in p["dependencies"]:
+                        if us in story_to_epics:
+                            associated.update(story_to_epics[us])
+                    case_to_epics[p["issue"]] = associated
+
+    repo_url = get_github_repo_url(cwd=docs_dir)
+    branch = get_current_branch(cwd=docs_dir)
+
+    for epic_issue, epic_data in epics.items():
+        associated_uss = [user_stories[us] for us, epics_set in story_to_epics.items() if epic_issue in epics_set]
+        associated_ucs = [use_cases[uc] for uc, epics_set in case_to_epics.items() if epic_issue in epics_set]
+        
+        with open(epic_data["filepath"], "r", encoding="utf-8") as f:
+            content = f.read()
+            
+        new_content = inject_associated_section(content, associated_ucs, associated_uss, repo_url, branch, project_root)
+        if new_content != content:
+            with open(epic_data["filepath"], "w", encoding="utf-8") as f:
+                f.write(new_content)
+            print(f"  [Epic Injection] Injected associated UCs/USs into {os.path.basename(epic_data['filepath'])}")
+
 
     # Process Epics
     epics_dir = os.path.join(docs_dir, "epics")
