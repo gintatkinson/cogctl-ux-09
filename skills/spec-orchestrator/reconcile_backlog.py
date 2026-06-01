@@ -10,7 +10,9 @@ def normalize_title(title):
         return ""
     # Strip quotes and leading/trailing whitespace
     title = title.strip().strip('"\'')
-    # Strip common prefixes (e.g., epic-01:, feat-02:, us-03:, uc-04:, etc.)
+    # Strip (Issue #...) suffix
+    title = re.sub(r'\s*\(\s*Issue\s*#?\s*\d+\s*\)', '', title, flags=re.IGNORECASE)
+    # Strip common prefixes (e.g., epic-01:, feat-02:, us-03:, us-10:, uc-04:, etc.)
     title = re.sub(r'^(epic|feat|us|uc|feature|user[- ]story|use[- ]case)[s]?[- ]*\d*[- ]*[:\-]\s*', '', title, flags=re.IGNORECASE)
     # Strip any remaining punctuation and normalize spacing
     title = re.sub(r'[^\w\s]', '', title)

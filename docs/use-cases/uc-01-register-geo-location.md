@@ -28,9 +28,9 @@ spec_source: "RFC 9179 Section 2.1, 2.2, 2.3"
   - The System rejects the entry or rounds according to configuration.
 
 ## Required User Stories
-- [ ] #7 - [User Story 1: WGS-84 Earth Location Compatibility](https://github.com/gintatkinson/cogctl-ux-09/blob/feat/1-reference-frame/docs/user-stories/us-01-earth-wgs84.md)
-- [ ] #8 - [User Story 2: Lunar Location](https://github.com/gintatkinson/cogctl-ux-09/blob/feat/1-reference-frame/docs/user-stories/us-02-lunar-location.md)
-- [ ] #10 - [User Story 4: Alternate System Reference Frame](https://github.com/gintatkinson/cogctl-ux-09/blob/feat/1-reference-frame/docs/user-stories/us-04-alternate-system.md)
+- [x] #7 - [User Story 1: WGS-84 Earth Location Compatibility](https://github.com/gintatkinson/cogctl-ux-09/blob/feat/1-reference-frame/docs/user-stories/us-01-earth-wgs84.md)
+- [x] #8 - [User Story 2: Lunar Location](https://github.com/gintatkinson/cogctl-ux-09/blob/feat/1-reference-frame/docs/user-stories/us-02-lunar-location.md)
+- [x] #10 - [User Story 4: Alternate System Reference Frame](https://github.com/gintatkinson/cogctl-ux-09/blob/feat/1-reference-frame/docs/user-stories/us-04-alternate-system.md)
 
 ## Source References
 YANG Schema: [ietf-geo-location.yang](https://github.com/YangModels/yang/blob/main/standard/ietf/RFC/ietf-geo-location%402022-02-11.yang)

@@ -24,7 +24,7 @@ spec_source: "RFC 9179 Section 2.3 & 2.4"
   - The System returns only the static location coordinates and flags the velocity as invalid.
 
 ## Required User Stories
-- [ ] #9 - [User Story 3: Moving Object Velocity Telemetry](https://github.com/gintatkinson/cogctl-ux-09/blob/feat/1-reference-frame/docs/user-stories/us-03-moving-object.md)
+- [x] #9 - [User Story 3: Moving Object Velocity Telemetry](https://github.com/gintatkinson/cogctl-ux-09/blob/feat/1-reference-frame/docs/user-stories/us-03-moving-object.md)
 
 ## Source References
 YANG Schema: [ietf-geo-location.yang](https://github.com/YangModels/yang/blob/main/standard/ietf/RFC/ietf-geo-location%402022-02-11.yang)

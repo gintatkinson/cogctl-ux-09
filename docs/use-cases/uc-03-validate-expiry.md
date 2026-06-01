@@ -24,7 +24,7 @@ spec_source: "RFC 9179 Section 2.5"
   - The System treats the entry as permanently valid and skips expiration marking.
 
 ## Required User Stories
-- [ ] #11 - [User Story 5: Temporal Validity Expiry Check](https://github.com/gintatkinson/cogctl-ux-09/blob/feat/1-reference-frame/docs/user-stories/us-05-temporal-expiry.md)
+- [x] #11 - [User Story 5: Temporal Validity Expiry Check](https://github.com/gintatkinson/cogctl-ux-09/blob/feat/1-reference-frame/docs/user-stories/us-05-temporal-expiry.md)
 
 ## Source References
 YANG Schema: [ietf-geo-location.yang](https://github.com/YangModels/yang/blob/main/standard/ietf/RFC/ietf-geo-location%402022-02-11.yang)

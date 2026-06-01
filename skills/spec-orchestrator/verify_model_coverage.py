@@ -36,13 +36,13 @@ def parse_yang_file(filepath):
 
     # Patterns to match definitions
     patterns = {
-        "typedef": r'\btypedef\s+([a-zA-Z0-9_\-]+)',
-        "leaf": r'\bleaf\s+([a-zA-Z0-9_\-]+)',
-        "container": r'\bcontainer\s+([a-zA-Z0-9_\-]+)',
-        "list": r'\blist\s+([a-zA-Z0-9_\-]+)',
-        "choice": r'\bchoice\s+([a-zA-Z0-9_\-]+)',
-        "case": r'\bcase\s+([a-zA-Z0-9_\-]+)',
-        "identity": r'\bidentity\s+([a-zA-Z0-9_\-]+)'
+        "typedef": r'\btypedef\s+([a-zA-Z0-9_\-.]+)',
+        "leaf": r'\bleaf\s+([a-zA-Z0-9_\-.]+)',
+        "container": r'\bcontainer\s+([a-zA-Z0-9_\-.]+)',
+        "list": r'\blist\s+([a-zA-Z0-9_\-.]+)',
+        "choice": r'\bchoice\s+([a-zA-Z0-9_\-.]+)',
+        "case": r'\bcase\s+([a-zA-Z0-9_\-.]+)',
+        "identity": r'\bidentity\s+([a-zA-Z0-9_\-.]+)'
     }
 
     definitions = set()
