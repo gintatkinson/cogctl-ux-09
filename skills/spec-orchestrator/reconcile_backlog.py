@@ -223,14 +223,11 @@ def auto_generate_solution_walkthrough(project_root, feature_id, issue_num, titl
     commits_info = []
     modified_files = set()
     try:
-        # Search git log for commits containing "#issue_num", "feat <feature_id>", or "feature <feature_id>"
+        # Search git log for commits
         git_log_cmd = [
             "git", "log", "--all", 
-            "--grep", f"#{issue_num}", 
-            "--grep", f"feat.*{feature_id}", 
-            "--grep", f"feature.*{feature_id}", 
             "--format=%H|%s|%an|%ad", 
-            "-n", "15"
+            "-n", "500"
         ]
         log_res = subprocess.run(git_log_cmd, capture_output=True, text=True, cwd=project_root)
         if log_res.returncode == 0 and log_res.stdout.strip():
@@ -238,25 +235,43 @@ def auto_generate_solution_walkthrough(project_root, feature_id, issue_num, titl
                 parts = line.split("|")
                 if len(parts) == 4:
                     commit_hash, subject, author, date = parts
-                    commits_info.append({
-                        "hash": commit_hash,
-                        "subject": subject,
-                        "author": author,
-                        "date": date
-                    })
-                    # Get modified files for this commit
-                    show_res = subprocess.run(
-                        ["git", "show", "--name-only", "--format=", commit_hash],
-                        capture_output=True,
-                        text=True,
-                        cwd=project_root
-                    )
-                    if show_res.returncode == 0:
-                        for f in show_res.stdout.strip().split("\n"):
-                            if f.strip():
-                                modified_files.add(f.strip())
+                    msg_lower = subject.lower()
+                    is_related = False
+                    if f"#{issue_num}" in msg_lower:
+                        is_related = True
+                    else:
+                        patterns = [
+                            rf'\bfeat(ure)?[-:\s(]+0*{clean_feature_id}\b',
+                            rf'\bfeat(ure)?\s+0*{clean_feature_id}\b'
+                        ]
+                        for pat in patterns:
+                            if re.search(pat, msg_lower):
+                                is_related = True
+                                break
+                    if is_related:
+                        commits_info.append({
+                            "hash": commit_hash,
+                            "subject": subject,
+                            "author": author,
+                            "date": date
+                        })
+                        # Get modified files for this commit
+                        show_res = subprocess.run(
+                            ["git", "show", "--name-only", "--format=", commit_hash],
+                            capture_output=True,
+                            text=True,
+                            cwd=project_root
+                        )
+                        if show_res.returncode == 0:
+                            for f in show_res.stdout.strip().split("\n"):
+                                if f.strip():
+                                    modified_files.add(f.strip())
     except Exception as e:
         print(f"  [Auto Design Error] Git query failed: {e}")
+
+    if not commits_info:
+        print(f"  [Auto Design] Skipping Feature {clean_feature_id} (Issue #{issue_num}) - no related commits found in git log.")
+        return
 
     # 2. Parse details from the feature spec file
     covered_nodes = ""
