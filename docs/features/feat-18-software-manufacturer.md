@@ -9,6 +9,8 @@ covered-nodes: ["software-rev", "patch", "mfg-name", "product-name", "uuid", "na
 
 # Feature: Feature 18: Common Entity Software & Manufacturer Attributes (Issue #45)
 
+**Parent Epic:** [Epic 4: Network Inventory (Issue #49)](https://github.com/gintatkinson/cogctl-ux-09/blob/main/docs/epics/epic-04-network-inventory.md)
+
 This feature implements software revision tracking, software patching lists, manufacturer details, and product names common to both network elements and components.
 
 ## 1. Schema Definitions & Constraints

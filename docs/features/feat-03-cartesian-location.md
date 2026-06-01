@@ -10,6 +10,8 @@ covered-nodes: ["cartesian", "x", "y", "z"]
 
 # Feature: Feature 3: Cartesian Location Coordinates (Issue #3)
 
+**Parent Epic:** [Epic 1: Geographic Location (Issue #6)](https://github.com/gintatkinson/cogctl-ux-09/blob/main/docs/epics/epic-01-geo-location.md)
+
 This feature covers the representation of geographic coordinates in Cartesian space (X, Y, Z axes) relative to the center of mass of the astronomical body.
 
 ## 1. Schema Definitions & Constraints

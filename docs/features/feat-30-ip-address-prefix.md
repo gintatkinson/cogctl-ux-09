@@ -9,6 +9,8 @@ covered-nodes: ["ip-address", "ipv4-address", "ipv6-address", "ip-address-no-zon
 
 # Feature: Feature 30: IP Address and Prefix Types
 
+**Parent Epic:** [Epic 8: Common Internet Address YANG Data Types (Issue #88)](https://github.com/gintatkinson/cogctl-ux-09/blob/main/docs/epics/epic-08-internet-types.md)
+
 This feature implements the validation rules, canonical structures, and UI representations for IP address and prefix data types defined in RFC 6021 (`ietf-inet-types`).
 
 ## 1. Schema Definitions & Constraints

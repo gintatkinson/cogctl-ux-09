@@ -9,6 +9,8 @@ covered-nodes: ["max-voltage", "max-allocated-power", "contained-chassis", "rela
 
 # Feature: Feature 16: Rack-contained Chassis & Electricity Attributes (Issue #34)
 
+**Parent Epic:** [Epic 3: Network Inventory Location (Issue #35)](https://github.com/gintatkinson/cogctl-ux-09/blob/main/docs/epics/epic-03-ni-location.md)
+
 This feature implements the electrical power constraints and the slot-level mapping of chassis components mounted inside server racks.
 
 ## 1. Schema Definitions & Constraints

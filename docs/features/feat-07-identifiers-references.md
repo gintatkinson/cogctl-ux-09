@@ -10,6 +10,8 @@ covered-nodes: ["object-identifier", "object-identifier-128", "yang-identifier"]
 
 # Feature: Feature 7: Identifiers and Object References (Issue #18)
 
+**Parent Epic:** [Epic 2: Common YANG Data Types (Issue #22)](https://github.com/gintatkinson/cogctl-ux-09/blob/main/docs/epics/epic-02-common-types.md)
+
 This feature implements the logical validation and modeling for the standard YANG object identifiers and YANG identifier string formats defined in RFC 9911.
 
 ## 1. Schema Definitions & Constraints

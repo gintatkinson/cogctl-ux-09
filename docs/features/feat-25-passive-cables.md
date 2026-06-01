@@ -9,6 +9,8 @@ covered-nodes: ["cable", "cable-type", "cable-role", "optical-cable", "fiber-cor
 
 # Feature: Feature 25: Passive Cable Inventory & Types (Issue #65)
 
+**Parent Epic:** [Epic 6: Passive Network Inventory (Issue #68)](https://github.com/gintatkinson/cogctl-ux-09/blob/main/docs/epics/epic-06-passive-inventory.md)
+
 This feature implements physical cable asset registrations, categorizations (optical, electrical, coax), routing roles (backbone, access, branch), and optical transmission characteristics (core count, fiber type, attenuation).
 
 ## 1. Schema Definitions & Constraints

@@ -9,6 +9,8 @@ covered-nodes: ["phys-address", "mac-address", "xpath1.0", "hex-string", "uuid",
 
 # Feature: Feature 10: General Address, Identity, and Language Tags (Issue #21)
 
+**Parent Epic:** [Epic 2: Common YANG Data Types (Issue #22)](https://github.com/gintatkinson/cogctl-ux-09/blob/main/docs/epics/epic-02-common-types.md)
+
 This feature implements logical validation and modeling for physical addresses, MAC addresses, UUIDs, XPath expressions, dotted-quads, hex-strings, and language tags defined in RFC 9911.
 
 ## 1. Schema Definitions & Constraints

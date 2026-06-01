@@ -10,6 +10,8 @@ covered-nodes: ["date-and-time", "date", "date-no-zone", "time", "time-no-zone"]
 
 # Feature: Feature 8: Date and Time Types (Issue #19)
 
+**Parent Epic:** [Epic 2: Common YANG Data Types (Issue #22)](https://github.com/gintatkinson/cogctl-ux-09/blob/main/docs/epics/epic-02-common-types.md)
+
 This feature implements the logical validation and modeling for the date and time representations defined in RFC 9911.
 
 ## 1. Schema Definitions & Constraints

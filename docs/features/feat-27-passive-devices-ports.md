@@ -9,6 +9,8 @@ covered-nodes: ["passive-device", "device-type", "custom-tags", "location-ref", 
 
 # Feature: Feature 27: Passive Device Management & Ports (Issue #67)
 
+**Parent Epic:** [Epic 6: Passive Network Inventory (Issue #68)](https://github.com/gintatkinson/cogctl-ux-09/blob/main/docs/epics/epic-06-passive-inventory.md)
+
 This feature implements passive device entries (ODFs, optical splitters, termination boxes), passive ports (service ports, inputs, outputs), tracking tags (RFID, barcode, QR codes), and geographical site references.
 
 ## 1. Schema Definitions & Constraints

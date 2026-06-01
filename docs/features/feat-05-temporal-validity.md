@@ -11,6 +11,8 @@ covered-nodes: ["timestamp", "valid-until"]
 
 # Feature: Feature 5: Temporal Validity & Expiry (Issue #5)
 
+**Parent Epic:** [Epic 1: Geographic Location (Issue #6)](https://github.com/gintatkinson/cogctl-ux-09/blob/main/docs/epics/epic-01-geo-location.md)
+
 This feature covers the recording timestamp and the expiration epoch (`valid-until`) of a geographic location coordinate entry.
 
 ## 1. Schema Definitions & Constraints

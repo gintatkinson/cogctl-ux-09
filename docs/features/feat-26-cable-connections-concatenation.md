@@ -9,6 +9,8 @@ covered-nodes: ["a-end", "z-end", "device-type", "device-id", "ne-ref", "compone
 
 # Feature: Feature 26: Connected Device Ends & Cable Concatenation (Issue #66)
 
+**Parent Epic:** [Epic 6: Passive Network Inventory (Issue #68)](https://github.com/gintatkinson/cogctl-ux-09/blob/main/docs/epics/epic-06-passive-inventory.md)
+
 This feature implements the mapping of physical cable connection ends (A-end and Z-end) to either passive devices or active Network Element components (e.g. transceiver ports), as well as concatenating multiple child cables into a single composite cable run.
 
 ## 1. Schema Definitions & Constraints

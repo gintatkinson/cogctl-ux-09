@@ -9,6 +9,8 @@ covered-nodes: ["components", "component", "component-id", "class", "hardware-re
 
 # Feature: Feature 20: Component Identification & Hardware Attributes (Issue #47)
 
+**Parent Epic:** [Epic 4: Network Inventory (Issue #49)](https://github.com/gintatkinson/cogctl-ux-09/blob/main/docs/epics/epic-04-network-inventory.md)
+
 This feature implements the components list, unique component identifiers, hardware classes (chassis, slot, port, virtual), manufacturing details, serial numbers, part numbers, asset tags, FRU flags, and URIs.
 
 ## 1. Schema Definitions & Constraints

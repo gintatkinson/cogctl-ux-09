@@ -9,6 +9,8 @@ covered-nodes: ["contained-chassis", "chassis-id", "ne-ref", "component-ref"]
 
 # Feature: Feature 13: Direct Location-contained Chassis (Issue #31)
 
+**Parent Epic:** [Epic 3: Network Inventory Location (Issue #35)](https://github.com/gintatkinson/cogctl-ux-09/blob/main/docs/epics/epic-03-ni-location.md)
+
 This feature implements the direct location-contained chassis association. It tracks chassis installed directly at an inventory location without a rack, as well as distributed chassis components.
 
 ## 1. Schema Definitions & Constraints

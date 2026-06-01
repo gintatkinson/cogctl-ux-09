@@ -9,6 +9,8 @@ covered-nodes: ["domain-name", "host", "uri"]
 
 # Feature: Feature 31: Internet Domain Names and URIs
 
+**Parent Epic:** [Epic 8: Common Internet Address YANG Data Types (Issue #88)](https://github.com/gintatkinson/cogctl-ux-09/blob/main/docs/epics/epic-08-internet-types.md)
+
 This feature implements the validation rules, domain restrictions, and URI canonical normalization criteria defined in RFC 6021 (`ietf-inet-types`).
 
 ## 1. Schema Definitions & Constraints

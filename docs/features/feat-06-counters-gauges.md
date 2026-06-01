@@ -11,6 +11,8 @@ covered-nodes: ["counter32", "zero-based-counter32", "counter64", "zero-based-co
 
 # Feature: Feature 6: Numeric Counters and Gauges (Issue #17)
 
+**Parent Epic:** [Epic 2: Common YANG Data Types (Issue #22)](https://github.com/gintatkinson/cogctl-ux-09/blob/main/docs/epics/epic-02-common-types.md)
+
 This feature implements the logical validation and modeling for the standard YANG numeric counters and gauges defined in RFC 9911.
 
 ## 1. Schema Definitions & Constraints

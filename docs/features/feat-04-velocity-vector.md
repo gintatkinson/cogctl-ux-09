@@ -11,6 +11,8 @@ covered-nodes: ["velocity", "v-north", "v-east", "v-up"]
 
 # Feature: Feature 4: Motion Velocity Vector (Issue #4)
 
+**Parent Epic:** [Epic 1: Geographic Location (Issue #6)](https://github.com/gintatkinson/cogctl-ux-09/blob/main/docs/epics/epic-01-geo-location.md)
+
 This feature models the speed and direction of a moving object using a 3D velocity vector (northward, eastward, and upward components).
 
 ## 1. Schema Definitions & Constraints

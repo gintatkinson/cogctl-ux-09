@@ -9,6 +9,8 @@ covered-nodes: ["port-breakout", "breakout-channel", "channel-id"]
 
 # Feature: Feature 24: Port Breakout & Channelization Capabilities (Issue #59)
 
+**Parent Epic:** [Epic 5: Network Inventory Topology (Issue #60)](https://github.com/gintatkinson/cogctl-ux-09/blob/main/docs/epics/epic-05-network-inventory-topology.md)
+
 This feature implements the capability to define physical breakout configurations and sub-port channels for termination points in the topology underlay.
 
 ## 1. Schema Definitions & Constraints

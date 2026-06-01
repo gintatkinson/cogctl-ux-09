@@ -9,6 +9,8 @@ covered-nodes: ["racks", "rack", "id", "rack-class", "rack-class-type", "rack-st
 
 # Feature: Feature 14: Equipment Racks Classification & Physical Bounds (Issue #32)
 
+**Parent Epic:** [Epic 3: Network Inventory Location (Issue #35)](https://github.com/gintatkinson/cogctl-ux-09/blob/main/docs/epics/epic-03-ni-location.md)
+
 This feature implements the configuration and classification of server racks, specifying physical dimensions (height, width, depth) and security classification identities.
 
 ## 1. Schema Definitions & Constraints

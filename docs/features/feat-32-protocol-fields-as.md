@@ -9,6 +9,8 @@ covered-nodes: ["ip-version", "dscp", "ipv6-flow-label", "port-number", "as-numb
 
 # Feature: Feature 32: IP Protocol Fields and Autonomous Systems
 
+**Parent Epic:** [Epic 8: Common Internet Address YANG Data Types (Issue #88)](https://github.com/gintatkinson/cogctl-ux-09/blob/main/docs/epics/epic-08-internet-types.md)
+
 This feature implements the ranges, enumerations, and validation criteria for core protocol header fields and autonomous system numbers defined in RFC 6021 (`ietf-inet-types`).
 
 ## 1. Schema Definitions & Constraints

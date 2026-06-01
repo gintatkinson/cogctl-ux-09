@@ -9,6 +9,8 @@ covered-nodes: ["inventory-topology"]
 
 # Feature: Feature 22: Network Inventory Topology Network Type (Issue #57)
 
+**Parent Epic:** [Epic 5: Network Inventory Topology (Issue #60)](https://github.com/gintatkinson/cogctl-ux-09/blob/main/docs/epics/epic-05-network-inventory-topology.md)
+
 This feature introduces a new physical topology network type identifier under `nw:network-types` representing a physical underlay containing physical mapping attributes.
 
 ## 1. Schema Definitions & Constraints

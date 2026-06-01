@@ -9,6 +9,8 @@ covered-nodes: ["physical-address", "address", "postal-code", "state", "city", "
 
 # Feature: Feature 12: Location Physical Addresses (Issue #30)
 
+**Parent Epic:** [Epic 3: Network Inventory Location (Issue #35)](https://github.com/gintatkinson/cogctl-ux-09/blob/main/docs/epics/epic-03-ni-location.md)
+
 This feature implements physical mailing address attributes for inventory locations, supporting country codes, state regions, city details, and postal zip codes.
 
 ## 1. Schema Definitions & Constraints

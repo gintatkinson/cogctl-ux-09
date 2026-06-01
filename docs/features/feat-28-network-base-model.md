@@ -9,6 +9,8 @@ covered-nodes: ["networks", "network", "network-id", "network-types", "supportin
 
 # Feature 28: Network and Node Base Models (Issue #73)
 
+**Parent Epic:** [Epic 7: Network Base Model (Issue #79)](https://github.com/gintatkinson/cogctl-ux-09/blob/main/docs/epics/epic-07-network-base.md)
+
 This feature implements the base network and node elements of RFC 8345, providing a common data model for describing collections of nodes, network relationships, and underlay network topologies.
 
 ## 1. Schema Definitions & Constraints

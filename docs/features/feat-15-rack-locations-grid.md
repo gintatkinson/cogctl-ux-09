@@ -9,6 +9,8 @@ covered-nodes: ["rack-location", "location-ref", "row-number", "column-number"]
 
 # Feature: Feature 15: Rack Locations & Grid Coordinates (Issue #33)
 
+**Parent Epic:** [Epic 3: Network Inventory Location (Issue #35)](https://github.com/gintatkinson/cogctl-ux-09/blob/main/docs/epics/epic-03-ni-location.md)
+
 This feature implements the positioning of equipment racks inside location facilities using grid coordinate row and column parameters.
 
 ## 1. Schema Definitions & Constraints

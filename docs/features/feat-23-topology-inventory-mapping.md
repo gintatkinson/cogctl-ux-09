@@ -9,6 +9,8 @@ covered-nodes: ["inventory-mapping-attributes", "ne-ref", "link-type", "copper",
 
 # Feature: Feature 23: Topology Inventory Mapping & Link Classification (Issue #58)
 
+**Parent Epic:** [Epic 5: Network Inventory Topology (Issue #60)](https://github.com/gintatkinson/cogctl-ux-09/blob/main/docs/epics/epic-05-network-inventory-topology.md)
+
 This feature implements the correlation between topology logical nodes/links and physical network elements, as well as lightweight classification of physical media link types.
 
 ## 1. Schema Definitions & Constraints

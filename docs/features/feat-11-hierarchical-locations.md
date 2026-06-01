@@ -9,6 +9,8 @@ covered-nodes: ["locations", "location", "id", "type", "parent", "timestamp", "v
 
 # Feature: Feature 11: Hierarchical Inventory Locations (Issue #29)
 
+**Parent Epic:** [Epic 3: Network Inventory Location (Issue #35)](https://github.com/gintatkinson/cogctl-ux-09/blob/main/docs/epics/epic-03-ni-location.md)
+
 This feature implements the hierarchical inventory location schema, providing containment models for location hierarchies (sites, rooms, buildings, poles, etc.) and temporal validity validation.
 
 ## 1. Schema Definitions & Constraints

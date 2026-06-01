@@ -9,6 +9,8 @@ covered-nodes: ["network-inventory", "network-elements", "network-element", "ne-
 
 # Feature: Feature 19: Network Element Management (Issue #46)
 
+**Parent Epic:** [Epic 4: Network Inventory (Issue #49)](https://github.com/gintatkinson/cogctl-ux-09/blob/main/docs/epics/epic-04-network-inventory.md)
+
 This feature implements the top-level network inventory container, containing lists of network elements, unique identifiers, and element-level product revisions.
 
 ## 1. Schema Definitions & Constraints

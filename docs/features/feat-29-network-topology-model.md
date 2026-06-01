@@ -9,6 +9,8 @@ covered-nodes: ["link", "link-id", "source", "source-node", "source-tp", "destin
 
 # Feature 29: Network Topology Model (Issue #74)
 
+**Parent Epic:** [Epic 9: Network Topology Model (Issue #80)](https://github.com/gintatkinson/cogctl-ux-09/blob/main/docs/epics/epic-09-network-topology.md)
+
 This feature implements the network topology model of RFC 8345, augmenting the base network model with links, source-to-destination connections, and termination points.
 
 ## 1. Schema Definitions & Constraints

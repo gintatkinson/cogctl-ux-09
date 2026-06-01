@@ -9,6 +9,8 @@ covered-nodes: ["ne-type", "ne-physical", "non-hardware-component-class", "ne-re
 
 # Feature: Feature 17: Inventory Type Definitions & References (Issue #44)
 
+**Parent Epic:** [Epic 4: Network Inventory (Issue #49)](https://github.com/gintatkinson/cogctl-ux-09/blob/main/docs/epics/epic-04-network-inventory.md)
+
 This feature implements core identities, typedefs, and grouping references that allow data models to consistently reference network elements, components, and ports in the inventory.
 
 ## 1. Schema Definitions & Constraints

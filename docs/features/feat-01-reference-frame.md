@@ -10,6 +10,8 @@ covered-nodes: ["alternate-system", "astronomical-body", "coord-accuracy", "geod
 
 # Feature: Feature 1: Geographic Reference Frame (Issue #1)
 
+**Parent Epic:** [Epic 1: Geographic Location (Issue #6)](https://github.com/gintatkinson/cogctl-ux-09/blob/main/docs/epics/epic-01-geo-location.md)
+
 This feature establishes the frame of reference for geographic coordinates, including the astronomical body, geodetic datum, and coordinate accuracy bounds.
 
 ## 1. Schema Definitions & Constraints

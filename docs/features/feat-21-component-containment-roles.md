@@ -9,6 +9,8 @@ covered-nodes: ["parent", "parent-rel-pos", "is-main"]
 
 # Feature: Feature 21: Component Containment & Roles (Issue #48)
 
+**Parent Epic:** [Epic 4: Network Inventory (Issue #49)](https://github.com/gintatkinson/cogctl-ux-09/blob/main/docs/epics/epic-04-network-inventory.md)
+
 This feature implements hierarchical containment reference trees (referencing parent component IDs), relative containment positions, and main role flags for chassis components.
 
 ## 1. Schema Definitions & Constraints
