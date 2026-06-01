@@ -649,9 +649,10 @@ class _ReferenceFrameDashboardState extends State<ReferenceFrameDashboard> {
 
     return Card(
       color: cardBg,
-      child: Padding(
-        padding: const EdgeInsets.all(24.0),
-        child: Form(
+      child: SingleChildScrollView(
+        child: Padding(
+          padding: const EdgeInsets.all(24.0),
+          child: Form(
           key: _formKey,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -861,10 +862,163 @@ class _ReferenceFrameDashboardState extends State<ReferenceFrameDashboard> {
           ),
         ),
       ),
+    ),
     );
   }
 
   Widget _buildListPane(ThemeData theme) {
+    final isDesktop = MediaQuery.of(context).size.width > 900;
+
+    final Widget listContent = _records.isEmpty
+        ? Center(
+            child: Padding(
+              padding: const EdgeInsets.all(48.0),
+              child: Column(
+                children: [
+                  Icon(Icons.storage, size: 48, color: theme.hintColor.withValues(alpha: 0.3)),
+                  const SizedBox(height: 12),
+                  Text(
+                    'Database registry is empty.',
+                    style: TextStyle(color: theme.hintColor),
+                  ),
+                ],
+              ),
+            ),
+          )
+        : ListView.builder(
+            shrinkWrap: !isDesktop,
+            physics: isDesktop ? const ScrollPhysics() : const NeverScrollableScrollPhysics(),
+            itemCount: _records.length,
+            itemBuilder: (context, index) {
+              final rec = _records[index];
+              final frame = rec.referenceFrame;
+              final system = frame.geodeticSystem;
+
+              return Card(
+                margin: const EdgeInsets.symmetric(vertical: 8),
+                child: Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Row(
+                            children: [
+                              Icon(Icons.public, color: theme.primaryColor, size: 18),
+                              const SizedBox(width: 8),
+                              Text(
+                                frame.astronomicalBody.toUpperCase(),
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 13,
+                                ),
+                              ),
+                              if (rec.networkDomain != null) ...[
+                                const SizedBox(width: 8),
+                                Container(
+                                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                  decoration: BoxDecoration(
+                                    color: theme.primaryColor.withValues(alpha: 0.1),
+                                    borderRadius: BorderRadius.circular(4),
+                                  ),
+                                  child: Text(
+                                    rec.networkDomain!,
+                                    style: TextStyle(
+                                      color: theme.primaryColor,
+                                      fontSize: 9,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ],
+                          ),
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                            decoration: BoxDecoration(
+                              color: Colors.green.withValues(alpha: 0.15),
+                              border: Border.all(color: Colors.green.withValues(alpha: 0.5)),
+                              borderRadius: BorderRadius.circular(4),
+                            ),
+                            child: const Text(
+                              'ACTIVE',
+                              style: TextStyle(
+                                color: Colors.green,
+                                fontSize: 9,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                      const Divider(height: 24, thickness: 0.5),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                const Text('GEODETIC DATUM', style: TextStyle(fontSize: 10, color: Colors.grey)),
+                                const SizedBox(height: 2),
+                                Text(
+                                  system.geodeticDatum,
+                                  style: const TextStyle(fontWeight: FontWeight.w500),
+                                ),
+                              ],
+                            ),
+                          ),
+                          if (frame.alternateSystem != null)
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  const Text('ALTERNATE SYSTEM', style: TextStyle(fontSize: 10, color: Colors.grey)),
+                                  const SizedBox(height: 2),
+                                  Text(
+                                    frame.alternateSystem!,
+                                    style: const TextStyle(fontWeight: FontWeight.w500),
+                                  ),
+                                ],
+                              ),
+                            ),
+                        ],
+                      ),
+                      const SizedBox(height: 12),
+                      Row(
+                        children: [
+                          if (system.coordAccuracy != null)
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  const Text('COORD ACCURACY', style: TextStyle(fontSize: 10, color: Colors.grey)),
+                                  const SizedBox(height: 2),
+                                  Text('${system.coordAccuracy}'),
+                                ],
+                              ),
+                            ),
+                          if (system.heightAccuracy != null)
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  const Text('HEIGHT ACCURACY', style: TextStyle(fontSize: 10, color: Colors.grey)),
+                                  const SizedBox(height: 2),
+                                  Text('${system.heightAccuracy} meters'),
+                                ],
+                              ),
+                            ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+              );
+            },
+          );
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -898,155 +1052,7 @@ class _ReferenceFrameDashboardState extends State<ReferenceFrameDashboard> {
           ],
         ),
         const SizedBox(height: 16),
-        _records.isEmpty
-            ? Center(
-                child: Padding(
-                  padding: const EdgeInsets.all(48.0),
-                  child: Column(
-                    children: [
-                      Icon(Icons.storage, size: 48, color: theme.hintColor.withValues(alpha: 0.3)),
-                      const SizedBox(height: 12),
-                      Text(
-                        'Database registry is empty.',
-                        style: TextStyle(color: theme.hintColor),
-                      ),
-                    ],
-                  ),
-                ),
-              )
-            : ListView.builder(
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
-                itemCount: _records.length,
-                itemBuilder: (context, index) {
-                  final rec = _records[index];
-                  final frame = rec.referenceFrame;
-                  final system = frame.geodeticSystem;
-
-                  return Card(
-                    margin: const EdgeInsets.symmetric(vertical: 8),
-                    child: Padding(
-                      padding: const EdgeInsets.all(16.0),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Row(
-                                children: [
-                                  Icon(Icons.public, color: theme.primaryColor, size: 18),
-                                  const SizedBox(width: 8),
-                                  Text(
-                                    frame.astronomicalBody.toUpperCase(),
-                                    style: const TextStyle(
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 13,
-                                    ),
-                                  ),
-                                  if (rec.networkDomain != null) ...[
-                                    const SizedBox(width: 8),
-                                    Container(
-                                      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                                      decoration: BoxDecoration(
-                                        color: theme.primaryColor.withValues(alpha: 0.1),
-                                        borderRadius: BorderRadius.circular(4),
-                                      ),
-                                      child: Text(
-                                        rec.networkDomain!,
-                                        style: TextStyle(
-                                          color: theme.primaryColor,
-                                          fontSize: 9,
-                                          fontWeight: FontWeight.bold,
-                                        ),
-                                      ),
-                                    ),
-                                  ],
-                                ],
-                              ),
-                              Container(
-                                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                                decoration: BoxDecoration(
-                                  color: Colors.green.withValues(alpha: 0.15),
-                                  border: Border.all(color: Colors.green.withValues(alpha: 0.5)),
-                                  borderRadius: BorderRadius.circular(4),
-                                ),
-                                child: const Text(
-                                  'ACTIVE',
-                                  style: TextStyle(
-                                    color: Colors.green,
-                                    fontSize: 9,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                          const Divider(height: 24, thickness: 0.5),
-                          Row(
-                            children: [
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    const Text('GEODETIC DATUM', style: TextStyle(fontSize: 10, color: Colors.grey)),
-                                    const SizedBox(height: 2),
-                                    Text(
-                                      system.geodeticDatum,
-                                      style: const TextStyle(fontWeight: FontWeight.w500),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                              if (frame.alternateSystem != null)
-                                Expanded(
-                                  child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: [
-                                      const Text('ALTERNATE SYSTEM', style: TextStyle(fontSize: 10, color: Colors.grey)),
-                                      const SizedBox(height: 2),
-                                      Text(
-                                        frame.alternateSystem!,
-                                        style: const TextStyle(fontWeight: FontWeight.w500),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                            ],
-                          ),
-                          const SizedBox(height: 12),
-                          Row(
-                            children: [
-                              if (system.coordAccuracy != null)
-                                Expanded(
-                                  child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: [
-                                      const Text('COORD ACCURACY', style: TextStyle(fontSize: 10, color: Colors.grey)),
-                                      const SizedBox(height: 2),
-                                      Text('${system.coordAccuracy}'),
-                                    ],
-                                  ),
-                                ),
-                              if (system.heightAccuracy != null)
-                                Expanded(
-                                  child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: [
-                                      const Text('HEIGHT ACCURACY', style: TextStyle(fontSize: 10, color: Colors.grey)),
-                                      const SizedBox(height: 2),
-                                      Text('${system.heightAccuracy} meters'),
-                                    ],
-                                  ),
-                                ),
-                            ],
-                          ),
-                        ],
-                      ),
-                    ),
-                  );
-                },
-              ),
+        isDesktop ? Expanded(child: listContent) : listContent,
       ],
     );
   }
