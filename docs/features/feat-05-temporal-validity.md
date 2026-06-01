@@ -3,6 +3,8 @@ title: "Feature 5: Temporal Validity & Expiry (Issue #5)"
 epic: "Epic 1: Geographic Location (Issue #6)"
 type: "feature"
 issue: 5
+platform: "flutter"
+status: "completed"
 labels: ["feature", "ietf-geo-location"]
 covered-nodes: ["timestamp", "valid-until"]
 ---

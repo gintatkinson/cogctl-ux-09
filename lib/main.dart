@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart' hide Velocity;
 import 'dart:math';
+import 'dart:async';
 import 'models/geo_location.dart';
 import 'services/mock_location_service.dart';
 
@@ -176,6 +177,13 @@ class _ReferenceFrameDashboardState extends State<ReferenceFrameDashboard> {
   double? _computedSpeed;
   double? _computedHeading;
 
+  // Expiry / Temporal Validity controllers
+  final _timestampController = TextEditingController();
+  final _validUntilController = TextEditingController();
+  String? _timestampError;
+  String? _validUntilError;
+  Timer? _expiryUpdateTimer;
+
   // List of location records
   List<GeoLocation> _records = [];
 
@@ -186,6 +194,40 @@ class _ReferenceFrameDashboardState extends State<ReferenceFrameDashboard> {
   void initState() {
     super.initState();
     _refreshList();
+
+    _expiryUpdateTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      if (mounted) {
+        setState(() {});
+      }
+    });
+
+    _timestampController.addListener(() {
+      final text = _timestampController.text.trim();
+      if (text.isEmpty) {
+        if (_timestampError != null) setState(() => _timestampError = null);
+        return;
+      }
+      try {
+        ReferenceFrameValidator.parseDateTime(text, 'timestamp');
+        if (_timestampError != null) setState(() => _timestampError = null);
+      } catch (e) {
+        setState(() => _timestampError = e.toString().replaceFirst('FormatException: ', ''));
+      }
+    });
+
+    _validUntilController.addListener(() {
+      final text = _validUntilController.text.trim();
+      if (text.isEmpty) {
+        if (_validUntilError != null) setState(() => _validUntilError = null);
+        return;
+      }
+      try {
+        ReferenceFrameValidator.parseDateTime(text, 'valid-until');
+        if (_validUntilError != null) setState(() => _validUntilError = null);
+      } catch (e) {
+        setState(() => _validUntilError = e.toString().replaceFirst('FormatException: ', ''));
+      }
+    });
 
     _bodyController.addListener(() {
       final text = _bodyController.text.trim();
@@ -443,6 +485,9 @@ class _ReferenceFrameDashboardState extends State<ReferenceFrameDashboard> {
     _vNorthController.dispose();
     _vEastController.dispose();
     _vUpController.dispose();
+    _timestampController.dispose();
+    _validUntilController.dispose();
+    _expiryUpdateTimer?.cancel();
     super.dispose();
   }
 
@@ -461,6 +506,8 @@ class _ReferenceFrameDashboardState extends State<ReferenceFrameDashboard> {
     _vNorthController.clear();
     _vEastController.clear();
     _vUpController.clear();
+    _timestampController.clear();
+    _validUntilController.clear();
     setState(() {
       _coordinateMode = 'Ellipsoidal';
       _selectedNetworkDomain = 'Terrestrial Fiber (L0-L4)';
@@ -479,6 +526,8 @@ class _ReferenceFrameDashboardState extends State<ReferenceFrameDashboard> {
       _vNorthError = null;
       _vEastError = null;
       _vUpError = null;
+      _timestampError = null;
+      _validUntilError = null;
       _computedSpeed = null;
       _computedHeading = null;
     });
@@ -501,6 +550,8 @@ class _ReferenceFrameDashboardState extends State<ReferenceFrameDashboard> {
       _vNorthError = null;
       _vEastError = null;
       _vUpError = null;
+      _timestampError = null;
+      _validUntilError = null;
     });
 
     final rawBody = _bodyController.text.trim();
@@ -726,6 +777,45 @@ class _ReferenceFrameDashboardState extends State<ReferenceFrameDashboard> {
       }
     }
 
+    final rawTimestamp = _timestampController.text.trim();
+    final rawValidUntil = _validUntilController.text.trim();
+
+    DateTime? timestampVal;
+    if (rawTimestamp.isNotEmpty) {
+      try {
+        timestampVal = ReferenceFrameValidator.parseDateTime(rawTimestamp, 'timestamp');
+      } catch (e) {
+        setState(() {
+          _timestampError = e.toString().replaceFirst('FormatException: ', '');
+        });
+        hasError = true;
+      }
+    }
+
+    DateTime? validUntilVal;
+    if (rawValidUntil.isNotEmpty) {
+      try {
+        validUntilVal = ReferenceFrameValidator.parseDateTime(rawValidUntil, 'valid-until');
+      } catch (e) {
+        setState(() {
+          _validUntilError = e.toString().replaceFirst('FormatException: ', '');
+        });
+        hasError = true;
+      }
+    }
+
+    if (timestampVal != null && validUntilVal != null) {
+      try {
+        ReferenceFrameValidator.validateTemporalValidity(timestampVal, validUntilVal);
+      } catch (e) {
+        setState(() {
+          _generalError = e.toString().replaceFirst('FormatException: ', '');
+          _validUntilError = e.toString().replaceFirst('FormatException: ', '');
+        });
+        hasError = true;
+      }
+    }
+
     if (hasError) {
       return;
     }
@@ -776,6 +866,8 @@ class _ReferenceFrameDashboardState extends State<ReferenceFrameDashboard> {
       networkDomain: _selectedNetworkDomain,
       location: locationCoord,
       velocity: velocityObj,
+      timestamp: timestampVal,
+      validUntil: validUntilVal,
     );
 
     // 4. Save to Mock DB
@@ -1534,9 +1626,9 @@ class _ReferenceFrameDashboardState extends State<ReferenceFrameDashboard> {
                 Container(
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
-                    color: theme.primaryColor.withOpacity(0.08),
+                    color: theme.primaryColor.withValues(alpha: 0.08),
                     borderRadius: BorderRadius.circular(4),
-                    border: Border.all(color: theme.primaryColor.withOpacity(0.3)),
+                    border: Border.all(color: theme.primaryColor.withValues(alpha: 0.3)),
                   ),
                   child: Row(
                     children: [
@@ -1556,6 +1648,115 @@ class _ReferenceFrameDashboardState extends State<ReferenceFrameDashboard> {
                 ),
                 const SizedBox(height: 16),
               ],
+
+              const Divider(height: 32),
+              Text(
+                'Temporal Validity (Optional)',
+                style: theme.textTheme.titleMedium?.copyWith(
+                  fontWeight: FontWeight.bold,
+                  color: theme.colorScheme.onSurface.withValues(alpha: 0.8),
+                ),
+              ),
+              const SizedBox(height: 12),
+
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Expanded(
+                    child: TextField(
+                      controller: _timestampController,
+                      decoration: InputDecoration(
+                        labelText: 'Recording Timestamp (ISO 8601 UTC)',
+                        hintText: 'e.g. 2026-06-01T12:00:00Z',
+                        errorText: _timestampError,
+                        prefixIcon: const Icon(Icons.access_time, size: 20),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(4),
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  SizedBox(
+                    height: 56,
+                    child: OutlinedButton(
+                      onPressed: () {
+                        setState(() {
+                          _timestampController.text = DateTime.now().toUtc().toIso8601String();
+                        });
+                      },
+                      style: OutlinedButton.styleFrom(
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
+                      ),
+                      child: const Text('SET NOW'),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 16),
+
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Expanded(
+                    child: TextField(
+                      controller: _validUntilController,
+                      decoration: InputDecoration(
+                        labelText: 'Valid Until (Expiration, ISO 8601 UTC)',
+                        hintText: 'e.g. 2026-06-02T12:00:00Z',
+                        errorText: _validUntilError,
+                        prefixIcon: const Icon(Icons.timer_off, size: 20),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(4),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 8),
+              Wrap(
+                spacing: 8,
+                children: [
+                  OutlinedButton(
+                    onPressed: () {
+                      final base = DateTime.tryParse(_timestampController.text.trim()) ?? DateTime.now();
+                      setState(() {
+                        _validUntilController.text = base.add(const Duration(hours: 1)).toUtc().toIso8601String();
+                      });
+                    },
+                    style: OutlinedButton.styleFrom(
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
+                    ),
+                    child: const Text('+1 Hour'),
+                  ),
+                  OutlinedButton(
+                    onPressed: () {
+                      final base = DateTime.tryParse(_timestampController.text.trim()) ?? DateTime.now();
+                      setState(() {
+                        _validUntilController.text = base.add(const Duration(days: 1)).toUtc().toIso8601String();
+                      });
+                    },
+                    style: OutlinedButton.styleFrom(
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
+                    ),
+                    child: const Text('+1 Day'),
+                  ),
+                  OutlinedButton(
+                    onPressed: () {
+                      final base = DateTime.tryParse(_timestampController.text.trim()) ?? DateTime.now();
+                      setState(() {
+                        _validUntilController.text = base.add(const Duration(days: 7)).toUtc().toIso8601String();
+                      });
+                    },
+                    style: OutlinedButton.styleFrom(
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
+                    ),
+                    child: const Text('+7 Days'),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 24),
 
               Row(
                 mainAxisAlignment: MainAxisAlignment.end,
@@ -1658,21 +1859,40 @@ class _ReferenceFrameDashboardState extends State<ReferenceFrameDashboard> {
                               ],
                             ],
                           ),
-                          Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                            decoration: BoxDecoration(
-                              color: Colors.green.withValues(alpha: 0.15),
-                              border: Border.all(color: Colors.green.withValues(alpha: 0.5)),
-                              borderRadius: BorderRadius.circular(4),
-                            ),
-                            child: const Text(
-                              'ACTIVE',
-                              style: TextStyle(
-                                color: Colors.green,
-                                fontSize: 9,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
+                          Builder(
+                            builder: (context) {
+                              final now = DateTime.now();
+                              final validUntil = rec.validUntil;
+                              String badgeText = 'PERSISTENT';
+                              Color badgeColor = Colors.grey;
+
+                              if (validUntil != null) {
+                                if (validUntil.isBefore(now)) {
+                                  badgeText = 'EXPIRED';
+                                  badgeColor = Colors.orange;
+                                } else {
+                                  badgeText = 'ACTIVE';
+                                  badgeColor = Colors.green;
+                                }
+                              }
+
+                              return Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                decoration: BoxDecoration(
+                                  color: badgeColor.withValues(alpha: 0.15),
+                                  border: Border.all(color: badgeColor.withValues(alpha: 0.5)),
+                                  borderRadius: BorderRadius.circular(4),
+                                ),
+                                child: Text(
+                                  badgeText,
+                                  style: TextStyle(
+                                    color: badgeColor,
+                                    fontSize: 9,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              );
+                            },
                           ),
                         ],
                       ),
@@ -1826,6 +2046,43 @@ class _ReferenceFrameDashboardState extends State<ReferenceFrameDashboard> {
                               ),
                             ],
                           ),
+                      ],
+                      if (rec.timestamp != null || rec.validUntil != null) ...[
+                        const Divider(height: 24, thickness: 0.5),
+                        const Text('TEMPORAL VALIDITY', style: TextStyle(fontSize: 10, color: Colors.grey)),
+                        const SizedBox(height: 4),
+                        Row(
+                          children: [
+                            if (rec.timestamp != null)
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    const Text('RECORDED TIMESTAMP', style: TextStyle(fontSize: 9, color: Colors.grey)),
+                                    const SizedBox(height: 2),
+                                    Text(
+                                      rec.timestamp!.toUtc().toIso8601String(),
+                                      style: const TextStyle(fontWeight: FontWeight.w500, fontSize: 11),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            if (rec.validUntil != null)
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    const Text('VALID UNTIL', style: TextStyle(fontSize: 9, color: Colors.grey)),
+                                    const SizedBox(height: 2),
+                                    Text(
+                                      rec.validUntil!.toUtc().toIso8601String(),
+                                      style: const TextStyle(fontWeight: FontWeight.w500, fontSize: 11),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                          ],
+                        ),
                       ],
                       if (rec.velocity != null) ...[
                         const Divider(height: 24, thickness: 0.5),
