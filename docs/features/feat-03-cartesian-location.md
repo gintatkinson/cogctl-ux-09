@@ -1,13 +1,13 @@
 ---
-title: "Feature 3: Cartesian Location Coordinates (Issue #[IssueID])"
-epic: "Epic 1: Geographic Location (Issue #[ParentIssueID])"
+title: "Feature 3: Cartesian Location Coordinates (Issue #3)"
+epic: "Epic 1: Geographic Location (Issue #6)"
 type: "feature"
-issue: [IssueID]
+issue: 3
 labels: ["feature", "ietf-geo-location"]
 covered-nodes: ["cartesian", "x", "y", "z"]
 ---
 
-# Feature: Feature 3: Cartesian Location Coordinates (Issue #[IssueID])
+# Feature: Feature 3: Cartesian Location Coordinates (Issue #3)
 
 This feature covers the representation of geographic coordinates in Cartesian space (X, Y, Z axes) relative to the center of mass of the astronomical body.
 

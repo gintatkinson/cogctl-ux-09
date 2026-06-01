@@ -1,13 +1,13 @@
 ---
-title: "Feature 5: Temporal Validity & Expiry (Issue #[IssueID])"
-epic: "Epic 1: Geographic Location (Issue #[ParentIssueID])"
+title: "Feature 5: Temporal Validity & Expiry (Issue #5)"
+epic: "Epic 1: Geographic Location (Issue #6)"
 type: "feature"
-issue: [IssueID]
+issue: 5
 labels: ["feature", "ietf-geo-location"]
 covered-nodes: ["timestamp", "valid-until"]
 ---
 
-# Feature: Feature 5: Temporal Validity & Expiry (Issue #[IssueID])
+# Feature: Feature 5: Temporal Validity & Expiry (Issue #5)
 
 This feature covers the recording timestamp and the expiration epoch (`valid-until`) of a geographic location coordinate entry.
 

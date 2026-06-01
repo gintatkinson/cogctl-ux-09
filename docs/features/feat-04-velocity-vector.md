@@ -1,13 +1,13 @@
 ---
-title: "Feature 4: Motion Velocity Vector (Issue #[IssueID])"
-epic: "Epic 1: Geographic Location (Issue #[ParentIssueID])"
+title: "Feature 4: Motion Velocity Vector (Issue #4)"
+epic: "Epic 1: Geographic Location (Issue #6)"
 type: "feature"
-issue: [IssueID]
+issue: 4
 labels: ["feature", "ietf-geo-location"]
 covered-nodes: ["velocity", "v-north", "v-east", "v-up"]
 ---
 
-# Feature: Feature 4: Motion Velocity Vector (Issue #[IssueID])
+# Feature: Feature 4: Motion Velocity Vector (Issue #4)
 
 This feature models the speed and direction of a moving object using a 3D velocity vector (northward, eastward, and upward components).
 

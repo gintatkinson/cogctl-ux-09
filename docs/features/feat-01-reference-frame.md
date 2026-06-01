@@ -1,13 +1,13 @@
 ---
-title: "Feature 1: Geographic Reference Frame (Issue #[IssueID])"
-epic: "Epic 1: Geographic Location (Issue #[ParentIssueID])"
+title: "Feature 1: Geographic Reference Frame (Issue #1)"
+epic: "Epic 1: Geographic Location (Issue #6)"
 type: "feature"
-issue: [IssueID]
+issue: 1
 labels: ["feature", "ietf-geo-location"]
 covered-nodes: ["alternate-system", "astronomical-body", "coord-accuracy", "geodetic-datum", "geodetic-system", "height-accuracy", "reference-frame", "geo-location"]
 ---
 
-# Feature: Feature 1: Geographic Reference Frame (Issue #[IssueID])
+# Feature: Feature 1: Geographic Reference Frame (Issue #1)
 
 This feature establishes the frame of reference for geographic coordinates, including the astronomical body, geodetic datum, and coordinate accuracy bounds.
 

@@ -1,13 +1,13 @@
 ---
-title: "Feature 2: Ellipsoidal Location Coordinates (Issue #[IssueID])"
-epic: "Epic 1: Geographic Location (Issue #[ParentIssueID])"
+title: "Feature 2: Ellipsoidal Location Coordinates (Issue #2)"
+epic: "Epic 1: Geographic Location (Issue #6)"
 type: "feature"
-issue: [IssueID]
+issue: 2
 labels: ["feature", "ietf-geo-location"]
 covered-nodes: ["ellipsoid", "height", "latitude", "location", "longitude"]
 ---
 
-# Feature: Feature 2: Ellipsoidal Location Coordinates (Issue #[IssueID])
+# Feature: Feature 2: Ellipsoidal Location Coordinates (Issue #2)
 
 This feature covers the representation of geographic location coordinates modeled on an ellipsoid, utilizing latitude, longitude, and optional height.
 
