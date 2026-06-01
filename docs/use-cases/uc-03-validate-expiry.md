@@ -1,11 +1,11 @@
 ---
-title: "Use Case 3: Validate Expiry & Temporal State (Issue #[IssueID])"
+title: "Use Case 3: Validate Expiry & Temporal State (Issue #14)"
 type: "use-case"
-issue: [IssueID]
+issue: 14
 spec_source: "RFC 9179 Section 2.5"
 ---
 
-# Use Case: Use Case 3: Validate Expiry & Temporal State (Issue #[IssueID])
+# Use Case: Use Case 3: Validate Expiry & Temporal State (Issue #14)
 
 ## OOA/OOD Realization
 - **Primary Actor:** Location Registry Daemon

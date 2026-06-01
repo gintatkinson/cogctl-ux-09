@@ -1,11 +1,11 @@
 ---
-title: "Use Case 1: Register Geographic Location (Issue #[IssueID])"
+title: "Use Case 1: Register Geographic Location (Issue #12)"
 type: "use-case"
-issue: [IssueID]
+issue: 12
 spec_source: "RFC 9179 Section 2.1, 2.2, 2.3"
 ---
 
-# Use Case: Use Case 1: Register Geographic Location (Issue #[IssueID])
+# Use Case: Use Case 1: Register Geographic Location (Issue #12)
 
 ## OOA/OOD Realization
 - **Primary Actor:** Location Provider

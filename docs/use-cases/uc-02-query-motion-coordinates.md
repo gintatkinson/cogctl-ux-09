@@ -1,11 +1,11 @@
 ---
-title: "Use Case 2: Query Motion Coordinates & Velocity Trajectory (Issue #[IssueID])"
+title: "Use Case 2: Query Motion Coordinates & Velocity Trajectory (Issue #13)"
 type: "use-case"
-issue: [IssueID]
+issue: 13
 spec_source: "RFC 9179 Section 2.3 & 2.4"
 ---
 
-# Use Case: Use Case 2: Query Motion Coordinates & Velocity Trajectory (Issue #[IssueID])
+# Use Case: Use Case 2: Query Motion Coordinates & Velocity Trajectory (Issue #13)
 
 ## OOA/OOD Realization
 - **Primary Actor:** Fleet Management System
