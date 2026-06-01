@@ -12,8 +12,8 @@ This Epic covers the standard common data types defined in RFC 9911 (`ietf-yang-
 
 ## 2. Requirements & Checklist
 - [x] #17 - [Feature 6: Numeric Counters and Gauges](https://github.com/gintatkinson/cogctl-ux-09/blob/feat/epic-2-common-types/docs/features/feat-06-counters-gauges.md)
-- [x] #18 - [Feature 7: Identifiers and Object References](https://github.com/gintatkinson/cogctl-ux-09/blob/feat/epic-2-common-types/docs/features/feat-07-identifiers-references.md)
-- [x] #19 - [Feature 8: Date and Time Types](https://github.com/gintatkinson/cogctl-ux-09/blob/feat/epic-2-common-types/docs/features/feat-08-date-time.md)
+- [ ] #18 - [Feature 7: Identifiers and Object References](https://github.com/gintatkinson/cogctl-ux-09/blob/feat/epic-2-common-types/docs/features/feat-07-identifiers-references.md)
+- [ ] #19 - [Feature 8: Date and Time Types](https://github.com/gintatkinson/cogctl-ux-09/blob/feat/epic-2-common-types/docs/features/feat-08-date-time.md)
 - [ ] #20 - [Feature 9: Time Durations](https://github.com/gintatkinson/cogctl-ux-09/blob/feat/epic-2-common-types/docs/features/feat-09-time-durations.md)
 - [ ] #21 - [Feature 10: General Address, Identity, and Language Tags](https://github.com/gintatkinson/cogctl-ux-09/blob/feat/epic-2-common-types/docs/features/feat-10-addresses-tags.md)
 
@@ -24,8 +24,8 @@ This Epic covers the standard common data types defined in RFC 9911 (`ietf-yang-
 
 ### Associated User Stories
 - [x] #23 - [User Story 6: Numeric Counters and Gauges (Issue #23)](https://github.com/gintatkinson/cogctl-ux-09/blob/main/docs/user-stories/us-06-counters-gauges.md)
-- [x] #24 - [User Story 7: Identifiers and Object References (Issue #24)](https://github.com/gintatkinson/cogctl-ux-09/blob/main/docs/user-stories/us-07-identifiers-references.md)
-- [x] #25 - [User Story 8: Date and Time Types (Issue #25)](https://github.com/gintatkinson/cogctl-ux-09/blob/main/docs/user-stories/us-08-date-time.md)
+- [ ] #24 - [User Story 7: Identifiers and Object References (Issue #24)](https://github.com/gintatkinson/cogctl-ux-09/blob/main/docs/user-stories/us-07-identifiers-references.md)
+- [ ] #25 - [User Story 8: Date and Time Types (Issue #25)](https://github.com/gintatkinson/cogctl-ux-09/blob/main/docs/user-stories/us-08-date-time.md)
 - [ ] #26 - [User Story 9: Time Durations (Issue #26)](https://github.com/gintatkinson/cogctl-ux-09/blob/main/docs/user-stories/us-09-time-durations.md)
 - [ ] #27 - [User Story 10: General Address, Identity, and Language Tags (Issue #27)](https://github.com/gintatkinson/cogctl-ux-09/blob/main/docs/user-stories/us-10-addresses-tags.md)
 ## 3. Architecture and System Interaction Diagrams
