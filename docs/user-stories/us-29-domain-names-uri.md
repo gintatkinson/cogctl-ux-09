@@ -21,7 +21,7 @@ labels: ["user-story", "ietf-inet-types"]
 > DNS names are validated up to 253 characters in US-ASCII format. URIs are converted to canonical format with scheme and host in lowercase, and hex-encoded values in uppercase.
 
 ## Required Features Matrix
-- [x] #31 - [Feature 31: Internet Domain Names and URIs](https://github.com/gintatkinson/cogctl-ux-09/blob/main/docs/features/feat-31-domain-names-uri.md)
+- [ ] #82 - [Feature 31: Internet Domain Names and URIs](https://github.com/gintatkinson/cogctl-ux-09/blob/main/docs/features/feat-31-domain-names-uri.md)
 
 ## Source References
 YANG Schema: [ietf-inet-types.yang](https://github.com/YangModels/yang/blob/main/standard/ietf/RFC/ietf-inet-types%402013-07-15.yang)

@@ -21,7 +21,7 @@ labels: ["user-story", "ietf-inet-types"]
 > Standard IP addresses are parsed as version-neutral unions. Link-local or scoped addresses allow zone identifiers (`%`), and zones are rejected if using the no-zone variants.
 
 ## Required Features Matrix
-- [x] #30 - [Feature 30: IP Address and Prefix Types](https://github.com/gintatkinson/cogctl-ux-09/blob/main/docs/features/feat-30-ip-address-prefix.md)
+- [ ] #81 - [Feature 30: IP Address and Prefix Types](https://github.com/gintatkinson/cogctl-ux-09/blob/main/docs/features/feat-30-ip-address-prefix.md)
 
 ## Source References
 YANG Schema: [ietf-inet-types.yang](https://github.com/YangModels/yang/blob/main/standard/ietf/RFC/ietf-inet-types%402013-07-15.yang)

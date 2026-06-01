@@ -23,7 +23,6 @@ This Epic covers the digital engineering reverse-engineering of the IETF draft "
 ### Associated Use Cases
 - [x] #42 - [Use Case 5: Validate Hierarchical Locations (Issue #42)](https://github.com/gintatkinson/cogctl-ux-09/blob/main/docs/use-cases/uc-05-validate-hierarchical-locations.md)
 - [x] #43 - [Use Case 6: Validate Racks and Contained Chassis (Issue #43)](https://github.com/gintatkinson/cogctl-ux-09/blob/main/docs/use-cases/uc-06-validate-racks-contained-chassis.md)
-- [ ] #87 - [Use Case 15: Validate Internet Address and Protocol Types](https://github.com/gintatkinson/cogctl-ux-09/blob/main/docs/use-cases/uc-15-validate-internet-address.md)
 
 ### Associated User Stories
 - [x] #36 - [User Story 11: Hierarchical Inventory Locations (Issue #36)](https://github.com/gintatkinson/cogctl-ux-09/blob/main/docs/user-stories/us-11-hierarchical-locations.md)
@@ -32,9 +31,6 @@ This Epic covers the digital engineering reverse-engineering of the IETF draft "
 - [x] #39 - [User Story 14: Equipment Racks Classification & Physical Bounds (Issue #39)](https://github.com/gintatkinson/cogctl-ux-09/blob/main/docs/user-stories/us-14-racks-physical-bounds.md)
 - [x] #40 - [User Story 15: Rack Locations & Grid Coordinates (Issue #40)](https://github.com/gintatkinson/cogctl-ux-09/blob/main/docs/user-stories/us-15-rack-locations-grid.md)
 - [x] #41 - [User Story 16: Rack-contained Chassis & Electricity Attributes (Issue #41)](https://github.com/gintatkinson/cogctl-ux-09/blob/main/docs/user-stories/us-16-rack-contained-chassis-electricity.md)
-- [ ] #84 - [User Story 28: IP Address and Prefix Types](https://github.com/gintatkinson/cogctl-ux-09/blob/main/docs/user-stories/us-28-ip-address-prefix.md)
-- [ ] #85 - [User Story 29: Internet Domain Names and URIs](https://github.com/gintatkinson/cogctl-ux-09/blob/main/docs/user-stories/us-29-domain-names-uri.md)
-- [ ] #86 - [User Story 30: IP Protocol Fields and Autonomous Systems](https://github.com/gintatkinson/cogctl-ux-09/blob/main/docs/user-stories/us-30-protocol-fields-as.md)
 ## 3. Architecture and System Interaction Diagrams
 ```mermaid
 classDiagram

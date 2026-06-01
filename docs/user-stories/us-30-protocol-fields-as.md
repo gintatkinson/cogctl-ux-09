@@ -21,7 +21,7 @@ labels: ["user-story", "ietf-inet-types"]
 > Handles low-level network protocol values like DSCP ranges (0..63), flow labels (0..1048575), port bounds (0..65535), and 32-bit AS numbers.
 
 ## Required Features Matrix
-- [x] #32 - [Feature 32: IP Protocol Fields and Autonomous Systems](https://github.com/gintatkinson/cogctl-ux-09/blob/main/docs/features/feat-32-protocol-fields-as.md)
+- [ ] #83 - [Feature 32: IP Protocol Fields and Autonomous Systems](https://github.com/gintatkinson/cogctl-ux-09/blob/main/docs/features/feat-32-protocol-fields-as.md)
 
 ## Source References
 YANG Schema: [ietf-inet-types.yang](https://github.com/YangModels/yang/blob/main/standard/ietf/RFC/ietf-inet-types%402013-07-15.yang)
