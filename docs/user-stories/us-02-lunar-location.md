@@ -1,11 +1,11 @@
 ---
-title: "User Story 2: Lunar Location (Issue #[IssueID])"
+title: "User Story 2: Lunar Location (Issue #8)"
 type: "user-story"
-issue: [IssueID]
+issue: 8
 spec_source: "RFC 9179 Section 2.1"
 ---
 
-# User Story: User Story 2: Lunar Location (Issue #[IssueID])
+# User Story: User Story 2: Lunar Location (Issue #8)
 
 ## Domain Object Mapping
 - **Primary Domain Objects:** `geo-location`, `reference-frame`, `astronomical-body`, `geodetic-datum`, `latitude`, `longitude`, `height`

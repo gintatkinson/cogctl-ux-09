@@ -1,11 +1,11 @@
 ---
-title: "User Story 4: Alternate System Reference Frame (Issue #[IssueID])"
+title: "User Story 4: Alternate System Reference Frame (Issue #10)"
 type: "user-story"
-issue: [IssueID]
+issue: 10
 spec_source: "RFC 9179 Section 2.1"
 ---
 
-# User Story: User Story 4: Alternate System Reference Frame (Issue #[IssueID])
+# User Story: User Story 4: Alternate System Reference Frame (Issue #10)
 
 ## Domain Object Mapping
 - **Primary Domain Objects:** `geo-location`, `reference-frame`, `alternate-system`, `astronomical-body`, `geodetic-datum`

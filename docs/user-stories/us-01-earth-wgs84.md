@@ -1,11 +1,11 @@
 ---
-title: "User Story 1: WGS-84 Earth Location Compatibility (Issue #[IssueID])"
+title: "User Story 1: WGS-84 Earth Location Compatibility (Issue #7)"
 type: "user-story"
-issue: [IssueID]
+issue: 7
 spec_source: "RFC 9179 Section 2.1 & 2.2"
 ---
 
-# User Story: User Story 1: WGS-84 Earth Location Compatibility (Issue #[IssueID])
+# User Story: User Story 1: WGS-84 Earth Location Compatibility (Issue #7)
 
 ## Domain Object Mapping
 - **Primary Domain Objects:** `geo-location`, `reference-frame`, `astronomical-body`, `geodetic-datum`, `latitude`, `longitude`, `height`

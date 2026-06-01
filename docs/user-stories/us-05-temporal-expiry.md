@@ -1,11 +1,11 @@
 ---
-title: "User Story 5: Temporal Validity Expiry Check (Issue #[IssueID])"
+title: "User Story 5: Temporal Validity Expiry Check (Issue #11)"
 type: "user-story"
-issue: [IssueID]
+issue: 11
 spec_source: "RFC 9179 Section 2.5"
 ---
 
-# User Story: User Story 5: Temporal Validity Expiry Check (Issue #[IssueID])
+# User Story: User Story 5: Temporal Validity Expiry Check (Issue #11)
 
 ## Domain Object Mapping
 - **Primary Domain Objects:** `geo-location`, `timestamp`, `valid-until`

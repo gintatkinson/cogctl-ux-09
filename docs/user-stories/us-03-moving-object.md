@@ -1,11 +1,11 @@
 ---
-title: "User Story 3: Moving Object Velocity Telemetry (Issue #[IssueID])"
+title: "User Story 3: Moving Object Velocity Telemetry (Issue #9)"
 type: "user-story"
-issue: [IssueID]
+issue: 9
 spec_source: "RFC 9179 Section 2.3"
 ---
 
-# User Story: User Story 3: Moving Object Velocity Telemetry (Issue #[IssueID])
+# User Story: User Story 3: Moving Object Velocity Telemetry (Issue #9)
 
 ## Domain Object Mapping
 - **Primary Domain Objects:** `geo-location`, `velocity`, `v-north`, `v-east`, `v-up`, `timestamp`
