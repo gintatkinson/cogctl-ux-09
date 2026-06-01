@@ -7,9 +7,10 @@ class MockLocationService {
   final List<GeoLocation> _locations = [];
 
   MockLocationService._internal() {
-    // Populate with default mock database records as required by the vertical slice
+    // Populate with SDN Multi-Domain Network Reference Frames
     _locations.addAll([
       GeoLocation(
+        networkDomain: 'Terrestrial Fiber (L0-L4)',
         referenceFrame: ReferenceFrame(
           astronomicalBody: 'earth',
           geodeticSystem: GeodeticSystem(
@@ -20,6 +21,30 @@ class MockLocationService {
         ),
       ),
       GeoLocation(
+        networkDomain: 'Submarine Cable (Subsea)',
+        referenceFrame: ReferenceFrame(
+          astronomicalBody: 'earth',
+          geodeticSystem: GeodeticSystem(
+            geodeticDatum: 'wgs-84',
+            coordAccuracy: 0.002,
+            heightAccuracy: 0.05,
+          ),
+        ),
+      ),
+      GeoLocation(
+        networkDomain: 'Non-Terrestrial Network (NTN)',
+        referenceFrame: ReferenceFrame(
+          astronomicalBody: 'earth',
+          alternateSystem: 'ecef',
+          geodeticSystem: GeodeticSystem(
+            geodeticDatum: 'wgs-84',
+            coordAccuracy: 0.01,
+            heightAccuracy: 0.1,
+          ),
+        ),
+      ),
+      GeoLocation(
+        networkDomain: 'Deep Space Network (DSN)',
         referenceFrame: ReferenceFrame(
           astronomicalBody: 'mars',
           alternateSystem: 'iau-2015',
@@ -27,6 +52,17 @@ class MockLocationService {
             geodeticDatum: 'areocentric-2015',
             coordAccuracy: 0.05,
             heightAccuracy: 0.1,
+          ),
+        ),
+      ),
+      GeoLocation(
+        networkDomain: 'Quantum Key Distribution (QKD)',
+        referenceFrame: ReferenceFrame(
+          astronomicalBody: 'earth',
+          geodeticSystem: GeodeticSystem(
+            geodeticDatum: 'wgs-84',
+            coordAccuracy: 0.0001,
+            heightAccuracy: 0.001,
           ),
         ),
       ),

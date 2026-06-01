@@ -127,6 +127,17 @@ class _ReferenceFrameDashboardState extends State<ReferenceFrameDashboard> {
   // Feature flag simulation for alternate-system
   bool _alternateSystemsEnabled = true;
 
+  // Selected Network Domain state
+  String _selectedNetworkDomain = 'Terrestrial Fiber (L0-L4)';
+  final List<String> _networkDomains = [
+    'Terrestrial Fiber (L0-L4)',
+    'Mobile / Wireless (L1-L4)',
+    'Submarine Cable (Subsea)',
+    'Non-Terrestrial Network (NTN)',
+    'Deep Space Network (DSN)',
+    'Quantum Key Distribution (QKD)',
+  ];
+
   // Validation messages
   String? _generalError;
   String? _bodyError;
@@ -169,6 +180,7 @@ class _ReferenceFrameDashboardState extends State<ReferenceFrameDashboard> {
     _coordAccController.clear();
     _heightAccController.clear();
     setState(() {
+      _selectedNetworkDomain = 'Terrestrial Fiber (L0-L4)';
       _generalError = null;
       _bodyError = null;
       _datumError = null;
@@ -264,7 +276,10 @@ class _ReferenceFrameDashboardState extends State<ReferenceFrameDashboard> {
       geodeticSystem: geodeticSystem,
     );
 
-    final location = GeoLocation(referenceFrame: referenceFrame);
+    final location = GeoLocation(
+      referenceFrame: referenceFrame,
+      networkDomain: _selectedNetworkDomain,
+    );
 
     // 4. Save to Mock DB
     try {
@@ -379,23 +394,146 @@ class _ReferenceFrameDashboardState extends State<ReferenceFrameDashboard> {
             child: Padding(
               padding: const EdgeInsets.all(24.0),
               child: isDesktop
-                  ? Row(
+                  ? Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Expanded(flex: 5, child: _buildFormCard(theme)),
-                        const SizedBox(width: 24),
-                        Expanded(flex: 6, child: _buildListPane(theme)),
+                        _buildSDNStatusSummary(theme),
+                        Expanded(
+                          child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Expanded(flex: 5, child: _buildFormCard(theme)),
+                              const SizedBox(width: 24),
+                              Expanded(flex: 6, child: _buildListPane(theme)),
+                            ],
+                          ),
+                        ),
                       ],
                     )
                   : SingleChildScrollView(
                       child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
+                          _buildSDNStatusSummary(theme),
                           _buildFormCard(theme),
                           const SizedBox(height: 24),
                           _buildListPane(theme),
                         ],
                       ),
                     ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSDNStatusSummary(ThemeData theme) {
+    final isDark = theme.brightness == Brightness.dark;
+    final cardBg = isDark ? const Color(0xFF2D2E30) : Colors.white;
+    final borderSide = BorderSide(
+      color: isDark ? const Color(0x1FFFFFFF) : const Color(0x1F000000),
+      width: 1,
+    );
+
+    int total = _records.length;
+    int terrestrial = _records.where((r) => r.referenceFrame.astronomicalBody == 'earth' && ((r.networkDomain?.contains('Terrestrial') ?? false) || (r.networkDomain?.contains('Mobile') ?? false))).length;
+    int submarine = _records.where((r) => r.networkDomain?.contains('Submarine') ?? false).length;
+    int space = _records.where((r) => r.referenceFrame.astronomicalBody != 'earth' || ((r.networkDomain?.contains('Satellite') ?? false) || (r.networkDomain?.contains('Space') ?? false))).length;
+    int quantum = _records.where((r) => (r.networkDomain?.contains('Quantum') ?? false) || (r.networkDomain?.contains('QKD') ?? false)).length;
+
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 24.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Text(
+                'Cognitive SDN Controller',
+                style: TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                  color: theme.primaryColor,
+                ),
+              ),
+              const SizedBox(width: 8),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                decoration: BoxDecoration(
+                  color: Colors.green.withValues(alpha: 0.15),
+                  border: Border.all(color: Colors.green.withValues(alpha: 0.5)),
+                  borderRadius: BorderRadius.circular(4),
+                ),
+                child: const Text(
+                  'L0-L4 ONLINE',
+                  style: TextStyle(
+                    color: Colors.green,
+                    fontSize: 10,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          Wrap(
+            spacing: 16,
+            runSpacing: 16,
+            children: [
+              _buildMiniStatusCard(theme, cardBg, borderSide, 'TOTAL NODES', '$total', Icons.hub, Colors.blue),
+              _buildMiniStatusCard(theme, cardBg, borderSide, 'FIBER & WIRELESS', '$terrestrial', Icons.settings_ethernet, Colors.amber),
+              _buildMiniStatusCard(theme, cardBg, borderSide, 'SUBSEA TRANSOCEANIC', '$submarine', Icons.waves, Colors.teal),
+              _buildMiniStatusCard(theme, cardBg, borderSide, 'NTN & DEEP SPACE', '$space', Icons.rocket_launch, Colors.deepOrange),
+              _buildMiniStatusCard(theme, cardBg, borderSide, 'QUANTUM QKD KEYS', '$quantum', Icons.compare_arrows, Colors.purple),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildMiniStatusCard(
+    ThemeData theme,
+    Color bg,
+    BorderSide border,
+    String title,
+    String value,
+    IconData icon,
+    Color iconColor,
+  ) {
+    return Container(
+      width: 190,
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: bg,
+        border: Border.all(color: border.color, width: border.width),
+        borderRadius: BorderRadius.circular(4),
+      ),
+      child: Row(
+        children: [
+          CircleAvatar(
+            backgroundColor: iconColor.withValues(alpha: 0.15),
+            radius: 18,
+            child: Icon(icon, color: iconColor, size: 18),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  title,
+                  style: const TextStyle(fontSize: 9, color: Colors.grey, fontWeight: FontWeight.w500),
+                  overflow: TextOverflow.ellipsis,
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  value,
+                  style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                ),
+              ],
             ),
           ),
         ],
@@ -434,14 +572,30 @@ class _ReferenceFrameDashboardState extends State<ReferenceFrameDashboard> {
             label: 'Reference Frames',
             isActive: true,
           ),
+          const Divider(height: 16),
           _buildSidebarItem(
-            icon: Icons.grid_view,
-            label: 'GKE Nodes / Locations',
+            icon: Icons.settings_ethernet,
+            label: 'Terrestrial & Mobile (Fiber)',
             isActive: false,
           ),
           _buildSidebarItem(
-            icon: Icons.settings,
-            label: 'Registry Settings',
+            icon: Icons.waves,
+            label: 'Submarine Networks (Subsea)',
+            isActive: false,
+          ),
+          _buildSidebarItem(
+            icon: Icons.satellite_alt,
+            label: 'Satellite & NTN Orbiters',
+            isActive: false,
+          ),
+          _buildSidebarItem(
+            icon: Icons.rocket_launch,
+            label: 'Deep Space Network (DSN)',
+            isActive: false,
+          ),
+          _buildSidebarItem(
+            icon: Icons.compare_arrows,
+            label: 'Quantum QKD Links',
             isActive: false,
           ),
         ],
@@ -554,6 +708,32 @@ class _ReferenceFrameDashboardState extends State<ReferenceFrameDashboard> {
                 ),
                 const SizedBox(height: 20),
               ],
+
+              // Network DomainDropdown
+              DropdownButtonFormField<String>(
+                value: _selectedNetworkDomain,
+                decoration: InputDecoration(
+                  labelText: 'SDN Network Domain Association',
+                  prefixIcon: const Icon(Icons.hub, size: 20),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(4),
+                  ),
+                ),
+                onChanged: (String? val) {
+                  if (val != null) {
+                    setState(() {
+                      _selectedNetworkDomain = val;
+                    });
+                  }
+                },
+                items: _networkDomains.map((String domain) {
+                  return DropdownMenuItem<String>(
+                    value: domain,
+                    child: Text(domain),
+                  );
+                }).toList(),
+              ),
+              const SizedBox(height: 16),
 
               // Astronomical Body
               TextField(
@@ -764,6 +944,24 @@ class _ReferenceFrameDashboardState extends State<ReferenceFrameDashboard> {
                                       fontSize: 13,
                                     ),
                                   ),
+                                  if (rec.networkDomain != null) ...[
+                                    const SizedBox(width: 8),
+                                    Container(
+                                      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                      decoration: BoxDecoration(
+                                        color: theme.primaryColor.withValues(alpha: 0.1),
+                                        borderRadius: BorderRadius.circular(4),
+                                      ),
+                                      child: Text(
+                                        rec.networkDomain!,
+                                        style: TextStyle(
+                                          color: theme.primaryColor,
+                                          fontSize: 9,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
                                 ],
                               ),
                               Container(

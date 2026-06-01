@@ -57,19 +57,23 @@ class ReferenceFrame {
 
 class GeoLocation {
   final ReferenceFrame referenceFrame;
+  final String? networkDomain;
 
   GeoLocation({
     required this.referenceFrame,
+    this.networkDomain,
   });
 
   Map<String, dynamic> toJson() => {
         'reference-frame': referenceFrame.toJson(),
+        if (networkDomain != null) 'network-domain': networkDomain,
       };
 
   factory GeoLocation.fromJson(Map<String, dynamic> json) {
     return GeoLocation(
       referenceFrame: ReferenceFrame.fromJson(
           json['reference-frame'] as Map<String, dynamic>? ?? {}),
+      networkDomain: json['network-domain'] as String?,
     );
   }
 }
