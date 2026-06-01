@@ -4,9 +4,12 @@ type: "user-story"
 issue: 85
 spec_source: "RFC 6021 Section 4"
 labels: ["user-story", "ietf-inet-types"]
+epic: "Epic 8: Common Internet Address YANG Data Types (Issue #88)"
 ---
 
 # User Story: User Story 29: Internet Domain Names and URIs
+
+**Epic:** [Epic 8: Common Internet Address YANG Data Types (Issue #88)](https://github.com/gintatkinson/cogctl-ux-09/blob/main/docs/epics/epic-08-internet-types.md)
 
 ## Domain Object Mapping
 - **Primary Domain Objects:** `domain-name`, `host`, `uri`

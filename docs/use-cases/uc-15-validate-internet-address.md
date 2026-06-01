@@ -4,9 +4,12 @@ type: "use-case"
 issue: 87
 spec_source: "RFC 6021"
 labels: ["use-case", "ietf-inet-types"]
+epic: "Epic 8: Common Internet Address YANG Data Types (Issue #88)"
 ---
 
 # Use Case: Use Case 15: Validate Internet Address and Protocol Types
+
+**Epic:** [Epic 8: Common Internet Address YANG Data Types (Issue #88)](https://github.com/gintatkinson/cogctl-ux-09/blob/main/docs/epics/epic-08-internet-types.md)
 
 ## OOA/OOD Realization
 - **Primary Actor:** Network Administrator
