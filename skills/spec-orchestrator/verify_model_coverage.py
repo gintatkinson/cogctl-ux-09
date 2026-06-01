@@ -1,0 +1,346 @@
+#!/usr/bin/env python3
+import os
+import re
+import subprocess
+import sys
+
+def parse_yang_file(filepath):
+    """
+    Parses a YANG file and extracts all defined names (typedefs, containers, lists, leaves, choices, cases, identities).
+    """
+    with open(filepath, "r", encoding="utf-8") as f:
+        content = f.read()
+
+    # Extract module name
+    module_match = re.search(r'\bmodule\s+([a-zA-Z0-9_\-]+)', content)
+    if not module_match:
+        return None, set(), {}
+
+    module_name = module_match.group(1)
+
+    # Clean the content by removing comments and quoted strings (descriptions/references) in a single pass
+    pattern = re.compile(
+        r'(/\*.*?\*/)|(//.*?\n)|("([^"\\]|\\.)*")|(\'[^\']*\')',
+        re.DOTALL
+    )
+    
+    def replacer(match):
+        if match.group(3) is not None:
+            return '""'
+        elif match.group(5) is not None:
+            return "''"
+        else:
+            return '\n'
+
+    clean_content = pattern.sub(replacer, content)
+
+    # Patterns to match definitions
+    patterns = {
+        "typedef": r'\btypedef\s+([a-zA-Z0-9_\-]+)',
+        "leaf": r'\bleaf\s+([a-zA-Z0-9_\-]+)',
+        "container": r'\bcontainer\s+([a-zA-Z0-9_\-]+)',
+        "list": r'\blist\s+([a-zA-Z0-9_\-]+)',
+        "choice": r'\bchoice\s+([a-zA-Z0-9_\-]+)',
+        "case": r'\bcase\s+([a-zA-Z0-9_\-]+)',
+        "identity": r'\bidentity\s+([a-zA-Z0-9_\-]+)'
+    }
+
+    definitions = set()
+    categorized_defs = {k: set() for k in patterns.keys()}
+    for key, pattern in patterns.items():
+        for match in re.finditer(pattern, clean_content):
+            name = match.group(1)
+            # Filter out any accidental matches with common keywords if matched
+            if name not in {"description", "reference", "organization", "contact", "revision", "import", "prefix", "namespace", "yang-version"}:
+                definitions.add(name)
+                categorized_defs[key].add(name)
+
+    return module_name, definitions, categorized_defs
+
+def parse_covered_nodes(content):
+    """
+    Parses the covered-nodes list from the YAML frontmatter of a markdown file.
+    Can handle:
+      covered-nodes: [node1, node2]
+      covered-nodes:
+        - node1
+        - node2
+    """
+    frontmatter_match = re.match(r"^---\s*\n(.*?)\n---\s*\n", content, re.DOTALL)
+    if not frontmatter_match:
+        return []
+    
+    frontmatter = frontmatter_match.group(1)
+    
+    # Check for inline list e.g. covered-nodes: [a, b, c]
+    inline_match = re.search(r"covered-nodes:\s*\[(.*?)\]", frontmatter)
+    if inline_match:
+        return [n.strip().strip('"').strip("'") for n in inline_match.group(1).split(",") if n.strip()]
+        
+    # Check for block list
+    block_match = re.search(r"covered-nodes:\s*\n((?:\s*-\s*\S+\n?)+)", frontmatter)
+    if block_match:
+        lines = block_match.group(1).splitlines()
+        nodes = []
+        for line in lines:
+            line_match = re.search(r"-\s*(\S+)", line)
+            if line_match:
+                nodes.append(line_match.group(1).strip().strip('"').strip("'"))
+        return nodes
+        
+    return []
+
+def load_feature_files(features_dir):
+    """
+    Loads all feature markdown files, returns a list of dicts with frontmatter, labels, covered_nodes, and full text.
+    """
+    features = []
+    if not os.path.exists(features_dir):
+        return features
+
+    for filename in os.listdir(features_dir):
+        if not filename.endswith(".md"):
+            continue
+        filepath = os.path.join(features_dir, filename)
+        with open(filepath, "r", encoding="utf-8") as f:
+            content = f.read()
+
+        # Parse simple frontmatter
+        labels = []
+        frontmatter_match = re.match(r"^---\s*\n(.*?)\n---\s*\n", content, re.DOTALL)
+        if frontmatter_match:
+            frontmatter_text = frontmatter_match.group(1)
+            for line in frontmatter_text.splitlines():
+                if line.startswith("labels:"):
+                    # Parse list of labels e.g. ["feature", "ietf-geo-location"]
+                    labels_match = re.search(r"\[(.*?)\]", line)
+                    if labels_match:
+                        labels = [lbl.strip().strip('"').strip("'") for lbl in labels_match.group(1).split(",")]
+        
+        covered_nodes = parse_covered_nodes(content)
+        
+        features.append({
+            "filename": filename,
+            "labels": labels,
+            "content": content,
+            "covered_nodes": covered_nodes
+        })
+    return features
+
+def main():
+    try:
+        workspace_dir = subprocess.check_output(["git", "rev-parse", "--show-toplevel"], text=True).strip()
+    except Exception:
+        workspace_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
+
+    yang_dir = None
+    for root, dirs, files in os.walk(workspace_dir):
+        if ".git" in dirs:
+            dirs.remove(".git")
+        if "yang" in dirs:
+            yang_dir = os.path.join(root, "yang")
+            break
+            
+    if not yang_dir:
+        yang_dir = os.path.join(workspace_dir, "yang")
+
+    features_dir = os.path.join(workspace_dir, "docs", "features")
+
+    if not os.path.exists(yang_dir):
+        print(f"Error: YANG directory not found at {yang_dir}")
+        sys.exit(1)
+
+    print("=== Model Coverage Parity Audit ===")
+    print(f"Scanning YANG schemas in: {yang_dir}")
+    print(f"Scanning feature specifications in: {features_dir}\n")
+
+    # 1. Parse all YANG modules
+    modules = {}
+    categorized_modules = {}
+    for filename in os.listdir(yang_dir):
+        if not filename.endswith(".yang"):
+            continue
+        filepath = os.path.join(yang_dir, filename)
+        try:
+            module_name, definitions, cat_defs = parse_yang_file(filepath)
+            if module_name:
+                modules[module_name] = definitions
+                categorized_modules[module_name] = cat_defs
+        except Exception as e:
+            print(f"Warning: Failed to parse YANG file {filename}: {e}")
+
+    if not modules:
+        print("Error: No valid YANG modules found.")
+        sys.exit(1)
+
+    # 2. Load all feature markdown files
+    features = load_feature_files(features_dir)
+    print(f"Loaded {len(features)} feature specifications.\n")
+
+    # 3. Audit coverage per module
+    total_defined = 0
+    total_covered = 0
+    coverage_gaps = {}
+    semantic_violations = {}
+    invalid_declarations = {}
+
+    for module_name, definitions in sorted(modules.items()):
+        cat_defs = categorized_modules.get(module_name, {})
+        
+        # Find all feature files that explicitly list this module name in their labels
+        matching_features = [f for f in features if module_name in f["labels"]]
+        
+        # Ensure target presence: a YANG module MUST have at least one feature file targeting it
+        if not matching_features:
+            coverage_gaps[module_name] = sorted(list(definitions))
+            semantic_violations[module_name] = [f"YANG module '{module_name}' is in the repository but has no matching feature specifications in labels."]
+            total_defined += len(definitions)
+            continue
+
+        # Combine content of matching features
+        combined_text = "\n".join([f["content"] for f in matching_features])
+        
+        # Extract all covered-nodes declared in the matching features frontmatter
+        declared_nodes = []
+        for f in matching_features:
+            for node in f["covered_nodes"]:
+                declared_nodes.append((node, f["filename"]))
+
+        # 1. Audit declared nodes validity (must exist in definitions)
+        invalid_nodes = []
+        for node, filename in declared_nodes:
+            if node not in definitions:
+                invalid_nodes.append(f"'{node}' (declared in {filename})")
+        if invalid_nodes:
+            invalid_declarations[module_name] = invalid_nodes
+
+        # 2. Audit coverage: union of declared nodes must cover 100% of defined nodes
+        declared_set = {node for node, filename in declared_nodes}
+        missing = []
+        for name in sorted(definitions):
+            if name not in declared_set:
+                missing.append(name)
+            else:
+                # Verify the name is actually documented in the body of the feature files
+                # using lookbehind/lookahead to prevent hyphenated false positives
+                pattern = rf"(?<![a-zA-Z0-9_\-]){re.escape(name)}(?![a-zA-Z0-9_\-])"
+                if not re.search(pattern, combined_text):
+                    missing.append(f"{name} (declared in frontmatter but missing/undocumented in markdown body)")
+
+        # 3. Semantic validation checks
+        module_violations = []
+
+        # Rule 1: Typedef completeness
+        for td in sorted(cat_defs.get("typedef", [])):
+            if td in declared_set:
+                td_pattern = rf"(?i)###\s+Typedefs.*?(?<![a-zA-Z0-9_\-]){re.escape(td)}(?![a-zA-Z0-9_\-])"
+                if not re.search(td_pattern, combined_text, re.DOTALL):
+                    module_violations.append(f"Typedef '{td}' is declared in coverage but lacks detailed mapping under a '### Typedefs' header in feature body.")
+
+        # Rule 2: Choice/Case Mutual Exclusivity and Co-dependency
+        for choice_node in sorted(cat_defs.get("choice", [])):
+            if choice_node in declared_set:
+                choice_patterns = [
+                    r"(?i)mutually\s+exclusive",
+                    r"(?i)mutual\s+exclusivity",
+                    r"(?i)exactly\s+one",
+                    r"(?i)exclusive\s+inputs",
+                    r"(?i)choice"
+                ]
+                if not any(re.search(pat, combined_text) for pat in choice_patterns):
+                    module_violations.append(f"Choice '{choice_node}' lacks explicit mutual exclusivity / choice selection validation criteria in feature body.")
+
+        # Rule 3: Conditional Constraints & Co-dependencies (Abstract)
+        module_file = os.path.join(yang_dir, f"{module_name}.yang")
+        if not os.path.exists(module_file):
+            for fn in os.listdir(yang_dir):
+                if fn.endswith(".yang"):
+                    fp = os.path.join(yang_dir, fn)
+                    try:
+                        with open(fp, "r", encoding="utf-8") as f:
+                            if f"module {module_name}" in f.read():
+                                module_file = fp
+                                break
+                    except Exception:
+                        pass
+
+        if os.path.exists(module_file):
+            try:
+                with open(module_file, "r", encoding="utf-8") as f:
+                    yang_content = f.read()
+                
+                # If must/when clauses are defined in the schema, the specs must document validation rules/conditions
+                if "must" in yang_content or "when" in yang_content:
+                    constraint_patterns = [
+                        r"(?i)must",
+                        r"(?i)when",
+                        r"(?i)condition",
+                        r"(?i)constraint",
+                        r"(?i)co-dependency",
+                        r"(?i)co-dependent",
+                        r"(?i)dependent",
+                        r"(?i)validation\s+rule"
+                    ]
+                    if not any(re.search(pat, combined_text) for pat in constraint_patterns):
+                        module_violations.append(f"YANG module '{module_name}' defines conditional constraints (must/when), but the feature specifications lack conditional validation rules or dependency criteria in the body.")
+            except Exception as e:
+                module_violations.append(f"Failed to read YANG file for conditional validation audit: {e}")
+
+        if module_violations:
+            semantic_violations[module_name] = module_violations
+
+        module_defined = len(definitions)
+        module_covered = module_defined - len(missing)
+        
+        total_defined += module_defined
+        total_covered += module_covered
+
+        if missing:
+            coverage_gaps[module_name] = missing
+
+        if module_defined > 0:
+            pct = (module_covered / module_defined) * 100
+            print(f"Module '{module_name}': {module_covered}/{module_defined} nodes covered ({pct:.2f}%)")
+            if module_violations:
+                print(f"  [!] {len(module_violations)} semantic validation failures found.")
+            if invalid_nodes:
+                print(f"  [!] {len(invalid_nodes)} invalid node declarations found.")
+        else:
+            print(f"Module '{module_name}': 0 nodes defined")
+
+    print("\n=== Audit Summary ===")
+    if total_defined > 0:
+        overall_pct = (total_covered / total_defined) * 100
+        print(f"Total Schema Nodes Defined: {total_defined}")
+        print(f"Total Schema Nodes Covered: {total_covered}")
+        print(f"Overall Model Coverage:     {overall_pct:.2f}%")
+    else:
+        print("No target schema nodes found to verify.")
+        sys.exit(1)
+
+    if coverage_gaps or semantic_violations or invalid_declarations:
+        if coverage_gaps:
+            print("\n[!] Coverage Gaps Identified:")
+            for module_name, missing in sorted(coverage_gaps.items()):
+                print(f"  Module '{module_name}' is missing {len(missing)} nodes:")
+                print(f"    Missing: {', '.join(missing)}")
+        if semantic_violations:
+            print("\n[!] Semantic Requirements Parity Gaps Identified:")
+            for module_name, violations in sorted(semantic_violations.items()):
+                print(f"  Module '{module_name}' failed {len(violations)} requirements checks:")
+                for viol in violations:
+                    print(f"    - {viol}")
+        if invalid_declarations:
+            print("\n[!] Invalid Frontmatter Node Declarations Identified:")
+            for module_name, invalids in sorted(invalid_declarations.items()):
+                print(f"  Module '{module_name}' has unrecognized nodes declared:")
+                for inv in invalids:
+                    print(f"    - {inv}")
+        print("\nError: Parity validation failed (either model coverage, semantic requirements, or invalid declarations present).")
+        sys.exit(1)
+    else:
+        print("\nSuccess: 100% model coverage and semantic requirements verified across all specification files.")
+        sys.exit(0)
+
+if __name__ == "__main__":
+    main()
