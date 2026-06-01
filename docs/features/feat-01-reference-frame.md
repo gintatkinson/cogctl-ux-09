@@ -3,6 +3,7 @@ title: "Feature 1: Geographic Reference Frame (Issue #1)"
 epic: "Epic 1: Geographic Location (Issue #6)"
 type: "feature"
 issue: 1
+status: completed
 labels: ["feature", "ietf-geo-location"]
 covered-nodes: ["alternate-system", "astronomical-body", "coord-accuracy", "geodetic-datum", "geodetic-system", "height-accuracy", "reference-frame", "geo-location"]
 ---

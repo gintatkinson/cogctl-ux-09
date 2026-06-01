@@ -3,6 +3,7 @@ title: "Feature 2: Ellipsoidal Location Coordinates (Issue #2)"
 epic: "Epic 1: Geographic Location (Issue #6)"
 type: "feature"
 issue: 2
+status: completed
 labels: ["feature", "ietf-geo-location"]
 covered-nodes: ["ellipsoid", "height", "latitude", "location", "longitude"]
 ---

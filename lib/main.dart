@@ -1,4 +1,5 @@
-import 'package:flutter/material.dart';
+import 'package:flutter/material.dart' hide Velocity;
+import 'dart:math';
 import 'models/geo_location.dart';
 import 'services/mock_location_service.dart';
 
@@ -29,11 +30,11 @@ class _CogctlUxAppState extends State<CogctlUxApp> {
     final lightTheme = ThemeData(
       useMaterial3: true,
       brightness: Brightness.light,
-      primaryColor: const Color(0xFF1A73E8), // Google Cloud Blue
-      scaffoldBackgroundColor: const Color(0xFFF8F9FA), // GCP Light Gray Background
+      primaryColor: const Color(0xFF3367D6), // Google Cloud Primary Action Blue
+      scaffoldBackgroundColor: const Color(0xFFF9F9F9), // GCP Console Canvas Background
       colorScheme: const ColorScheme.light(
-        primary: Color(0xFF1A73E8),
-        secondary: Color(0xFF1A73E8),
+        primary: Color(0xFF3367D6),
+        secondary: Color(0xFF3367D6),
         surface: Colors.white,
         error: Color(0xFFD93025), // GCP Red Error
       ),
@@ -41,8 +42,8 @@ class _CogctlUxAppState extends State<CogctlUxApp> {
         color: Colors.white,
         elevation: 0,
         shape: RoundedRectangleBorder(
-          side: const BorderSide(color: Color(0x1F000000), width: 1), // Thin GCP card border
-          borderRadius: BorderRadius.circular(8),
+          side: const BorderSide(color: Color(0xFFE0E0E0), width: 1), // GCP solid light gray border
+          borderRadius: BorderRadius.circular(4), // Boxy GCP corners
         ),
       ),
       textTheme: const TextTheme(
@@ -50,7 +51,7 @@ class _CogctlUxAppState extends State<CogctlUxApp> {
         titleMedium: TextStyle(fontFamily: 'Roboto', color: Color(0xFF202124), fontWeight: FontWeight.w500),
       ),
       appBarTheme: const AppBarTheme(
-        backgroundColor: Color(0xFF1A73E8), // Classic GCP Console Header Blue
+        backgroundColor: Color(0xFF3367D6), // Classic GCP Console Header Blue
         foregroundColor: Colors.white,
       ),
     );
@@ -64,15 +65,15 @@ class _CogctlUxAppState extends State<CogctlUxApp> {
       colorScheme: const ColorScheme.dark(
         primary: Color(0xFF8AB4F8),
         secondary: Color(0xFF8AB4F8),
-        surface: Color(0xFF2D2E30), // GCP Darker card background
+        surface: Color(0xFF303134), // GCP Darker card background
         error: Color(0xFFF28B82), // GCP Light Red Error for Dark Mode
       ),
       cardTheme: CardThemeData(
-        color: const Color(0xFF2D2E30),
+        color: const Color(0xFF303134),
         elevation: 0,
         shape: RoundedRectangleBorder(
-          side: const BorderSide(color: Color(0x1FFFFFFF), width: 1), // Thin light border for dark mode
-          borderRadius: BorderRadius.circular(8),
+          side: const BorderSide(color: Color(0xFF3C4043), width: 1), // Dark mode card border
+          borderRadius: BorderRadius.circular(4), // Boxy GCP corners
         ),
       ),
       textTheme: const TextTheme(
@@ -80,7 +81,7 @@ class _CogctlUxAppState extends State<CogctlUxApp> {
         titleMedium: TextStyle(fontFamily: 'Roboto', color: Color(0xFFF1F3F4), fontWeight: FontWeight.w500),
       ),
       appBarTheme: const AppBarTheme(
-        backgroundColor: Color(0xFF2D2E30), // GCP Console Header Dark Gray
+        backgroundColor: Color(0xFF303134), // GCP Console Header Dark Gray
         foregroundColor: Colors.white,
       ),
     );
@@ -123,6 +124,22 @@ class _ReferenceFrameDashboardState extends State<ReferenceFrameDashboard> {
   final _altSystemController = TextEditingController();
   final _coordAccController = TextEditingController();
   final _heightAccController = TextEditingController();
+  final _latController = TextEditingController();
+  final _lonController = TextEditingController();
+  final _heightController = TextEditingController();
+
+  // Cartesian controllers
+  final _xController = TextEditingController();
+  final _yController = TextEditingController();
+  final _zController = TextEditingController();
+
+  // Velocity controllers
+  final _vNorthController = TextEditingController();
+  final _vEastController = TextEditingController();
+  final _vUpController = TextEditingController();
+
+  // Choice mode state
+  String _coordinateMode = 'Ellipsoidal';
 
   // Feature flag simulation for alternate-system
   bool _alternateSystemsEnabled = true;
@@ -141,9 +158,23 @@ class _ReferenceFrameDashboardState extends State<ReferenceFrameDashboard> {
   // Validation messages
   String? _generalError;
   String? _bodyError;
+  String? _altSystemError;
   String? _datumError;
   String? _coordAccError;
   String? _heightAccError;
+  String? _latError;
+  String? _lonError;
+  String? _heightError;
+  String? _xError;
+  String? _yError;
+  String? _zError;
+  String? _vNorthError;
+  String? _vEastError;
+  String? _vUpError;
+
+  // Dynamic calculated velocity speed/heading
+  double? _computedSpeed;
+  double? _computedHeading;
 
   // List of location records
   List<GeoLocation> _records = [];
@@ -155,6 +186,239 @@ class _ReferenceFrameDashboardState extends State<ReferenceFrameDashboard> {
   void initState() {
     super.initState();
     _refreshList();
+
+    _bodyController.addListener(() {
+      final text = _bodyController.text.trim();
+      if (text.isEmpty) {
+        if (_bodyError != null) setState(() => _bodyError = null);
+        return;
+      }
+      try {
+        ReferenceFrameValidator.validateAstronomicalBody(ReferenceFrameValidator.normalize(text));
+        if (_bodyError != null) setState(() => _bodyError = null);
+      } catch (e) {
+        setState(() => _bodyError = e.toString().replaceFirst('FormatException: ', ''));
+      }
+    });
+
+    _altSystemController.addListener(() {
+      final text = _altSystemController.text.trim();
+      if (text.isEmpty) {
+        if (_altSystemError != null) setState(() => _altSystemError = null);
+        return;
+      }
+      try {
+        ReferenceFrameValidator.validateAlternateSystem(ReferenceFrameValidator.normalize(text));
+        if (_altSystemError != null) setState(() => _altSystemError = null);
+      } catch (e) {
+        setState(() => _altSystemError = e.toString().replaceFirst('FormatException: ', ''));
+      }
+    });
+
+    _datumController.addListener(() {
+      final text = _datumController.text.trim();
+      if (text.isEmpty) {
+        if (_datumError != null) setState(() => _datumError = null);
+        return;
+      }
+      try {
+        ReferenceFrameValidator.validateGeodeticDatum(ReferenceFrameValidator.normalize(text));
+        if (_datumError != null) setState(() => _datumError = null);
+      } catch (e) {
+        setState(() => _datumError = e.toString().replaceFirst('FormatException: ', ''));
+      }
+    });
+
+    _coordAccController.addListener(() {
+      final text = _coordAccController.text.trim();
+      if (text.isEmpty) {
+        if (_coordAccError != null) setState(() => _coordAccError = null);
+        return;
+      }
+      try {
+        ReferenceFrameValidator.parseAccuracy(text);
+        if (_coordAccError != null) setState(() => _coordAccError = null);
+      } catch (e) {
+        setState(() => _coordAccError = e.toString().replaceFirst('FormatException: ', ''));
+      }
+    });
+
+    _heightAccController.addListener(() {
+      final text = _heightAccController.text.trim();
+      if (text.isEmpty) {
+        if (_heightAccError != null) setState(() => _heightAccError = null);
+        return;
+      }
+      try {
+        ReferenceFrameValidator.parseAccuracy(text);
+        if (_heightAccError != null) setState(() => _heightAccError = null);
+      } catch (e) {
+        setState(() => _heightAccError = e.toString().replaceFirst('FormatException: ', ''));
+      }
+    });
+
+    _latController.addListener(() {
+      final text = _latController.text.trim();
+      if (text.isEmpty) {
+        if (_latError != null) setState(() => _latError = null);
+        return;
+      }
+      try {
+        ReferenceFrameValidator.parseLatitude(text);
+        if (_latError != null) setState(() => _latError = null);
+      } catch (e) {
+        setState(() => _latError = e.toString().replaceFirst('FormatException: ', ''));
+      }
+    });
+
+    _lonController.addListener(() {
+      final text = _lonController.text.trim();
+      if (text.isEmpty) {
+        if (_lonError != null) setState(() => _lonError = null);
+        return;
+      }
+      try {
+        ReferenceFrameValidator.parseLongitude(text);
+        if (_lonError != null) setState(() => _lonError = null);
+      } catch (e) {
+        setState(() => _lonError = e.toString().replaceFirst('FormatException: ', ''));
+      }
+    });
+
+    _heightController.addListener(() {
+      final text = _heightController.text.trim();
+      if (text.isEmpty) {
+        if (_heightError != null) setState(() => _heightError = null);
+        return;
+      }
+      try {
+        ReferenceFrameValidator.parseHeight(text);
+        if (_heightError != null) setState(() => _heightError = null);
+      } catch (e) {
+        setState(() => _heightError = e.toString().replaceFirst('FormatException: ', ''));
+      }
+    });
+
+    _xController.addListener(() {
+      final text = _xController.text.trim();
+      if (text.isEmpty) {
+        if (_xError != null) setState(() => _xError = null);
+        return;
+      }
+      try {
+        ReferenceFrameValidator.parseCartesianCoordinate(text, 'X');
+        if (_xError != null) setState(() => _xError = null);
+      } catch (e) {
+        setState(() => _xError = e.toString().replaceFirst('FormatException: ', ''));
+      }
+    });
+
+    _yController.addListener(() {
+      final text = _yController.text.trim();
+      if (text.isEmpty) {
+        if (_yError != null) setState(() => _yError = null);
+        return;
+      }
+      try {
+        ReferenceFrameValidator.parseCartesianCoordinate(text, 'Y');
+        if (_yError != null) setState(() => _yError = null);
+      } catch (e) {
+        setState(() => _yError = e.toString().replaceFirst('FormatException: ', ''));
+      }
+    });
+
+    _zController.addListener(() {
+      final text = _zController.text.trim();
+      if (text.isEmpty) {
+        if (_zError != null) setState(() => _zError = null);
+        return;
+      }
+      try {
+        ReferenceFrameValidator.parseCartesianCoordinate(text, 'Z');
+        if (_zError != null) setState(() => _zError = null);
+      } catch (e) {
+        setState(() => _zError = e.toString().replaceFirst('FormatException: ', ''));
+      }
+    });
+
+    _vNorthController.addListener(() {
+      final text = _vNorthController.text.trim();
+      if (text.isEmpty) {
+        if (_vNorthError != null) setState(() => _vNorthError = null);
+        _recalculateVelocity();
+        return;
+      }
+      try {
+        ReferenceFrameValidator.parseVelocityComponent(text, 'v-north');
+        if (_vNorthError != null) setState(() => _vNorthError = null);
+      } catch (e) {
+        setState(() => _vNorthError = e.toString().replaceFirst('FormatException: ', ''));
+      }
+      _recalculateVelocity();
+    });
+
+    _vEastController.addListener(() {
+      final text = _vEastController.text.trim();
+      if (text.isEmpty) {
+        if (_vEastError != null) setState(() => _vEastError = null);
+        _recalculateVelocity();
+        return;
+      }
+      try {
+        ReferenceFrameValidator.parseVelocityComponent(text, 'v-east');
+        if (_vEastError != null) setState(() => _vEastError = null);
+      } catch (e) {
+        setState(() => _vEastError = e.toString().replaceFirst('FormatException: ', ''));
+      }
+      _recalculateVelocity();
+    });
+
+    _vUpController.addListener(() {
+      final text = _vUpController.text.trim();
+      if (text.isEmpty) {
+        if (_vUpError != null) setState(() => _vUpError = null);
+        return;
+      }
+      try {
+        ReferenceFrameValidator.parseVelocityComponent(text, 'v-up');
+        if (_vUpError != null) setState(() => _vUpError = null);
+      } catch (e) {
+        setState(() => _vUpError = e.toString().replaceFirst('FormatException: ', ''));
+      }
+    });
+  }
+
+  void _recalculateVelocity() {
+    final vNorthStr = _vNorthController.text.trim();
+    final vEastStr = _vEastController.text.trim();
+    if (vNorthStr.isEmpty && vEastStr.isEmpty) {
+      setState(() {
+        _computedSpeed = null;
+        _computedHeading = null;
+      });
+      return;
+    }
+    final vNorth = double.tryParse(vNorthStr);
+    final vEast = double.tryParse(vEastStr);
+    
+    if (vNorth == null || vEast == null) {
+      setState(() {
+        _computedSpeed = null;
+        _computedHeading = null;
+      });
+      return;
+    }
+    
+    final speed = sqrt(vNorth * vNorth + vEast * vEast);
+    double headingRad = atan2(vEast, vNorth);
+    double headingDeg = headingRad * 180 / pi;
+    if (headingDeg < 0) {
+      headingDeg += 360.0;
+    }
+    setState(() {
+      _computedSpeed = speed;
+      _computedHeading = headingDeg;
+    });
   }
 
   void _refreshList() {
@@ -170,6 +434,15 @@ class _ReferenceFrameDashboardState extends State<ReferenceFrameDashboard> {
     _altSystemController.dispose();
     _coordAccController.dispose();
     _heightAccController.dispose();
+    _latController.dispose();
+    _lonController.dispose();
+    _heightController.dispose();
+    _xController.dispose();
+    _yController.dispose();
+    _zController.dispose();
+    _vNorthController.dispose();
+    _vEastController.dispose();
+    _vUpController.dispose();
     super.dispose();
   }
 
@@ -179,13 +452,35 @@ class _ReferenceFrameDashboardState extends State<ReferenceFrameDashboard> {
     _altSystemController.clear();
     _coordAccController.clear();
     _heightAccController.clear();
+    _latController.clear();
+    _lonController.clear();
+    _heightController.clear();
+    _xController.clear();
+    _yController.clear();
+    _zController.clear();
+    _vNorthController.clear();
+    _vEastController.clear();
+    _vUpController.clear();
     setState(() {
+      _coordinateMode = 'Ellipsoidal';
       _selectedNetworkDomain = 'Terrestrial Fiber (L0-L4)';
       _generalError = null;
       _bodyError = null;
+      _altSystemError = null;
       _datumError = null;
       _coordAccError = null;
       _heightAccError = null;
+      _latError = null;
+      _lonError = null;
+      _heightError = null;
+      _xError = null;
+      _yError = null;
+      _zError = null;
+      _vNorthError = null;
+      _vEastError = null;
+      _vUpError = null;
+      _computedSpeed = null;
+      _computedHeading = null;
     });
   }
 
@@ -193,16 +488,32 @@ class _ReferenceFrameDashboardState extends State<ReferenceFrameDashboard> {
     setState(() {
       _generalError = null;
       _bodyError = null;
+      _altSystemError = null;
       _datumError = null;
       _coordAccError = null;
       _heightAccError = null;
+      _latError = null;
+      _lonError = null;
+      _heightError = null;
+      _xError = null;
+      _yError = null;
+      _zError = null;
+      _vNorthError = null;
+      _vEastError = null;
+      _vUpError = null;
     });
 
     final rawBody = _bodyController.text.trim();
     final rawDatum = _datumController.text.trim();
     final rawAlt = _altSystemController.text.trim();
     final rawCoord = _coordAccController.text.trim();
-    final rawHeight = _heightAccController.text.trim();
+    final rawHeightAcc = _heightAccController.text.trim();
+    final rawLat = _latController.text.trim();
+    final rawLon = _lonController.text.trim();
+    final rawHeightVal = _heightController.text.trim();
+    final rawX = _xController.text.trim();
+    final rawY = _yController.text.trim();
+    final rawZ = _zController.text.trim();
 
     // 1. Determine defaults
     String astronomicalBody = rawBody.isEmpty ? 'earth' : ReferenceFrameValidator.normalize(rawBody);
@@ -222,7 +533,21 @@ class _ReferenceFrameDashboardState extends State<ReferenceFrameDashboard> {
       });
       hasError = true;
     }
+    // Validate Alternate System pattern
+    String? alternateSystem = _alternateSystemsEnabled && rawAlt.isNotEmpty 
+        ? ReferenceFrameValidator.normalize(rawAlt) 
+        : null;
 
+    if (alternateSystem != null) {
+      try {
+        ReferenceFrameValidator.validateAlternateSystem(alternateSystem);
+      } catch (e) {
+        setState(() {
+          _altSystemError = e.toString().replaceFirst('FormatException: ', '');
+        });
+        hasError = true;
+      }
+    }
     // Validate Geodetic Datum pattern
     try {
       ReferenceFrameValidator.validateGeodeticDatum(geodeticDatum);
@@ -248,12 +573,154 @@ class _ReferenceFrameDashboardState extends State<ReferenceFrameDashboard> {
 
     // Parse & Validate Height Accuracy
     double? heightAccuracy;
-    if (rawHeight.isNotEmpty) {
+    if (rawHeightAcc.isNotEmpty) {
       try {
-        heightAccuracy = ReferenceFrameValidator.parseAccuracy(rawHeight);
+        heightAccuracy = ReferenceFrameValidator.parseAccuracy(rawHeightAcc);
       } catch (e) {
         setState(() {
           _heightAccError = e.toString().replaceFirst('FormatException: ', '');
+        });
+        hasError = true;
+      }
+    }
+
+    double? latitude;
+    double? longitude;
+    double? height;
+    double? xVal;
+    double? yVal;
+    double? zVal;
+
+    if (_coordinateMode == 'Ellipsoidal') {
+      // New validation for Ellipsoidal Coordinates
+      final bool anyCoordProvided = rawLat.isNotEmpty || rawLon.isNotEmpty || rawHeightVal.isNotEmpty;
+      if (anyCoordProvided) {
+        if (rawLat.isEmpty) {
+          setState(() {
+            _latError = 'Latitude is required when longitude/height is specified';
+          });
+          hasError = true;
+        }
+        if (rawLon.isEmpty) {
+          setState(() {
+            _lonError = 'Longitude is required when latitude/height is specified';
+          });
+          hasError = true;
+        }
+      }
+
+      if (rawLat.isNotEmpty) {
+        try {
+          latitude = ReferenceFrameValidator.parseLatitude(rawLat);
+        } catch (e) {
+          setState(() {
+            _latError = e.toString().replaceFirst('FormatException: ', '');
+          });
+          hasError = true;
+        }
+      }
+
+      if (rawLon.isNotEmpty) {
+        try {
+          longitude = ReferenceFrameValidator.parseLongitude(rawLon);
+        } catch (e) {
+          setState(() {
+            _lonError = e.toString().replaceFirst('FormatException: ', '');
+          });
+          hasError = true;
+        }
+      }
+
+      if (rawHeightVal.isNotEmpty) {
+        try {
+          height = ReferenceFrameValidator.parseHeight(rawHeightVal);
+        } catch (e) {
+          setState(() {
+            _heightError = e.toString().replaceFirst('FormatException: ', '');
+          });
+          hasError = true;
+        }
+      }
+    } else {
+      // Cartesian Mode
+      if (rawX.isEmpty || rawY.isEmpty || rawZ.isEmpty) {
+        setState(() {
+          _generalError = 'All X, Y, Z coordinates are required in Cartesian mode';
+          if (rawX.isEmpty) _xError = 'X coordinate is required in Cartesian mode';
+          if (rawY.isEmpty) _yError = 'Y coordinate is required in Cartesian mode';
+          if (rawZ.isEmpty) _zError = 'Z coordinate is required in Cartesian mode';
+        });
+        hasError = true;
+      }
+
+      if (rawX.isNotEmpty) {
+        try {
+          xVal = ReferenceFrameValidator.parseCartesianCoordinate(rawX, 'X');
+        } catch (e) {
+          setState(() {
+            _xError = e.toString().replaceFirst('FormatException: ', '');
+          });
+          hasError = true;
+        }
+      }
+
+      if (rawY.isNotEmpty) {
+        try {
+          yVal = ReferenceFrameValidator.parseCartesianCoordinate(rawY, 'Y');
+        } catch (e) {
+          setState(() {
+            _yError = e.toString().replaceFirst('FormatException: ', '');
+          });
+          hasError = true;
+        }
+      }
+
+      if (rawZ.isNotEmpty) {
+        try {
+          zVal = ReferenceFrameValidator.parseCartesianCoordinate(rawZ, 'Z');
+        } catch (e) {
+          setState(() {
+            _zError = e.toString().replaceFirst('FormatException: ', '');
+          });
+          hasError = true;
+        }
+      }
+    }
+
+    double? vNorth;
+    double? vEast;
+    double? vUp;
+
+    final rawVNorth = _vNorthController.text.trim();
+    final rawVEast = _vEastController.text.trim();
+    final rawVUp = _vUpController.text.trim();
+
+    if (rawVNorth.isNotEmpty) {
+      try {
+        vNorth = ReferenceFrameValidator.parseVelocityComponent(rawVNorth, 'v-north');
+      } catch (e) {
+        setState(() {
+          _vNorthError = e.toString().replaceFirst('FormatException: ', '');
+        });
+        hasError = true;
+      }
+    }
+    if (rawVEast.isNotEmpty) {
+      try {
+        vEast = ReferenceFrameValidator.parseVelocityComponent(rawVEast, 'v-east');
+      } catch (e) {
+        setState(() {
+          _vEastError = e.toString().replaceFirst('FormatException: ', '');
+        });
+        hasError = true;
+      }
+    }
+    if (rawVUp.isNotEmpty) {
+      try {
+        vUp = ReferenceFrameValidator.parseVelocityComponent(rawVUp, 'v-up');
+      } catch (e) {
+        setState(() {
+          _vUpError = e.toString().replaceFirst('FormatException: ', '');
         });
         hasError = true;
       }
@@ -272,13 +739,43 @@ class _ReferenceFrameDashboardState extends State<ReferenceFrameDashboard> {
 
     final referenceFrame = ReferenceFrame(
       astronomicalBody: astronomicalBody,
-      alternateSystem: _alternateSystemsEnabled && rawAlt.isNotEmpty ? rawAlt : null,
+      alternateSystem: alternateSystem,
       geodeticSystem: geodeticSystem,
     );
+
+    LocationCoordinate? locationCoord;
+    if (_coordinateMode == 'Ellipsoidal') {
+      if (latitude != null && longitude != null) {
+        locationCoord = EllipsoidCoordinate(
+          latitude: latitude,
+          longitude: longitude,
+          height: height,
+        );
+      }
+    } else {
+      if (xVal != null && yVal != null && zVal != null) {
+        locationCoord = CartesianCoordinate(
+          x: xVal,
+          y: yVal,
+          z: zVal,
+        );
+      }
+    }
+
+    Velocity? velocityObj;
+    if (vNorth != null || vEast != null || vUp != null) {
+      velocityObj = Velocity(
+        vNorth: vNorth,
+        vEast: vEast,
+        vUp: vUp,
+      );
+    }
 
     final location = GeoLocation(
       referenceFrame: referenceFrame,
       networkDomain: _selectedNetworkDomain,
+      location: locationCoord,
+      velocity: velocityObj,
     );
 
     // 4. Save to Mock DB
@@ -793,6 +1290,7 @@ class _ReferenceFrameDashboardState extends State<ReferenceFrameDashboard> {
                   decoration: InputDecoration(
                     labelText: 'Alternate System (Optional)',
                     hintText: 'e.g. ECEF, Lunar-System',
+                    errorText: _altSystemError,
                     prefixIcon: const Icon(Icons.swap_horiz, size: 20),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(4),
@@ -832,7 +1330,232 @@ class _ReferenceFrameDashboardState extends State<ReferenceFrameDashboard> {
                   ),
                 ),
               ),
+              const SizedBox(height: 16),
+
+              const Divider(height: 32),
+              Text(
+                'Location Coordinates Choice',
+                style: theme.textTheme.titleMedium?.copyWith(
+                  fontWeight: FontWeight.bold,
+                  color: theme.colorScheme.onSurface.withOpacity(0.8),
+                ),
+              ),
+              const SizedBox(height: 12),
+
+              LayoutBuilder(
+                builder: (context, constraints) {
+                  return ToggleButtons(
+                    isSelected: [
+                      _coordinateMode == 'Ellipsoidal',
+                      _coordinateMode == 'Cartesian',
+                    ],
+                    onPressed: (index) {
+                      setState(() {
+                        _coordinateMode = index == 0 ? 'Ellipsoidal' : 'Cartesian';
+                        _latError = null;
+                        _lonError = null;
+                        _heightError = null;
+                        _xError = null;
+                        _yError = null;
+                        _zError = null;
+                      });
+                    },
+                    borderRadius: BorderRadius.circular(4),
+                    constraints: BoxConstraints(
+                      minWidth: (constraints.maxWidth - 4) / 2,
+                      minHeight: 40,
+                    ),
+                    children: const [
+                      Text('Ellipsoidal (Lat/Lon/H)'),
+                      Text('Cartesian (X/Y/Z)'),
+                    ],
+                  );
+                },
+              ),
+              const SizedBox(height: 16),
+
+              if (_coordinateMode == 'Ellipsoidal') ...[
+                // Latitude
+                TextField(
+                  controller: _latController,
+                  keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                  decoration: InputDecoration(
+                    labelText: 'Latitude (decimal degrees)',
+                    hintText: 'e.g. 37.7749',
+                    errorText: _latError,
+                    prefixIcon: const Icon(Icons.explore, size: 20),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(4),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 16),
+
+                // Longitude
+                TextField(
+                  controller: _lonController,
+                  keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                  decoration: InputDecoration(
+                    labelText: 'Longitude (decimal degrees)',
+                    hintText: 'e.g. -122.4194',
+                    errorText: _lonError,
+                    prefixIcon: const Icon(Icons.explore, size: 20),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(4),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 16),
+
+                // Height
+                TextField(
+                  controller: _heightController,
+                  keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                  decoration: InputDecoration(
+                    labelText: 'Height (meters, optional)',
+                    hintText: 'e.g. 10.5',
+                    errorText: _heightError,
+                    prefixIcon: const Icon(Icons.vertical_align_top, size: 20),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(4),
+                    ),
+                  ),
+                ),
+              ] else ...[
+                // X coordinate
+                TextField(
+                  controller: _xController,
+                  keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                  decoration: InputDecoration(
+                    labelText: 'X Coordinate (meters)',
+                    hintText: 'e.g. 6378137.123456',
+                    errorText: _xError,
+                    prefixIcon: const Icon(Icons.gps_fixed, size: 20),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(4),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 16),
+
+                // Y coordinate
+                TextField(
+                  controller: _yController,
+                  keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                  decoration: InputDecoration(
+                    labelText: 'Y Coordinate (meters)',
+                    hintText: 'e.g. 0.0',
+                    errorText: _yError,
+                    prefixIcon: const Icon(Icons.gps_fixed, size: 20),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(4),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 16),
+
+                // Z coordinate
+                TextField(
+                  controller: _zController,
+                  keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                  decoration: InputDecoration(
+                    labelText: 'Z Coordinate (meters)',
+                    hintText: 'e.g. 0.0',
+                    errorText: _zError,
+                    prefixIcon: const Icon(Icons.gps_fixed, size: 20),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(4),
+                    ),
+                  ),
+                ),
+              ],
               const SizedBox(height: 24),
+
+              const Divider(height: 32),
+              Text(
+                'Motion Velocity Vector (Optional)',
+                style: theme.textTheme.titleMedium?.copyWith(
+                  fontWeight: FontWeight.bold,
+                  color: theme.colorScheme.onSurface.withOpacity(0.8),
+                ),
+              ),
+              const SizedBox(height: 12),
+
+              // v-north
+              TextField(
+                controller: _vNorthController,
+                keyboardType: const TextInputType.numberWithOptions(decimal: true, signed: true),
+                decoration: InputDecoration(
+                  labelText: 'Northward Velocity (v-north, m/s)',
+                  hintText: 'e.g. 10.0',
+                  errorText: _vNorthError,
+                  prefixIcon: const Icon(Icons.north, size: 20),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(4),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 16),
+
+              // v-east
+              TextField(
+                controller: _vEastController,
+                keyboardType: const TextInputType.numberWithOptions(decimal: true, signed: true),
+                decoration: InputDecoration(
+                  labelText: 'Eastward Velocity (v-east, m/s)',
+                  hintText: 'e.g. 5.5',
+                  errorText: _vEastError,
+                  prefixIcon: const Icon(Icons.east, size: 20),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(4),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 16),
+
+              // v-up
+              TextField(
+                controller: _vUpController,
+                keyboardType: const TextInputType.numberWithOptions(decimal: true, signed: true),
+                decoration: InputDecoration(
+                  labelText: 'Upward Velocity (v-up, m/s)',
+                  hintText: 'e.g. 0.1',
+                  errorText: _vUpError,
+                  prefixIcon: const Icon(Icons.arrow_upward, size: 20),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(4),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 16),
+
+              // Computed Speed & Heading Display
+              if (_computedSpeed != null && _computedHeading != null) ...[
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: theme.primaryColor.withOpacity(0.08),
+                    borderRadius: BorderRadius.circular(4),
+                    border: Border.all(color: theme.primaryColor.withOpacity(0.3)),
+                  ),
+                  child: Row(
+                    children: [
+                      Icon(Icons.speed, color: theme.primaryColor, size: 20),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Text(
+                          'Live Computed Horizontal Speed: ${_computedSpeed!.toStringAsFixed(2)} m/s (${(_computedSpeed! * 3.6).toStringAsFixed(2)} km/h)  |  Heading: ${_computedHeading!.toStringAsFixed(2)}°',
+                          style: TextStyle(
+                            fontWeight: FontWeight.w500,
+                            color: theme.colorScheme.onSurface,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 16),
+              ],
 
               Row(
                 mainAxisAlignment: MainAxisAlignment.end,
@@ -1012,6 +1735,169 @@ class _ReferenceFrameDashboardState extends State<ReferenceFrameDashboard> {
                             ),
                         ],
                       ),
+                      if (rec.location != null) ...[
+                        const Divider(height: 24, thickness: 0.5),
+                        if (rec.location is EllipsoidCoordinate)
+                          Row(
+                            children: [
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    const Text('LATITUDE', style: TextStyle(fontSize: 10, color: Colors.grey)),
+                                    const SizedBox(height: 2),
+                                    Text(
+                                      '${(rec.location as EllipsoidCoordinate).latitude}°',
+                                      style: const TextStyle(fontWeight: FontWeight.w500),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    const Text('LONGITUDE', style: TextStyle(fontSize: 10, color: Colors.grey)),
+                                    const SizedBox(height: 2),
+                                    Text(
+                                      '${(rec.location as EllipsoidCoordinate).longitude}°',
+                                      style: const TextStyle(fontWeight: FontWeight.w500),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              if ((rec.location as EllipsoidCoordinate).height != null)
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      const Text('HEIGHT', style: TextStyle(fontSize: 10, color: Colors.grey)),
+                                      const SizedBox(height: 2),
+                                      Text(
+                                        '${(rec.location as EllipsoidCoordinate).height} m',
+                                        style: const TextStyle(fontWeight: FontWeight.w500),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                            ],
+                          ),
+                        if (rec.location is CartesianCoordinate)
+                          Row(
+                            children: [
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    const Text('X COORDINATE', style: TextStyle(fontSize: 10, color: Colors.grey)),
+                                    const SizedBox(height: 2),
+                                    Text(
+                                      '${(rec.location as CartesianCoordinate).x} m',
+                                      style: const TextStyle(fontWeight: FontWeight.w500),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    const Text('Y COORDINATE', style: TextStyle(fontSize: 10, color: Colors.grey)),
+                                    const SizedBox(height: 2),
+                                    Text(
+                                      '${(rec.location as CartesianCoordinate).y} m',
+                                      style: const TextStyle(fontWeight: FontWeight.w500),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    const Text('Z COORDINATE', style: TextStyle(fontSize: 10, color: Colors.grey)),
+                                    const SizedBox(height: 2),
+                                    Text(
+                                      '${(rec.location as CartesianCoordinate).z} m',
+                                      style: const TextStyle(fontWeight: FontWeight.w500),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
+                      ],
+                      if (rec.velocity != null) ...[
+                        const Divider(height: 24, thickness: 0.5),
+                        const Text('MOTION VELOCITY VECTOR', style: TextStyle(fontSize: 10, color: Colors.grey)),
+                        const SizedBox(height: 4),
+                        Row(
+                          children: [
+                            if (rec.velocity!.vNorth != null)
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    const Text('V-NORTH', style: TextStyle(fontSize: 9, color: Colors.grey)),
+                                    const SizedBox(height: 2),
+                                    Text(
+                                      '${rec.velocity!.vNorth} m/s',
+                                      style: const TextStyle(fontWeight: FontWeight.w500, fontSize: 12),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            if (rec.velocity!.vEast != null)
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    const Text('V-EAST', style: TextStyle(fontSize: 9, color: Colors.grey)),
+                                    const SizedBox(height: 2),
+                                    Text(
+                                      '${rec.velocity!.vEast} m/s',
+                                      style: const TextStyle(fontWeight: FontWeight.w500, fontSize: 12),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            if (rec.velocity!.vUp != null)
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    const Text('V-UP', style: TextStyle(fontSize: 9, color: Colors.grey)),
+                                    const SizedBox(height: 2),
+                                    Text(
+                                      '${rec.velocity!.vUp} m/s',
+                                      style: const TextStyle(fontWeight: FontWeight.w500, fontSize: 12),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                          ],
+                        ),
+                        if (rec.velocity!.vNorth != null && rec.velocity!.vEast != null) ...[
+                          const SizedBox(height: 8),
+                          Builder(
+                            builder: (context) {
+                              final vn = rec.velocity!.vNorth!;
+                              final ve = rec.velocity!.vEast!;
+                              final speed = sqrt(vn * vn + ve * ve);
+                              double heading = atan2(ve, vn) * 180 / pi;
+                              if (heading < 0) heading += 360.0;
+                              return Text(
+                                'Horizontal Speed: ${speed.toStringAsFixed(3)} m/s (${(speed * 3.6).toStringAsFixed(2)} km/h)  |  Heading: ${heading.toStringAsFixed(2)}°',
+                                style: TextStyle(
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.bold,
+                                  color: theme.primaryColor,
+                                ),
+                              );
+                            },
+                          ),
+                        ],
+                      ],
                     ],
                   ),
                 ),

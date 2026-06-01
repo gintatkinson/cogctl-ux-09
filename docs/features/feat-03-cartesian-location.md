@@ -3,6 +3,7 @@ title: "Feature 3: Cartesian Location Coordinates (Issue #3)"
 epic: "Epic 1: Geographic Location (Issue #6)"
 type: "feature"
 issue: 3
+status: completed
 labels: ["feature", "ietf-geo-location"]
 covered-nodes: ["cartesian", "x", "y", "z"]
 ---

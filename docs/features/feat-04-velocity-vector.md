@@ -3,6 +3,8 @@ title: "Feature 4: Motion Velocity Vector (Issue #4)"
 epic: "Epic 1: Geographic Location (Issue #6)"
 type: "feature"
 issue: 4
+platform: "flutter"
+status: "completed"
 labels: ["feature", "ietf-geo-location"]
 covered-nodes: ["velocity", "v-north", "v-east", "v-up"]
 ---
