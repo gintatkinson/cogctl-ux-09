@@ -2187,7 +2187,7 @@ class _ReferenceFrameDashboardState extends State<ReferenceFrameDashboard> {
 
               // Network DomainDropdown
               DropdownButtonFormField<String>(
-                value: _selectedNetworkDomain,
+                initialValue: _selectedNetworkDomain,
                 decoration: InputDecoration(
                   labelText: 'SDN Network Domain Association',
                   prefixIcon: const Icon(Icons.hub, size: 20),
@@ -2315,7 +2315,7 @@ class _ReferenceFrameDashboardState extends State<ReferenceFrameDashboard> {
                 'Location Coordinates Choice',
                 style: theme.textTheme.titleMedium?.copyWith(
                   fontWeight: FontWeight.bold,
-                  color: theme.colorScheme.onSurface.withOpacity(0.8),
+                  color: theme.colorScheme.onSurface.withValues(alpha: 0.8),
                 ),
               ),
               const SizedBox(height: 12),
@@ -2454,7 +2454,7 @@ class _ReferenceFrameDashboardState extends State<ReferenceFrameDashboard> {
                 'Motion Velocity Vector (Optional)',
                 style: theme.textTheme.titleMedium?.copyWith(
                   fontWeight: FontWeight.bold,
-                  color: theme.colorScheme.onSurface.withOpacity(0.8),
+                  color: theme.colorScheme.onSurface.withValues(alpha: 0.8),
                 ),
               ),
               const SizedBox(height: 12),
@@ -3169,7 +3169,7 @@ class _ReferenceFrameDashboardState extends State<ReferenceFrameDashboard> {
                 // Select Node Dropdown
                 DropdownButtonFormField<YangCounterGauge>(
                   isExpanded: true,
-                  value: _selectedCounterGaugeNode,
+                  initialValue: _selectedCounterGaugeNode,
                   decoration: const InputDecoration(
                     labelText: 'Target Node',
                     border: OutlineInputBorder(),
@@ -3616,7 +3616,7 @@ class _ReferenceFrameDashboardState extends State<ReferenceFrameDashboard> {
                 // Select Node Dropdown
                 DropdownButtonFormField<YangIdentifierReference>(
                   isExpanded: true,
-                  value: _selectedIdentifierNode,
+                  initialValue: _selectedIdentifierNode,
                   decoration: const InputDecoration(
                     labelText: 'Target Node',
                     border: OutlineInputBorder(),
@@ -3938,7 +3938,7 @@ class _ReferenceFrameDashboardState extends State<ReferenceFrameDashboard> {
                 // Select Node Dropdown
                 DropdownButtonFormField<YangDateTimeReference>(
                   isExpanded: true,
-                  value: _selectedDateTimeNode,
+                  initialValue: _selectedDateTimeNode,
                   decoration: const InputDecoration(
                     labelText: 'Target Node',
                     border: OutlineInputBorder(),
@@ -4274,7 +4274,7 @@ class _ReferenceFrameDashboardState extends State<ReferenceFrameDashboard> {
                 // Select Node Dropdown
                 DropdownButtonFormField<YangTimeDurationReference>(
                   isExpanded: true,
-                  value: _selectedTimeDurationNode,
+                  initialValue: _selectedTimeDurationNode,
                   decoration: const InputDecoration(
                     labelText: 'Target Node',
                     border: OutlineInputBorder(),
@@ -4940,7 +4940,7 @@ class _ReferenceFrameDashboardState extends State<ReferenceFrameDashboard> {
           _buildMiniStatusCard(theme, cardBg, borderSide, 'TOTAL RACKS', '$total', Icons.grid_view, Colors.blue),
           _buildMiniStatusCard(theme, cardBg, borderSide, 'STANDARD GENERAL', '$standard', Icons.check_circle_outline, Colors.cyan),
           _buildMiniStatusCard(theme, cardBg, borderSide, 'SECURED CABINETS', '$secure', Icons.security, Colors.redAccent),
-          _buildMiniStatusCard(theme, cardBg, borderSide, 'AVG HEIGHT (mm)', '${avgHeight.toStringAsFixed(0)}', Icons.height, Colors.amber),
+          _buildMiniStatusCard(theme, cardBg, borderSide, 'AVG HEIGHT (mm)', avgHeight.toStringAsFixed(0), Icons.height, Colors.amber),
           _buildMiniStatusCard(theme, cardBg, borderSide, 'AVG WIDTH/DEPTH', '${avgWidth.toStringAsFixed(0)} / ${avgDepth.toStringAsFixed(0)}', Icons.settings_overscan, Colors.teal),
         ],
       ),
@@ -4980,7 +4980,7 @@ class _ReferenceFrameDashboardState extends State<ReferenceFrameDashboard> {
 
               // Classification Identity Dropdown
               DropdownButtonFormField<String>(
-                value: _selectedRackClass,
+                initialValue: _selectedRackClass,
                 decoration: const InputDecoration(
                   labelText: 'Rack Classification (identityref)',
                   border: OutlineInputBorder(),
@@ -5070,7 +5070,7 @@ class _ReferenceFrameDashboardState extends State<ReferenceFrameDashboard> {
               // Location Dropdown
               DropdownButtonFormField<String>(
                 isExpanded: true,
-                value: _rackFormLocationId,
+                initialValue: _rackFormLocationId,
                 decoration: const InputDecoration(
                   labelText: 'Physical Location Reference',
                   border: OutlineInputBorder(),
@@ -5492,12 +5492,12 @@ class _ReferenceFrameDashboardState extends State<ReferenceFrameDashboard> {
                   'FACILITY GRID FLOOR PLAN (10x10)',
                   style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                 ),
-                Container(
+                SizedBox(
                   width: 250,
                   child: DropdownButtonFormField<String>(
                     key: const Key('facility-selector-dropdown'),
                     isExpanded: true,
-                    value: _selectedPlacementLocationId,
+                    initialValue: _selectedPlacementLocationId,
                     decoration: const InputDecoration(
                       labelText: 'Select Facility Location',
                       border: OutlineInputBorder(),
@@ -6478,7 +6478,7 @@ class _ReferenceFrameDashboardState extends State<ReferenceFrameDashboard> {
                 DropdownButtonFormField<String>(
                   key: const Key('parentLocationDropdown'),
                   isExpanded: true,
-                  value: _selectedLocationParentId,
+                  initialValue: _selectedLocationParentId,
                   decoration: const InputDecoration(
                     labelText: 'Parent Location (Optional)',
                     border: OutlineInputBorder(),
@@ -6669,7 +6669,7 @@ class _ReferenceFrameDashboardState extends State<ReferenceFrameDashboard> {
                           Expanded(
                             child: DropdownButtonFormField<String>(
                               key: ValueKey('neRefDropdown_${_chassisNeRef ?? "none"}'),
-                              value: _chassisNeRef,
+                              initialValue: _chassisNeRef,
                               isExpanded: true,
                               decoration: const InputDecoration(
                                 labelText: 'Network Element Ref',
@@ -6694,7 +6694,7 @@ class _ReferenceFrameDashboardState extends State<ReferenceFrameDashboard> {
                           Expanded(
                             child: DropdownButtonFormField<String>(
                               key: ValueKey('compRefDropdown_${_chassisComponentRef ?? "none"}_ne_${_chassisNeRef ?? "none"}'),
-                              value: _chassisComponentRef,
+                              initialValue: _chassisComponentRef,
                               isExpanded: true,
                               decoration: const InputDecoration(
                                 labelText: 'Component Ref',
@@ -6915,10 +6915,8 @@ class _ReferenceFrameDashboardState extends State<ReferenceFrameDashboard> {
                           ),
                           const SizedBox(height: 2),
                           Text(
-                            'Recorded: ${loc.timestamp.toIso8601String().substring(0, 19).replaceFirst("T", " ")}' +
-                                (loc.validUntil != null
-                                    ? ' | Valid Until: ${loc.validUntil!.toIso8601String().substring(0, 19).replaceFirst("T", " ")}'
-                                    : ''),
+                            'Recorded: ${loc.timestamp.toIso8601String().substring(0, 19).replaceFirst("T", " ")}'
+                            '${loc.validUntil != null ? ' | Valid Until: ${loc.validUntil!.toIso8601String().substring(0, 19).replaceFirst("T", " ")}' : ''}',
                             style: const TextStyle(fontSize: 10, color: Colors.grey),
                           ),
                           if (loc.physicalAddress != null) ...[
