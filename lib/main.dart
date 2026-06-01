@@ -3,6 +3,9 @@ import 'dart:math';
 import 'dart:async';
 import 'models/geo_location.dart';
 import 'services/mock_location_service.dart';
+import 'models/counter_gauge.dart';
+import 'services/mock_counter_gauge_service.dart';
+
 
 void main() {
   runApp(const CogctlUxApp());
@@ -190,10 +193,21 @@ class _ReferenceFrameDashboardState extends State<ReferenceFrameDashboard> {
   // Drawer / Sidebar state
   bool _isDrawerCollapsed = false;
 
+  // Counters & Gauges state
+  String _currentScreen = 'reference_frames';
+  final MockCounterGaugeService _counterGaugeService = MockCounterGaugeService();
+  List<YangCounterGauge> _counterGaugeNodes = [];
+  YangCounterGauge? _selectedCounterGaugeNode;
+  final _counterGaugeFormKey = GlobalKey<FormState>();
+  final _counterGaugeValueController = TextEditingController();
+  bool _discontinuityChecked = false;
+  String? _counterGaugeValueError;
+
   @override
   void initState() {
     super.initState();
     _refreshList();
+    _refreshCounterGaugeList();
 
     _expiryUpdateTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
       if (mounted) {
@@ -487,8 +501,71 @@ class _ReferenceFrameDashboardState extends State<ReferenceFrameDashboard> {
     _vUpController.dispose();
     _timestampController.dispose();
     _validUntilController.dispose();
+    _counterGaugeValueController.dispose();
     _expiryUpdateTimer?.cancel();
     super.dispose();
+  }
+
+  void _refreshCounterGaugeList() {
+    setState(() {
+      _counterGaugeNodes = _counterGaugeService.getNodes();
+      if (_selectedCounterGaugeNode != null) {
+        final existingIndex = _counterGaugeNodes.indexWhere((n) => n.id == _selectedCounterGaugeNode!.id);
+        if (existingIndex != -1) {
+          _selectedCounterGaugeNode = _counterGaugeNodes[existingIndex];
+        } else if (_counterGaugeNodes.isNotEmpty) {
+          _selectedCounterGaugeNode = _counterGaugeNodes.first;
+        }
+      } else if (_counterGaugeNodes.isNotEmpty) {
+        _selectedCounterGaugeNode = _counterGaugeNodes.first;
+      }
+    });
+  }
+
+  void _submitCounterGaugeUpdate() {
+    if (_selectedCounterGaugeNode == null) return;
+    
+    final text = _counterGaugeValueController.text.trim();
+    if (text.isEmpty) {
+      setState(() {
+        _counterGaugeValueError = 'Value cannot be empty';
+      });
+      return;
+    }
+
+    final newValue = BigInt.tryParse(text);
+    if (newValue == null || newValue < BigInt.zero) {
+      setState(() {
+        _counterGaugeValueError = 'Please enter a valid non-negative integer';
+      });
+      return;
+    }
+
+    try {
+      _counterGaugeService.updateNodeValue(
+        _selectedCounterGaugeNode!.id,
+        newValue,
+        discontinuity: _discontinuityChecked,
+      );
+      
+      setState(() {
+        _counterGaugeValueError = null;
+        _discontinuityChecked = false;
+      });
+
+      _refreshCounterGaugeList();
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Successfully updated ${_selectedCounterGaugeNode!.name} to $newValue'),
+          backgroundColor: Colors.green,
+        ),
+      );
+    } catch (e) {
+      setState(() {
+        _counterGaugeValueError = e.toString().replaceFirst('FormatException: ', '');
+      });
+    }
   }
 
   void _clearForm() {
@@ -898,14 +975,16 @@ class _ReferenceFrameDashboardState extends State<ReferenceFrameDashboard> {
       // Top Navigation Bar (GCP Console Style)
       appBar: AppBar(
         titleSpacing: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.menu),
-          onPressed: () {
-            setState(() {
-              _isDrawerCollapsed = !_isDrawerCollapsed;
-            });
-          },
-        ),
+        leading: isDesktop
+            ? IconButton(
+                icon: const Icon(Icons.menu),
+                onPressed: () {
+                  setState(() {
+                    _isDrawerCollapsed = !_isDrawerCollapsed;
+                  });
+                },
+              )
+            : null,
         title: screenWidth > 950
             ? Row(
                 children: [
@@ -929,13 +1008,17 @@ class _ReferenceFrameDashboardState extends State<ReferenceFrameDashboard> {
                   const Icon(Icons.chevron_right, size: 16, color: Colors.white70),
                   const SizedBox(width: 8),
                   Text(
-                    'RFC 9179 Geo-Location Specs',
+                    _currentScreen == 'reference_frames'
+                        ? 'RFC 9179 Geo-Location Specs'
+                        : 'RFC 9911 Counters & Gauges',
                     style: TextStyle(fontWeight: FontWeight.w400, fontSize: 16, color: Colors.white.withValues(alpha: 0.9)),
                   ),
                 ],
               )
             : Text(
-                'RFC 9179 Geo-Location Specs',
+                _currentScreen == 'reference_frames'
+                    ? 'RFC 9179 Geo-Location Specs'
+                    : 'RFC 9911 Counters & Gauges',
                 style: TextStyle(fontWeight: FontWeight.w500, fontSize: 16, color: Colors.white.withValues(alpha: 0.9)),
               ),
         actions: [
@@ -972,6 +1055,14 @@ class _ReferenceFrameDashboardState extends State<ReferenceFrameDashboard> {
           const SizedBox(width: 8),
         ],
       ),
+      drawer: isDesktop
+          ? null
+          : Drawer(
+              child: Container(
+                color: theme.brightness == Brightness.dark ? const Color(0xFF202124) : Colors.white,
+                child: _buildSidebar(theme),
+              ),
+            ),
       body: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -982,34 +1073,69 @@ class _ReferenceFrameDashboardState extends State<ReferenceFrameDashboard> {
           Expanded(
             child: Padding(
               padding: const EdgeInsets.all(24.0),
-              child: isDesktop
-                  ? Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        _buildSDNStatusSummary(theme),
-                        Expanded(
-                          child: Row(
+              child: _currentScreen == 'reference_frames'
+                  ? (isDesktop
+                      ? Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            _buildSDNStatusSummary(theme),
+                            Expanded(
+                              child: Row(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Expanded(flex: 5, child: _buildFormCard(theme)),
+                                  const SizedBox(width: 24),
+                                  Expanded(flex: 6, child: _buildListPane(theme)),
+                                ],
+                              ),
+                            ),
+                          ],
+                        )
+                      : SingleChildScrollView(
+                          child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Expanded(flex: 5, child: _buildFormCard(theme)),
-                              const SizedBox(width: 24),
-                              Expanded(flex: 6, child: _buildListPane(theme)),
+                              _buildSDNStatusSummary(theme),
+                              _buildFormCard(theme),
+                              const SizedBox(height: 24),
+                              _buildListPane(theme),
                             ],
                           ),
-                        ),
-                      ],
-                    )
-                  : SingleChildScrollView(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          _buildSDNStatusSummary(theme),
-                          _buildFormCard(theme),
-                          const SizedBox(height: 24),
-                          _buildListPane(theme),
-                        ],
-                      ),
-                    ),
+                        ))
+                  : (isDesktop
+                      ? Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            _buildCountersGaugesHeader(theme),
+                            const SizedBox(height: 12),
+                            _buildCountersGaugesSummary(theme),
+                            const SizedBox(height: 24),
+                            Expanded(
+                              child: Row(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Expanded(flex: 5, child: _buildCounterGaugeFormCard(theme)),
+                                  const SizedBox(width: 24),
+                                  Expanded(flex: 6, child: _buildCounterGaugeListPane(theme)),
+                                ],
+                              ),
+                            ),
+                          ],
+                        )
+                      : SingleChildScrollView(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              _buildCountersGaugesHeader(theme),
+                              const SizedBox(height: 12),
+                              _buildCountersGaugesSummary(theme),
+                              const SizedBox(height: 24),
+                              _buildCounterGaugeFormCard(theme),
+                              const SizedBox(height: 24),
+                              _buildCounterGaugeListPane(theme),
+                            ],
+                          ),
+                        )),
             ),
           ),
         ],
@@ -1139,6 +1265,7 @@ class _ReferenceFrameDashboardState extends State<ReferenceFrameDashboard> {
       color: isDark ? const Color(0x1FFFFFFF) : const Color(0x1F000000),
       width: 1,
     );
+    final isDesktop = MediaQuery.of(context).size.width > 900;
 
     return AnimatedContainer(
       duration: const Duration(milliseconds: 200),
@@ -1155,37 +1282,64 @@ class _ReferenceFrameDashboardState extends State<ReferenceFrameDashboard> {
             icon: Icons.dashboard,
             label: 'Console Overview',
             isActive: false,
+            onTap: () {},
           ),
           _buildSidebarItem(
             icon: Icons.language,
             label: 'Reference Frames',
-            isActive: true,
+            isActive: _currentScreen == 'reference_frames',
+            onTap: () {
+              setState(() {
+                _currentScreen = 'reference_frames';
+              });
+              if (!isDesktop) {
+                Navigator.of(context).pop();
+              }
+            },
+          ),
+          _buildSidebarItem(
+            icon: Icons.analytics,
+            label: 'Counters & Gauges',
+            isActive: _currentScreen == 'counters_gauges',
+            onTap: () {
+              setState(() {
+                _currentScreen = 'counters_gauges';
+              });
+              if (!isDesktop) {
+                Navigator.of(context).pop();
+              }
+            },
           ),
           const Divider(height: 16),
           _buildSidebarItem(
             icon: Icons.settings_ethernet,
             label: 'Terrestrial & Mobile (Fiber)',
             isActive: false,
+            onTap: () {},
           ),
           _buildSidebarItem(
             icon: Icons.waves,
             label: 'Submarine Networks (Subsea)',
             isActive: false,
+            onTap: () {},
           ),
           _buildSidebarItem(
             icon: Icons.satellite_alt,
             label: 'Satellite & NTN Orbiters',
             isActive: false,
+            onTap: () {},
           ),
           _buildSidebarItem(
             icon: Icons.rocket_launch,
             label: 'Deep Space Network (DSN)',
             isActive: false,
+            onTap: () {},
           ),
           _buildSidebarItem(
             icon: Icons.compare_arrows,
             label: 'Quantum QKD Links',
             isActive: false,
+            onTap: () {},
           ),
         ],
       ),
@@ -1196,13 +1350,14 @@ class _ReferenceFrameDashboardState extends State<ReferenceFrameDashboard> {
     required IconData icon,
     required String label,
     required bool isActive,
+    VoidCallback? onTap,
   }) {
     final theme = Theme.of(context);
     final activeColor = theme.primaryColor;
     final inactiveColor = theme.brightness == Brightness.dark ? Colors.white70 : Colors.black54;
 
     return InkWell(
-      onTap: () {},
+      onTap: onTap,
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
         color: isActive ? activeColor.withValues(alpha: 0.1) : Colors.transparent,
@@ -2199,4 +2354,521 @@ class _ReferenceFrameDashboardState extends State<ReferenceFrameDashboard> {
       ],
     );
   }
+
+  Widget _buildCountersGaugesHeader(ThemeData theme) {
+    return Row(
+      children: [
+        Text(
+          'Counters & Gauges Dashboard',
+          style: TextStyle(
+            fontSize: 20,
+            fontWeight: FontWeight.bold,
+            color: theme.primaryColor,
+          ),
+        ),
+        const SizedBox(width: 8),
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+          decoration: BoxDecoration(
+            color: Colors.blue.withValues(alpha: 0.15),
+            border: Border.all(color: Colors.blue.withValues(alpha: 0.5)),
+            borderRadius: BorderRadius.circular(4),
+          ),
+          child: const Text(
+            'RFC 9911 / ietf-yang-types',
+            style: TextStyle(
+              color: Colors.blue,
+              fontSize: 10,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildCountersGaugesSummary(ThemeData theme) {
+    final isDark = theme.brightness == Brightness.dark;
+    final cardBg = isDark ? const Color(0xFF2D2E30) : Colors.white;
+    final borderSide = BorderSide(
+      color: isDark ? const Color(0x1FFFFFFF) : const Color(0x1F000000),
+      width: 1,
+    );
+
+    int total = _counterGaugeNodes.length;
+    int counters = _counterGaugeNodes.where((n) => n.isCounter).length;
+    int gauges = _counterGaugeNodes.where((n) => n.isGauge).length;
+    int zeroBased = _counterGaugeNodes.where((n) => n.isZeroBased).length;
+    int highUtil = _counterGaugeNodes.where((n) => n.isGauge && n.utilization > 0.9).length;
+
+    return Wrap(
+      spacing: 16,
+      runSpacing: 16,
+      children: [
+        _buildMiniStatusCard(theme, cardBg, borderSide, 'TOTAL NODES', '$total', Icons.analytics, Colors.blue),
+        _buildMiniStatusCard(theme, cardBg, borderSide, 'COUNTERS', '$counters', Icons.add_circle_outline, Colors.teal),
+        _buildMiniStatusCard(theme, cardBg, borderSide, 'GAUGES', '$gauges', Icons.speed, Colors.amber),
+        _buildMiniStatusCard(theme, cardBg, borderSide, 'ZERO-BASED', '$zeroBased', Icons.exposure_zero, Colors.purple),
+        _buildMiniStatusCard(theme, cardBg, borderSide, 'HIGH UTIL (>90%)', '$highUtil', Icons.warning_amber, Colors.red),
+      ],
+    );
+  }
+
+  Widget _buildCounterGaugeFormCard(ThemeData theme) {
+    final isDark = theme.brightness == Brightness.dark;
+    final cardBg = isDark ? const Color(0xFF2D2E30) : Colors.white;
+
+    return Card(
+      color: cardBg,
+      child: SingleChildScrollView(
+        child: Padding(
+          padding: const EdgeInsets.all(24.0),
+          child: Form(
+            key: _counterGaugeFormKey,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Text(
+                  'Update Numeric Value',
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                ),
+                const SizedBox(height: 16),
+                
+                // Select Node Dropdown
+                DropdownButtonFormField<YangCounterGauge>(
+                  isExpanded: true,
+                  value: _selectedCounterGaugeNode,
+                  decoration: const InputDecoration(
+                    labelText: 'Target Node',
+                    border: OutlineInputBorder(),
+                  ),
+                  dropdownColor: cardBg,
+                  items: _counterGaugeNodes.map((node) {
+                    return DropdownMenuItem<YangCounterGauge>(
+                      value: node,
+                      child: Text(
+                        '${node.name} (${node.type.name})',
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    );
+                  }).toList(),
+                onChanged: (YangCounterGauge? val) {
+                  if (val != null) {
+                    setState(() {
+                      _selectedCounterGaugeNode = val;
+                      _counterGaugeValueController.text = val.value.toString();
+                      _discontinuityChecked = false;
+                      _counterGaugeValueError = null;
+                    });
+                  }
+                },
+              ),
+              const SizedBox(height: 16),
+
+              // Description and Type Info
+              if (_selectedCounterGaugeNode != null) ...[
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: theme.brightness == Brightness.dark ? Colors.white12 : Colors.black.withValues(alpha: 0.05),
+                    borderRadius: BorderRadius.circular(4),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        _selectedCounterGaugeNode!.description,
+                        style: const TextStyle(fontSize: 12, fontStyle: FontStyle.italic),
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        'Type: ${_selectedCounterGaugeNode!.type.name} (Max Limit: ${_selectedCounterGaugeNode!.maxLimit != null ? _selectedCounterGaugeNode!.maxLimit.toString() : 'None'})',
+                        style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: theme.primaryColor),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 16),
+              ],
+
+              // New Value input field
+              TextFormField(
+                controller: _counterGaugeValueController,
+                decoration: InputDecoration(
+                  labelText: 'New Numeric Value',
+                  helperText: 'Enter non-negative integer (supports 64-bit bounds)',
+                  border: const OutlineInputBorder(),
+                  errorText: _counterGaugeValueError,
+                ),
+                keyboardType: TextInputType.number,
+                onChanged: (val) {
+                  if (_counterGaugeValueError != null) {
+                    setState(() {
+                      _counterGaugeValueError = null;
+                    });
+                  }
+                },
+              ),
+              const SizedBox(height: 16),
+
+              // Discontinuity switch (only for counters)
+              if (_selectedCounterGaugeNode != null && _selectedCounterGaugeNode!.isCounter) ...[
+                Row(
+                  children: [
+                    Checkbox(
+                      value: _discontinuityChecked,
+                      onChanged: (val) {
+                        setState(() {
+                          _discontinuityChecked = val ?? false;
+                        });
+                      },
+                    ),
+                    const Expanded(
+                      child: Text(
+                        'Discontinuity / Re-initialization (Allows decreasing value)',
+                        style: TextStyle(fontSize: 12),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 16),
+              ],
+
+              // Submit Buttons Row
+              Row(
+                children: [
+                  Expanded(
+                    child: ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: theme.primaryColor,
+                        foregroundColor: Colors.white,
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
+                      ),
+                      onPressed: _submitCounterGaugeUpdate,
+                      child: const Text('Update Value'),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  // Reset to zero button (simulates re-initialization)
+                  OutlinedButton(
+                    style: OutlinedButton.styleFrom(
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
+                    ),
+                    onPressed: () {
+                      if (_selectedCounterGaugeNode != null) {
+                        try {
+                          _counterGaugeService.resetNode(_selectedCounterGaugeNode!.id);
+                          _refreshCounterGaugeList();
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text('Reset ${_selectedCounterGaugeNode!.name} to zero (discontinuity signaled).'),
+                              backgroundColor: theme.primaryColor,
+                            ),
+                          );
+                        } catch (e) {
+                          setState(() {
+                            _counterGaugeValueError = e.toString().replaceFirst('FormatException: ', '');
+                          });
+                        }
+                      }
+                    },
+                    child: const Text('Reset to 0'),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+    ),
+  );
+}
+
+  Widget _buildCounterGaugeListPane(ThemeData theme) {
+    final isDark = theme.brightness == Brightness.dark;
+    final cardBg = isDark ? const Color(0xFF2D2E30) : Colors.white;
+    final isDesktop = MediaQuery.of(context).size.width > 900;
+
+    final Widget listContent = _counterGaugeNodes.isEmpty
+        ? const Center(
+            child: Padding(
+              padding: EdgeInsets.all(24.0),
+              child: Text('No nodes registered.'),
+            ),
+          )
+        : ListView.separated(
+            shrinkWrap: !isDesktop,
+            physics: isDesktop ? const ScrollPhysics() : const NeverScrollableScrollPhysics(),
+            itemCount: _counterGaugeNodes.length,
+            separatorBuilder: (context, index) => const Divider(height: 16),
+            itemBuilder: (context, index) {
+              final node = _counterGaugeNodes[index];
+              final isHighUtil = node.isGauge && node.utilization > 0.9;
+              final isMediumUtil = node.isGauge && node.utilization > 0.7 && node.utilization <= 0.9;
+              
+              Color gaugeColor = Colors.green;
+              if (isHighUtil) {
+                gaugeColor = Colors.red;
+              } else if (isMediumUtil) {
+                gaugeColor = Colors.orange;
+              }
+
+              return Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  // Status light / Icon
+                  Icon(
+                    node.isCounter ? Icons.add_circle_outline : Icons.speed,
+                    color: node.isCounter ? Colors.teal : gaugeColor,
+                    size: 24,
+                  ),
+                  const SizedBox(width: 12),
+                  
+                  // Node Details
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            Expanded(
+                              child: Text(
+                                node.name,
+                                style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                            const SizedBox(width: 8),
+                            Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                              decoration: BoxDecoration(
+                                color: (node.isCounter ? Colors.teal : Colors.amber).withValues(alpha: 0.1),
+                                border: Border.all(
+                                  color: (node.isCounter ? Colors.teal : Colors.amber).withValues(alpha: 0.4),
+                                ),
+                                borderRadius: BorderRadius.circular(4),
+                              ),
+                              child: Text(
+                                node.type.name,
+                                style: TextStyle(
+                                  fontSize: 9,
+                                  color: node.isCounter ? Colors.teal : Colors.amber[800] ?? Colors.amber,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ),
+                            if (node.isZeroBased) ...[
+                              const SizedBox(width: 4),
+                              Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                decoration: BoxDecoration(
+                                  color: Colors.purple.withValues(alpha: 0.1),
+                                  border: Border.all(
+                                    color: Colors.purple.withValues(alpha: 0.4),
+                                  ),
+                                  borderRadius: BorderRadius.circular(4),
+                                ),
+                                child: const Text(
+                                  'Zero-Based',
+                                  style: TextStyle(
+                                    fontSize: 9,
+                                    color: Colors.purple,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ],
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          node.description,
+                          style: const TextStyle(fontSize: 11, color: Colors.grey),
+                        ),
+                        const SizedBox(height: 8),
+                        if (node.isGauge) ...[
+                          // Linear progress utilization bar
+                          Row(
+                            children: [
+                              Expanded(
+                                child: ClipRRect(
+                                  borderRadius: BorderRadius.circular(2),
+                                  child: LinearProgressIndicator(
+                                    value: node.utilization,
+                                    backgroundColor: theme.brightness == Brightness.dark ? Colors.white10 : Colors.black12,
+                                    valueColor: AlwaysStoppedAnimation<Color>(gaugeColor),
+                                    minHeight: 6,
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(width: 8),
+                              Text(
+                                '${(node.utilization * 100).toInt()}%',
+                                style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: gaugeColor),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            '${node.value} / ${node.maxLimit ?? 'None'}',
+                            style: const TextStyle(fontSize: 10, color: Colors.grey),
+                          ),
+                        ] else if (node.isCounter) ...[
+                          // For counters: sparkline & latest value
+                          Row(
+                            children: [
+                              const Icon(Icons.trending_up, color: Colors.teal, size: 14),
+                              const SizedBox(width: 4),
+                              Expanded(
+                                child: Text(
+                                  'Value: ${node.value}',
+                                  style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ),
+                              if (node.history.length > 1) ...[
+                                const Text('Trend: ', style: TextStyle(fontSize: 10, color: Colors.grey)),
+                                const SizedBox(width: 4),
+                                SparklineWidget(history: node.history, color: Colors.teal),
+                              ],
+                            ],
+                          ),
+                        ],
+                      ],
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  // Action buttons: quick select or quick reset
+                  Column(
+                    children: [
+                      IconButton(
+                        icon: const Icon(Icons.edit, size: 18),
+                        tooltip: 'Select for Update',
+                        onPressed: () {
+                          setState(() {
+                            _selectedCounterGaugeNode = node;
+                            _counterGaugeValueController.text = node.value.toString();
+                            _discontinuityChecked = false;
+                            _counterGaugeValueError = null;
+                          });
+                        },
+                      ),
+                      IconButton(
+                        icon: const Icon(Icons.refresh, size: 18),
+                        tooltip: 'Reset to 0',
+                        onPressed: () {
+                          try {
+                            _counterGaugeService.resetNode(node.id);
+                            _refreshCounterGaugeList();
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text('Reset ${node.name} to zero (discontinuity signaled).'),
+                                backgroundColor: theme.primaryColor,
+                              ),
+                            );
+                          } catch (e) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text('Failed to reset: ${e.toString()}'),
+                                backgroundColor: Colors.red,
+                              ),
+                            );
+                          }
+                        },
+                      ),
+                    ],
+                  ),
+                ],
+              );
+            },
+          );
+
+    return Card(
+      color: cardBg,
+      child: Padding(
+        padding: const EdgeInsets.all(24.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text(
+              'YANG Node Registries',
+              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 16),
+            isDesktop ? Expanded(child: listContent) : listContent,
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class SparklineWidget extends StatelessWidget {
+  final List<BigInt> history;
+  final Color color;
+
+  const SparklineWidget({
+    super.key,
+    required this.history,
+    this.color = Colors.blue,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      width: 80,
+      height: 30,
+      child: CustomPaint(
+        painter: _SparklinePainter(history, color),
+      ),
+    );
+  }
+}
+
+class _SparklinePainter extends CustomPainter {
+  final List<BigInt> history;
+  final Color color;
+
+  _SparklinePainter(this.history, this.color);
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    if (history.length < 2) return;
+    
+    final paint = Paint()
+      ..color = color
+      ..strokeWidth = 2.0
+      ..style = PaintingStyle.stroke
+      ..strokeCap = StrokeCap.round;
+
+    final path = Path();
+    
+    // Find min and max values to normalize
+    BigInt minVal = history.reduce((a, b) => a < b ? a : b);
+    BigInt maxVal = history.reduce((a, b) => a > b ? a : b);
+    
+    // Prevent division by zero if all values are equal
+    double range = (maxVal - minVal).toDouble();
+    if (range == 0.0) range = 1.0;
+
+    final dx = size.width / (history.length - 1);
+    
+    for (int i = 0; i < history.length; i++) {
+      final double x = i * dx;
+      final double normalizedY = (history[i] - minVal).toDouble() / range;
+      final double y = size.height - (normalizedY * size.height);
+      
+      if (i == 0) {
+        path.moveTo(x, y);
+      } else {
+        path.lineTo(x, y);
+      }
+    }
+    canvas.drawPath(path, paint);
+  }
+
+  @override
+  bool shouldRepaint(covariant _SparklinePainter oldDelegate) =>
+      oldDelegate.history != history || oldDelegate.color != color;
 }
