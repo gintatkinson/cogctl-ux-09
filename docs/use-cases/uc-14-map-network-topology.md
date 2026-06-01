@@ -3,9 +3,13 @@ title: "Use Case 14: Map Network Topology Connectivity (Issue #78)"
 type: "use-case"
 issue: 78
 spec_source: "RFC 8345 Section 3.1"
+epic: "Epic 9: Network Topology Model (Issue #80)"
 ---
 
 # Use Case: Use Case 14: Map Network Topology Connectivity (Issue #78)
+
+**Epic:** [Epic 9: Network Topology Model (Issue #80)](https://github.com/gintatkinson/cogctl-ux-09/blob/main/docs/epics/epic-09-network-topology.md)
+
 
 ## OOA/OOD Realization
 - **Primary Actor:** Network Operations Center (NOC) Operator / Automated Topology Collector

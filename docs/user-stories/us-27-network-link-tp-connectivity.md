@@ -3,9 +3,13 @@ title: "User Story 27: Network Link and TP Connectivity (Issue #76)"
 type: "user-story"
 issue: 76
 spec_source: "RFC 8345 Section 3.1"
+epic: "Epic 9: Network Topology Model (Issue #80)"
 ---
 
 # User Story: User Story 27: Network Link and TP Connectivity (Issue #76)
+
+**Epic:** [Epic 9: Network Topology Model (Issue #80)](https://github.com/gintatkinson/cogctl-ux-09/blob/main/docs/epics/epic-09-network-topology.md)
+
 
 ## Domain Object Mapping
 - **Primary Domain Objects:** `link`, `termination-point`, `source`, `destination`, `supporting-link`, `supporting-termination-point`
