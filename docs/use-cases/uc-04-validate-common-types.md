@@ -24,7 +24,7 @@ spec_source: "RFC 9911"
   - The System rejects the registration and alerts the Actor with a specific validation error message.
 
 ## Required User Stories
-- [ ] #23 - [User Story 6: Numeric Counters and Gauges](https://github.com/gintatkinson/cogctl-ux-09/blob/feat/epic-2-common-types/docs/user-stories/us-06-counters-gauges.md)
+- [x] #23 - [User Story 6: Numeric Counters and Gauges](https://github.com/gintatkinson/cogctl-ux-09/blob/feat/epic-2-common-types/docs/user-stories/us-06-counters-gauges.md)
 - [ ] #24 - [User Story 7: Identifiers and Object References](https://github.com/gintatkinson/cogctl-ux-09/blob/feat/epic-2-common-types/docs/user-stories/us-07-identifiers-references.md)
 - [ ] #25 - [User Story 8: Date and Time Types](https://github.com/gintatkinson/cogctl-ux-09/blob/feat/epic-2-common-types/docs/user-stories/us-08-date-time.md)
 - [ ] #26 - [User Story 9: Time Durations](https://github.com/gintatkinson/cogctl-ux-09/blob/feat/epic-2-common-types/docs/user-stories/us-09-time-durations.md)

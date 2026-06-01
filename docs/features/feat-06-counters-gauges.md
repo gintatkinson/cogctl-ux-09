@@ -3,6 +3,8 @@ title: "Feature 6: Numeric Counters and Gauges (Issue #17)"
 epic: "Epic 2: Common YANG Data Types (Issue #22)"
 type: "feature"
 issue: 17
+platform: "flutter"
+status: "completed"
 labels: ["feature", "common-yang-types", "ietf-yang-types"]
 covered-nodes: ["counter32", "zero-based-counter32", "counter64", "zero-based-counter64", "gauge32", "gauge64"]
 ---

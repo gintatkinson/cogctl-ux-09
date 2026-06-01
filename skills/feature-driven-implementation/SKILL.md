@@ -56,8 +56,8 @@ Use this skill to execute the end-to-end implementation lifecycle for prioritize
 2. Run local tests or build checks (e.g., `npm run lint`, `npm run build`, `flutter analyze`).
 3. Provide **precise, step-by-step human manual testing instructions** in the verification section. The instructions must guide the user on exactly what commands to run, which page/element to navigate to, what actions to perform, and what visual output to inspect in the browser or client to verify that the implementation is 100% correct.
 4. **Independent Subagent Validation Check (or Single-Agent Fallback Self-Audit):** 
-   - **Multi-Agent Mode:** Dispatch a separate **Validator Subagent** to read the draft `walkthrough.md` / `feat-<Issue_Number>-solution.md` and cross-reference every referenced UUID, link, and port ID. The Validator subagent must independently locate these elements in the unified database to confirm they exist and match the UI navigation targets. Fail the validation step if there is any mismatch.
-   - **Single-Agent Fallback:** The agent must step out of the implementation context and systematically audit its own draft `walkthrough.md` / `feat-<Issue_Number>-solution.md`. Perform exact regex and grep lookups to verify that every single UUID, link, and port ID referenced in the walkthrough exists verbatim in the unified database. Document the results of this check explicitly before requesting user approval.
+   - **Multi-Agent Mode:** Dispatch a separate **Validator Subagent** to read the draft `walkthrough.md` / `feat-<Feature_ID>-solution.md` and cross-reference every referenced UUID, link, and port ID. The Validator subagent must independently locate these elements in the unified database to confirm they exist and match the UI navigation targets. Fail the validation step if there is any mismatch.
+   - **Single-Agent Fallback:** The agent must step out of the implementation context and systematically audit its own draft `walkthrough.md` / `feat-<Feature_ID>-solution.md`. Perform exact regex and grep lookups to verify that every single UUID, link, and port ID referenced in the walkthrough exists verbatim in the unified database. Document the results of this check explicitly before requesting user approval.
 5. Apply any feedback iteratively on the feature branch.
 
 ### Step 5: Release & Closure (CRITICAL)
@@ -66,20 +66,20 @@ Use this skill to execute the end-to-end implementation lifecycle for prioritize
    git checkout master
    git merge feat/<N>-<short-description>
    ```
-2. Create or update a cumulative solution walkthrough document under `docs/designs/feat-<Issue_Number>-solution.md` summarizing the changes, testing, and validations. Do not delete or overwrite sections for previously implemented sub-features or related components. Ensure the document is a cumulative record of all changes, maintaining a 100% scope perspective to deliver 0-defect verification instructions.
+2. Create or update a cumulative solution walkthrough document under `docs/designs/feat-<Feature_ID>-solution.md` summarizing the changes, testing, and validations. Do not delete or overwrite sections for previously implemented sub-features or related components. Ensure the document is a cumulative record of all changes, maintaining a 100% scope perspective to deliver 0-defect verification instructions.
    > [!IMPORTANT]
-   > **DO NOT USE THE FEATURE INDEX NUMBER** (e.g. 24 for Feature 24) in the solution filename if the GitHub Issue Number is different (e.g. 82). The solution file name MUST strictly use the GitHub Issue Number (e.g. `feat-82-solution.md`).
+   > **USE THE FEATURE INDEX NUMBER** (e.g. 6 for Feature 6) in the solution filename, NOT the GitHub Issue Number (e.g. 17). The solution file name MUST strictly use the Feature ID (e.g. `feat-6-solution.md`).
    > 
-   > **ZERO-TRUST COLLISION CHECK:** Before updating or creating this file, search the repository and Git history for the filename `feat-<Issue_Number>-solution.md` to check its existing content. If it exists, read it first and append/merge the new changes rather than overwriting. If there is a filename mismatch or conflict, alert the user and resolve the naming conflict immediately.
+   > **ZERO-TRUST COLLISION CHECK:** Before updating or creating this file, search the repository and Git history for the filename `feat-<Feature_ID>-solution.md` to check its existing content. If it exists, read it first and append/merge the new changes rather than overwriting. If there is a filename mismatch or conflict, alert the user and resolve the naming conflict immediately.
 3. Commit and push the solution document:
    ```bash
-   git add docs/designs/feat-<Issue_Number>-solution.md
-   git commit -m "docs: release solution walkthrough for issue #<Issue_Number>"
+   git add docs/designs/feat-<Feature_ID>-solution.md
+   git commit -m "docs: release solution walkthrough for feature #<Feature_ID>"
    git push origin master
    ```
 4. Close the feature issue on GitHub using `gh` CLI, embedding a comment pointing to the committed solution document:
    ```bash
-   gh issue close <Issue_Number> --comment "Implemented in master. Solution Walkthrough: https://github.com/<owner>/<repo>/blob/master/docs/designs/feat-<Issue_Number>-solution.md"
+   gh issue close <Issue_Number> --comment "Implemented in master. Solution Walkthrough: https://github.com/<owner>/<repo>/blob/master/docs/designs/feat-<Feature_ID>-solution.md"
    ```
 5. Update the local parent Epic markdown checklist:
    - Mark the completed feature as completed (`[x]`).
