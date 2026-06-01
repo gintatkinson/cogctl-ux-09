@@ -107,6 +107,7 @@ def load_feature_files(features_dir):
 
         # Parse simple frontmatter
         labels = []
+        status = None
         frontmatter_match = re.match(r"^---\s*\n(.*?)\n---\s*\n", content, re.DOTALL)
         if frontmatter_match:
             frontmatter_text = frontmatter_match.group(1)
@@ -116,12 +117,15 @@ def load_feature_files(features_dir):
                     labels_match = re.search(r"\[(.*?)\]", line)
                     if labels_match:
                         labels = [lbl.strip().strip('"').strip("'") for lbl in labels_match.group(1).split(",")]
+                elif line.startswith("status:"):
+                    status = line.split(":", 1)[1].strip().strip('"').strip("'")
         
         covered_nodes = parse_covered_nodes(content)
         
         features.append({
             "filename": filename,
             "labels": labels,
+            "status": status,
             "content": content,
             "covered_nodes": covered_nodes
         })
@@ -176,6 +180,31 @@ def main():
     # 2. Load all feature markdown files
     features = load_feature_files(features_dir)
     print(f"Loaded {len(features)} feature specifications.\n")
+
+    # 2b. Audit design/solution document existence
+    designs_dir = os.path.join(workspace_dir, "docs", "designs")
+    design_files = []
+    if os.path.exists(designs_dir):
+        design_files = [f for f in os.listdir(designs_dir) if f.endswith(".md")]
+
+    missing_designs = []
+    for f in features:
+        if f.get("status") != "completed":
+            continue
+        feat_match = re.search(r"feat-(\d+)", f["filename"])
+        if not feat_match:
+            continue
+        feat_num = int(feat_match.group(1))
+        
+        found = False
+        for df in design_files:
+            df_match = re.search(r"feat-(\d+)-solution", df)
+            if df_match and int(df_match.group(1)) == feat_num:
+                found = True
+                break
+        
+        if not found:
+            missing_designs.append((f["filename"], f"feat-{feat_num}-solution.md"))
 
     # 3. Audit coverage per module
     total_defined = 0
@@ -318,7 +347,7 @@ def main():
         print("No target schema nodes found to verify.")
         sys.exit(1)
 
-    if coverage_gaps or semantic_violations or invalid_declarations:
+    if coverage_gaps or semantic_violations or invalid_declarations or missing_designs:
         if coverage_gaps:
             print("\n[!] Coverage Gaps Identified:")
             for module_name, missing in sorted(coverage_gaps.items()):
@@ -336,10 +365,14 @@ def main():
                 print(f"  Module '{module_name}' has unrecognized nodes declared:")
                 for inv in invalids:
                     print(f"    - {inv}")
-        print("\nError: Parity validation failed (either model coverage, semantic requirements, or invalid declarations present).")
+        if missing_designs:
+            print("\n[!] Design / Solution Walkthrough Gaps Identified:")
+            for feat_file, design_file in missing_designs:
+                print(f"  Feature spec '{feat_file}' is missing a corresponding solution document (e.g. '{design_file}') under 'docs/designs/'")
+        print("\nError: Parity validation failed (either model coverage, semantic requirements, invalid declarations, or missing design documents present).")
         sys.exit(1)
     else:
-        print("\nSuccess: 100% model coverage and semantic requirements verified across all specification files.")
+        print("\nSuccess: 100% model coverage, semantic requirements, and design solution documents verified across all specification files.")
         sys.exit(0)
 
 if __name__ == "__main__":
