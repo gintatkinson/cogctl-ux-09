@@ -86,7 +86,7 @@ class _CogctlUxAppState extends State<CogctlUxApp> {
     );
 
     return MaterialApp(
-      title: 'Google Cloud Console - GKE Geo-Location Registry',
+      title: 'xG-AI Cognitive Controller - Geo-Location Registry',
       debugShowCheckedModeBanner: false,
       theme: lightTheme,
       darkTheme: darkTheme,
@@ -321,7 +321,7 @@ class _ReferenceFrameDashboardState extends State<ReferenceFrameDashboard> {
             ? Row(
                 children: [
                   const Text(
-                    'Google Cloud',
+                    'xG-AI',
                     style: TextStyle(fontWeight: FontWeight.w500, fontSize: 18),
                   ),
                   const SizedBox(width: 8),
@@ -332,7 +332,7 @@ class _ReferenceFrameDashboardState extends State<ReferenceFrameDashboard> {
                       borderRadius: BorderRadius.circular(4),
                     ),
                     child: const Text(
-                      'GKE',
+                      'Cognitive Controller',
                       style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold),
                     ),
                   ),
