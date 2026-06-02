@@ -19,6 +19,11 @@ import 'models/network_element.dart';
 import 'services/mock_network_inventory_service.dart';
 import 'models/equipment_rack.dart';
 import 'services/mock_equipment_rack_service.dart';
+import 'models/inventory_type_reference.dart';
+import 'services/mock_types_references_service.dart';
+import 'models/software_manufacturer.dart';
+import 'services/mock_software_manufacturer_service.dart';
+
 
 
 void main() {
@@ -328,6 +333,34 @@ class _ReferenceFrameDashboardState extends State<ReferenceFrameDashboard> {
   String? _rackChassisComponentRef;
   String? _rackChassisError;
 
+  // YANG Types & References state
+  final MockTypesReferencesService _typesReferencesService = MockTypesReferencesService();
+  List<MockInventoryTypeReference> _typeReferences = [];
+  final _typesRefFormKey = GlobalKey<FormState>();
+  final _typesRefIdController = TextEditingController();
+  String _selectedTypesRefType = 'ne-ref';
+  String? _selectedTypesRefNe;
+  String? _selectedTypesRefTarget;
+  String? _typesRefFormError;
+
+  // Feature 18: Software & Manufacturer state
+  final MockSoftwareManufacturerService _softwareManufacturerService = MockSoftwareManufacturerService();
+  List<MockSoftwareManufacturerConfig> _softwareMfgConfigs = [];
+  MockSoftwareManufacturerConfig? _selectedSoftwareMfgConfig;
+  final _softwareMfgFormKey = GlobalKey<FormState>();
+  final _smUuidController = TextEditingController();
+  final _smNameController = TextEditingController();
+  final _smAliasController = TextEditingController();
+  final _smDescController = TextEditingController();
+  final _smMfgNameController = TextEditingController();
+  final _smProductNameController = TextEditingController();
+  final _newSwNameController = TextEditingController();
+  final _newSwRevController = TextEditingController();
+  final _newPatchRevController = TextEditingController();
+  String? _selectedSwNameForPatch;
+  String? _smFormError;
+
+
   @override
   void initState() {
     super.initState();
@@ -339,6 +372,8 @@ class _ReferenceFrameDashboardState extends State<ReferenceFrameDashboard> {
     _refreshAddressTagList();
     _refreshInventoryLocationList();
     _refreshEquipmentRackList();
+    _refreshTypesReferencesList();
+    _refreshSoftwareMfgConfigs();
 
     _expiryUpdateTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
       if (mounted) {
@@ -1769,44 +1804,81 @@ class _ReferenceFrameDashboardState extends State<ReferenceFrameDashboard> {
                                                     ],
                                                   ),
                                                 ))
-                                          : (isDesktop
-                                              ? Column(
-                                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                                  children: [
-                                                    _buildInventoryLocationHeader(theme),
-                                                    const SizedBox(height: 12),
-                                                    _buildInventoryLocationSummary(theme),
-                                                    const SizedBox(height: 16),
-                                                    _buildNetworkInventoryManager(theme),
-                                                    const SizedBox(height: 16),
-                                                    Expanded(
-                                                      child: Row(
+                                          : (_currentScreen == 'types_references'
+                                              ? (isDesktop
+                                                  ? Column(
+                                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                                      children: [
+                                                        _buildTypesReferencesHeader(theme),
+                                                        const SizedBox(height: 12),
+                                                        _buildTypesReferencesSummary(theme),
+                                                        const SizedBox(height: 24),
+                                                        Expanded(
+                                                          child: Row(
+                                                            crossAxisAlignment: CrossAxisAlignment.start,
+                                                            children: [
+                                                              Expanded(flex: 5, child: _buildTypesReferencesFormCard(theme)),
+                                                              const SizedBox(width: 24),
+                                                              Expanded(flex: 6, child: _buildTypesReferencesListPane(theme)),
+                                                            ],
+                                                          ),
+                                                        ),
+                                                      ],
+                                                    )
+                                                  : SingleChildScrollView(
+                                                      child: Column(
                                                         crossAxisAlignment: CrossAxisAlignment.start,
                                                         children: [
-                                                          Expanded(flex: 5, child: _buildInventoryLocationFormCard(theme)),
-                                                          const SizedBox(width: 24),
-                                                          Expanded(flex: 6, child: _buildInventoryLocationListPane(theme)),
+                                                          _buildTypesReferencesHeader(theme),
+                                                          const SizedBox(height: 12),
+                                                          _buildTypesReferencesSummary(theme),
+                                                          const SizedBox(height: 24),
+                                                          _buildTypesReferencesFormCard(theme),
+                                                          const SizedBox(height: 24),
+                                                          _buildTypesReferencesListPane(theme),
                                                         ],
                                                       ),
-                                                    ),
-                                                  ],
-                                                )
-                                              : SingleChildScrollView(
-                                                  child: Column(
-                                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                                    children: [
-                                                      _buildInventoryLocationHeader(theme),
-                                                      const SizedBox(height: 12),
-                                                      _buildInventoryLocationSummary(theme),
-                                                      const SizedBox(height: 16),
-                                                      _buildNetworkInventoryManager(theme),
-                                                      const SizedBox(height: 16),
-                                                      _buildInventoryLocationFormCard(theme),
-                                                      const SizedBox(height: 24),
-                                                      _buildInventoryLocationListPane(theme),
-                                                    ],
-                                                  ),
-                                                )))))))),
+                                                    ))
+                                              : (_currentScreen == 'software_manufacturer'
+                                                  ? _buildSoftwareManufacturerScreen(theme)
+                                                  : (isDesktop
+                                                  ? Column(
+                                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                                      children: [
+                                                        _buildInventoryLocationHeader(theme),
+                                                        const SizedBox(height: 12),
+                                                        _buildInventoryLocationSummary(theme),
+                                                        const SizedBox(height: 16),
+                                                        _buildNetworkInventoryManager(theme),
+                                                        const SizedBox(height: 16),
+                                                        Expanded(
+                                                          child: Row(
+                                                            crossAxisAlignment: CrossAxisAlignment.start,
+                                                            children: [
+                                                              Expanded(flex: 5, child: _buildInventoryLocationFormCard(theme)),
+                                                              const SizedBox(width: 24),
+                                                              Expanded(flex: 6, child: _buildInventoryLocationListPane(theme)),
+                                                            ],
+                                                          ),
+                                                        ),
+                                                      ],
+                                                    )
+                                                  : SingleChildScrollView(
+                                                      child: Column(
+                                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                                        children: [
+                                                          _buildInventoryLocationHeader(theme),
+                                                          const SizedBox(height: 12),
+                                                          _buildInventoryLocationSummary(theme),
+                                                          const SizedBox(height: 16),
+                                                          _buildNetworkInventoryManager(theme),
+                                                          const SizedBox(height: 16),
+                                                          _buildInventoryLocationFormCard(theme),
+                                                          const SizedBox(height: 24),
+                                                          _buildInventoryLocationListPane(theme),
+                                                        ],
+                                                      ),
+                                                    )))))))))),
             ),
           ),
         ],
@@ -2053,6 +2125,32 @@ class _ReferenceFrameDashboardState extends State<ReferenceFrameDashboard> {
             onTap: () {
               setState(() {
                 _currentScreen = 'equipment_racks';
+              });
+              if (!isDesktop) {
+                Navigator.of(context).pop();
+              }
+            },
+          ),
+          _buildSidebarItem(
+            icon: Icons.link,
+            label: 'YANG Types & References',
+            isActive: _currentScreen == 'types_references',
+            onTap: () {
+              setState(() {
+                _currentScreen = 'types_references';
+              });
+              if (!isDesktop) {
+                Navigator.of(context).pop();
+              }
+            },
+          ),
+          _buildSidebarItem(
+            icon: Icons.settings_applications,
+            label: 'Software & Mfg',
+            isActive: _currentScreen == 'software_manufacturer',
+            onTap: () {
+              setState(() {
+                _currentScreen = 'software_manufacturer';
               });
               if (!isDesktop) {
                 Navigator.of(context).pop();
@@ -7390,6 +7488,913 @@ class _ReferenceFrameDashboardState extends State<ReferenceFrameDashboard> {
       ),
     );
   }
+
+  void _refreshTypesReferencesList() {
+    setState(() {
+      _typeReferences = _typesReferencesService.getReferences();
+      final neList = _networkInventoryService.getNetworkElements();
+      if (neList.isNotEmpty) {
+        if (_selectedTypesRefNe == null || !neList.any((e) => e.neId == _selectedTypesRefNe)) {
+          if (neList.any((e) => e.neId == 'ne-01')) {
+            _selectedTypesRefNe = 'ne-01';
+          } else {
+            _selectedTypesRefNe = neList.first.neId;
+          }
+        }
+      }
+      _updateTargetDropdownOptions();
+    });
+  }
+
+  void _refreshSoftwareMfgConfigs() {
+    setState(() {
+      _softwareMfgConfigs = _softwareManufacturerService.getConfigs();
+      if (_softwareMfgConfigs.isNotEmpty) {
+        if (_selectedSoftwareMfgConfig == null || !_softwareMfgConfigs.any((c) => c.id == _selectedSoftwareMfgConfig!.id)) {
+          _selectedSoftwareMfgConfig = _softwareMfgConfigs.first;
+          _populateSelectedEntityData();
+        } else {
+          _selectedSoftwareMfgConfig = _softwareMfgConfigs.firstWhere((c) => c.id == _selectedSoftwareMfgConfig!.id);
+          _populateSelectedEntityData();
+        }
+      } else {
+        _selectedSoftwareMfgConfig = null;
+        _populateSelectedEntityData();
+      }
+    });
+  }
+
+  void _populateSelectedEntityData() {
+    if (_selectedSoftwareMfgConfig == null) {
+      _smUuidController.clear();
+      _smNameController.clear();
+      _smAliasController.clear();
+      _smDescController.clear();
+      _smMfgNameController.clear();
+      _smProductNameController.clear();
+      _selectedSwNameForPatch = null;
+      return;
+    }
+
+    final config = _selectedSoftwareMfgConfig!;
+    _smUuidController.text = config.uuid;
+    _smNameController.text = config.name;
+    _smAliasController.text = config.alias;
+    _smDescController.text = config.description;
+    _smMfgNameController.text = config.mfgName;
+    _smProductNameController.text = config.productName;
+    if (config.softwareRevisions.isNotEmpty) {
+      if (_selectedSwNameForPatch == null || !config.softwareRevisions.any((s) => s.name == _selectedSwNameForPatch)) {
+        _selectedSwNameForPatch = config.softwareRevisions.first.name;
+      }
+    } else {
+      _selectedSwNameForPatch = null;
+    }
+  }
+
+  void _saveSelectedEntityAttributes() {
+    if (_selectedSoftwareMfgConfig == null) return;
+    final uuidVal = _smUuidController.text.trim();
+    final nameVal = _smNameController.text.trim();
+    final aliasVal = _smAliasController.text.trim();
+    final descVal = _smDescController.text.trim();
+    final mfgVal = _smMfgNameController.text.trim();
+    final prodVal = _smProductNameController.text.trim();
+
+    if (mfgVal.isEmpty) {
+      setState(() {
+        _smFormError = 'Manufacturer name is required';
+      });
+      return;
+    }
+
+    final updated = _selectedSoftwareMfgConfig!.copyWith(
+      uuid: uuidVal,
+      name: nameVal,
+      alias: aliasVal,
+      description: descVal,
+      mfgName: mfgVal,
+      productName: prodVal,
+    );
+
+    final validationErr = _softwareManufacturerService.validateConfig(updated);
+    if (validationErr != 'Valid') {
+      setState(() {
+        _smFormError = validationErr;
+      });
+      return;
+    }
+
+    setState(() {
+      _softwareManufacturerService.updateConfig(updated);
+      _smFormError = null;
+      _refreshSoftwareMfgConfigs();
+      ScaffoldMessenger.of(context).hideCurrentSnackBar();
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Common attributes saved successfully!')),
+      );
+    });
+  }
+
+  void _addSoftwareRevision() {
+    if (_selectedSoftwareMfgConfig == null) return;
+    final nameVal = _newSwNameController.text.trim();
+    final revVal = _newSwRevController.text.trim();
+
+    if (nameVal.isEmpty) {
+      setState(() {
+        _smFormError = 'Software module name cannot be empty.';
+      });
+      return;
+    }
+    if (revVal.isEmpty) {
+      setState(() {
+        _smFormError = 'Software revision is required for module "$nameVal".';
+      });
+      return;
+    }
+
+    final config = _selectedSoftwareMfgConfig!;
+    if (config.softwareRevisions.any((s) => s.name == nameVal)) {
+      setState(() {
+        _smFormError = 'Duplicate software module name "$nameVal".';
+      });
+      return;
+    }
+
+    final updatedRevs = List<MockSoftwareRevision>.from(config.softwareRevisions)
+      ..add(MockSoftwareRevision(name: nameVal, revision: revVal, patches: []));
+
+    final updated = config.copyWith(softwareRevisions: updatedRevs);
+
+    setState(() {
+      _softwareManufacturerService.updateConfig(updated);
+      _newSwNameController.clear();
+      _newSwRevController.clear();
+      _smFormError = null;
+      _refreshSoftwareMfgConfigs();
+    });
+  }
+
+  void _applySoftwarePatch() {
+    if (_selectedSoftwareMfgConfig == null || _selectedSwNameForPatch == null) return;
+    final patchRevVal = _newPatchRevController.text.trim();
+
+    if (patchRevVal.isEmpty) {
+      setState(() {
+        _smFormError = 'Patch revision cannot be empty.';
+      });
+      return;
+    }
+
+    final config = _selectedSoftwareMfgConfig!;
+    final swIdx = config.softwareRevisions.indexWhere((s) => s.name == _selectedSwNameForPatch);
+    if (swIdx == -1) return;
+
+    final swRev = config.softwareRevisions[swIdx];
+    if (swRev.patches.any((p) => p.revision == patchRevVal)) {
+      setState(() {
+        _smFormError = 'Duplicate patch revision "$patchRevVal" in module "${swRev.name}".';
+      });
+      return;
+    }
+
+    final updatedPatches = List<MockSoftwarePatch>.from(swRev.patches)
+      ..add(MockSoftwarePatch(revision: patchRevVal));
+
+    final updatedRevs = List<MockSoftwareRevision>.from(config.softwareRevisions);
+    updatedRevs[swIdx] = swRev.copyWith(patches: updatedPatches);
+
+    final updated = config.copyWith(softwareRevisions: updatedRevs);
+
+    setState(() {
+      _softwareManufacturerService.updateConfig(updated);
+      _newPatchRevController.clear();
+      _smFormError = null;
+      _refreshSoftwareMfgConfigs();
+    });
+  }
+
+
+  void _updateTargetDropdownOptions() {
+    if (_selectedTypesRefNe != null) {
+      final ne = _networkInventoryService.getNetworkElement(_selectedTypesRefNe!);
+      if (ne != null && ne.componentIds.isNotEmpty) {
+        if (_selectedTypesRefTarget == null || !ne.componentIds.contains(_selectedTypesRefTarget)) {
+          _selectedTypesRefTarget = ne.componentIds.first;
+        }
+        return;
+      }
+    }
+    _selectedTypesRefTarget = null;
+  }
+
+  Widget _buildTypesReferencesHeader(ThemeData theme) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Text(
+              'YANG Types & References',
+              style: TextStyle(
+                fontSize: 24,
+                fontWeight: FontWeight.bold,
+                color: theme.primaryColor,
+              ),
+            ),
+            const SizedBox(width: 8),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+              decoration: BoxDecoration(
+                color: Colors.green.withValues(alpha: 0.15),
+                border: Border.all(color: Colors.green.withValues(alpha: 0.5)),
+                borderRadius: BorderRadius.circular(4),
+              ),
+              child: const Text(
+                'ACTIVE',
+                style: TextStyle(
+                  color: Colors.green,
+                  fontSize: 10,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 4),
+        Text(
+          'Manage and validate references mapping (ne-ref, component-ref, port-ref) against network inventory.',
+          style: TextStyle(
+            color: theme.brightness == Brightness.dark ? Colors.white70 : Colors.black54,
+            fontSize: 14,
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildTypesReferencesSummary(ThemeData theme) {
+    final isDark = theme.brightness == Brightness.dark;
+    final cardBg = isDark ? const Color(0xFF2D2E30) : Colors.white;
+    final borderSide = BorderSide(
+      color: isDark ? const Color(0x1FFFFFFF) : const Color(0x1F000000),
+      width: 1,
+    );
+
+    int total = _typeReferences.length;
+    int valid = _typeReferences.where((r) => _typesReferencesService.validateReference(r) == 'Valid').length;
+
+    return Wrap(
+      spacing: 16,
+      runSpacing: 16,
+      children: [
+        _buildMiniStatusCard(theme, cardBg, borderSide, 'Total References', '$total', Icons.link, Colors.blue),
+        _buildMiniStatusCard(theme, cardBg, borderSide, 'Valid References', '$valid', Icons.check_circle_outline, Colors.green),
+      ],
+    );
+  }
+
+  Widget _buildTypesReferencesFormCard(ThemeData theme) {
+    final isDark = theme.brightness == Brightness.dark;
+    final cardBg = isDark ? const Color(0xFF2D2E30) : Colors.white;
+    final borderSide = BorderSide(
+      color: isDark ? const Color(0x1FFFFFFF) : const Color(0x1F000000),
+      width: 1,
+    );
+
+    final neList = _networkInventoryService.getNetworkElements();
+    final ne = _selectedTypesRefNe != null 
+        ? _networkInventoryService.getNetworkElement(_selectedTypesRefNe!) 
+        : null;
+    final components = ne?.componentIds ?? [];
+
+    return Card(
+      color: cardBg,
+      elevation: 0,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(8),
+        side: borderSide,
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(24.0),
+        child: Form(
+          key: _typesRefFormKey,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Configure Type Reference',
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                  color: isDark ? Colors.white : Colors.black87,
+                ),
+              ),
+              const SizedBox(height: 16),
+
+              // ID Field
+              TextFormField(
+                key: const ValueKey('types-ref-id-field'),
+                controller: _typesRefIdController,
+                decoration: const InputDecoration(
+                  labelText: 'Reference Config ID (id)',
+                  border: OutlineInputBorder(),
+                  isDense: true,
+                ),
+                style: const TextStyle(fontSize: 14),
+              ),
+              const SizedBox(height: 16),
+
+              // Reference Type Dropdown
+              DropdownButtonFormField<String>(
+                key: const ValueKey('types-ref-type-dropdown'),
+                value: _selectedTypesRefType,
+                decoration: const InputDecoration(
+                  labelText: 'Reference Type',
+                  border: OutlineInputBorder(),
+                  isDense: true,
+                ),
+                items: const [
+                  DropdownMenuItem(value: 'ne-ref', child: Text('ne-ref (Network Element)')),
+                  DropdownMenuItem(value: 'component-ref', child: Text('component-ref (Component)')),
+                  DropdownMenuItem(value: 'port-ref', child: Text('port-ref (Port Component)')),
+                ],
+                onChanged: (val) {
+                  if (val != null) {
+                    setState(() {
+                      _selectedTypesRefType = val;
+                      _typesRefFormError = null;
+                      _updateTargetDropdownOptions();
+                    });
+                  }
+                },
+              ),
+              const SizedBox(height: 16),
+
+              // Network Element Dropdown
+              DropdownButtonFormField<String>(
+                key: const ValueKey('types-ref-ne-dropdown'),
+                value: _selectedTypesRefNe,
+                decoration: const InputDecoration(
+                  labelText: 'Referenced Network Element (ne-ref)',
+                  border: OutlineInputBorder(),
+                  isDense: true,
+                ),
+                items: neList.map((e) {
+                  return DropdownMenuItem(value: e.neId, child: Text(e.neId));
+                }).toList(),
+                onChanged: (val) {
+                  if (val != null) {
+                    setState(() {
+                      _selectedTypesRefNe = val;
+                      _typesRefFormError = null;
+                      _updateTargetDropdownOptions();
+                    });
+                  }
+                },
+              ),
+              const SizedBox(height: 16),
+
+              // Target Component Dropdown (Visible only if component-ref or port-ref)
+              if (_selectedTypesRefType != 'ne-ref') ...[
+                DropdownButtonFormField<String>(
+                  key: const ValueKey('types-ref-target-dropdown'),
+                  value: _selectedTypesRefTarget,
+                  decoration: const InputDecoration(
+                    labelText: 'Referenced Target Component (target-ref)',
+                    border: OutlineInputBorder(),
+                    isDense: true,
+                  ),
+                  items: components.map((compId) {
+                    final compClass = _typesReferencesService.getComponentClass(compId);
+                    return DropdownMenuItem(
+                      value: compId,
+                      child: Text('$compId ($compClass)'),
+                    );
+                  }).toList(),
+                  onChanged: (val) {
+                    if (val != null) {
+                      setState(() {
+                        _selectedTypesRefTarget = val;
+                        _typesRefFormError = null;
+                      });
+                    }
+                  },
+                ),
+                const SizedBox(height: 16),
+              ],
+
+              // Error banner
+              if (_typesRefFormError != null) ...[
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: Colors.red.withValues(alpha: 0.1),
+                    border: Border.all(color: Colors.red.withValues(alpha: 0.4)),
+                    borderRadius: BorderRadius.circular(4),
+                  ),
+                  child: Row(
+                    children: [
+                      const Icon(Icons.error_outline, color: Colors.red, size: 20),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Text(
+                          _typesRefFormError!,
+                          style: const TextStyle(color: Colors.red, fontSize: 13),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 16),
+              ],
+
+              // Submit Button
+              SizedBox(
+                width: double.infinity,
+                height: 40,
+                child: ElevatedButton(
+                  key: const ValueKey('create-reference-button'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: theme.primaryColor,
+                    foregroundColor: Colors.white,
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
+                  ),
+                  onPressed: () {
+                    final idText = _typesRefIdController.text.trim();
+                    if (idText.isEmpty) {
+                      setState(() {
+                        _typesRefFormError = 'ID is required';
+                      });
+                      return;
+                    }
+                    
+                    final ref = MockInventoryTypeReference(
+                      id: idText,
+                      referenceType: _selectedTypesRefType,
+                      neRef: _selectedTypesRefNe ?? '',
+                      targetRef: (_selectedTypesRefType != 'ne-ref') ? _selectedTypesRefTarget : null,
+                    );
+                    final validationResult = _typesReferencesService.validateReference(ref);
+                    if (validationResult != 'Valid') {
+                      setState(() {
+                        _typesRefFormError = validationResult;
+                      });
+                      return;
+                    }
+                    // Success
+                    try {
+                      _typesReferencesService.addReference(ref);
+                      setState(() {
+                        _typesRefFormError = null;
+                        _typesRefIdController.clear();
+                      });
+                      _refreshTypesReferencesList();
+                      ScaffoldMessenger.of(context).hideCurrentSnackBar();
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text('Successfully created reference configuration')),
+                      );
+                    } catch (e) {
+                      setState(() {
+                        _typesRefFormError = e.toString().replaceFirst('FormatException: ', '');
+                      });
+                    }
+                  },
+                  child: const Text('Create Reference'),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildTypesReferencesListPane(ThemeData theme) {
+    final isDark = theme.brightness == Brightness.dark;
+    final cardBg = isDark ? const Color(0xFF2D2E30) : Colors.white;
+    final borderSide = BorderSide(
+      color: isDark ? const Color(0x1FFFFFFF) : const Color(0x1F000000),
+      width: 1,
+    );
+
+    return Card(
+      color: cardBg,
+      elevation: 0,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(8),
+        side: borderSide,
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(24.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Active Reference Configurations',
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+                color: isDark ? Colors.white : Colors.black87,
+              ),
+            ),
+            const SizedBox(height: 16),
+            if (_typeReferences.isEmpty)
+              const Center(
+                child: Padding(
+                  padding: EdgeInsets.symmetric(vertical: 32.0),
+                  child: Text('No reference configurations configured.', style: TextStyle(color: Colors.grey)),
+                ),
+              )
+            else
+              ListView.separated(
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                itemCount: _typeReferences.length,
+                separatorBuilder: (context, index) => Divider(color: isDark ? Colors.white10 : Colors.black12),
+                itemBuilder: (context, index) {
+                  final ref = _typeReferences[index];
+                  final validation = _typesReferencesService.validateReference(ref);
+                  final isValid = validation == 'Valid';
+
+                  return Row(
+                    children: [
+                      // Status Icon
+                      Icon(
+                        isValid ? Icons.check_circle : Icons.error_outline,
+                        color: isValid ? Colors.green : Colors.red,
+                        size: 20,
+                      ),
+                      const SizedBox(width: 12),
+                      // Details
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              ref.id,
+                              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+                            ),
+                            const SizedBox(height: 2),
+                            Text(
+                              'Type: ${ref.referenceType} | NE: ${ref.neRef}' +
+                                  (ref.targetRef != null ? ' | Target: ${ref.targetRef}' : ''),
+                              style: TextStyle(color: isDark ? Colors.white60 : Colors.black54, fontSize: 12),
+                            ),
+                            if (!isValid) ...[
+                              const SizedBox(height: 2),
+                              Text(
+                                validation,
+                                style: const TextStyle(color: Colors.red, fontSize: 11),
+                              ),
+                            ],
+                          ],
+                        ),
+                      ),
+                      // Actions
+                      IconButton(
+                        icon: const Icon(Icons.delete_outline, color: Colors.redAccent, size: 20),
+                        onPressed: () {
+                          _typesReferencesService.deleteReference(ref.id);
+                          _refreshTypesReferencesList();
+                          ScaffoldMessenger.of(context).hideCurrentSnackBar();
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(content: Text('Successfully deleted reference configuration')),
+                          );
+                        },
+                      ),
+                    ],
+                  );
+                },
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSoftwareManufacturerScreen(ThemeData theme) {
+    final isDesktop = MediaQuery.of(context).size.width > 900;
+
+    return isDesktop
+        ? Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _buildSoftwareManufacturerHeader(theme),
+              const SizedBox(height: 12),
+              _buildSoftwareManufacturerSummary(theme),
+              const SizedBox(height: 16),
+              Expanded(
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Expanded(flex: 5, child: _buildSoftwareManufacturerFormCard(theme)),
+                    const SizedBox(width: 24),
+                    Expanded(flex: 6, child: _buildSoftwareManufacturerListPane(theme)),
+                  ],
+                ),
+              ),
+            ],
+          )
+        : SingleChildScrollView(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _buildSoftwareManufacturerHeader(theme),
+                const SizedBox(height: 12),
+                _buildSoftwareManufacturerSummary(theme),
+                const SizedBox(height: 16),
+                _buildSoftwareManufacturerFormCard(theme),
+                const SizedBox(height: 24),
+                _buildSoftwareManufacturerListPane(theme),
+              ],
+            ),
+          );
+  }
+
+  Widget _buildSoftwareManufacturerHeader(ThemeData theme) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Software & Manufacturer Specs',
+          style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: theme.brightness == Brightness.dark ? Colors.white : Colors.grey.shade900),
+        ),
+        const SizedBox(height: 4),
+        Text(
+          'YANG Network Inventory common entity attributes (uuid, name, alias, mfg-name, product-name, software-rev, and active patches).',
+          style: TextStyle(fontSize: 12, color: theme.brightness == Brightness.dark ? Colors.grey.shade400 : Colors.grey.shade600),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildSoftwareManufacturerSummary(ThemeData theme) {
+    final isDark = theme.brightness == Brightness.dark;
+    final cardBg = isDark ? const Color(0xFF2D2E30) : Colors.white;
+    final borderSide = BorderSide(color: isDark ? const Color(0x1FFFFFFF) : const Color(0x1F000000));
+
+    int totalConfigs = _softwareMfgConfigs.length;
+    int neCount = _softwareMfgConfigs.where((c) => c.targetType == 'Network Element').length;
+    int componentCount = _softwareMfgConfigs.where((c) => c.targetType == 'Component').length;
+    int totalSoftwareRevs = _softwareMfgConfigs.fold<int>(0, (sum, c) => sum + c.softwareRevisions.length);
+
+    return Wrap(
+      spacing: 16,
+      runSpacing: 16,
+      children: [
+        _buildMiniStatusCard(theme, cardBg, borderSide, 'Total Configs', '$totalConfigs', Icons.settings, Colors.blue),
+        _buildMiniStatusCard(theme, cardBg, borderSide, 'Network Elements', '$neCount', Icons.dns, Colors.teal),
+        _buildMiniStatusCard(theme, cardBg, borderSide, 'Components', '$componentCount', Icons.extension, Colors.orange),
+        _buildMiniStatusCard(theme, cardBg, borderSide, 'Software Modules', '$totalSoftwareRevs', Icons.folder_zip, Colors.purple),
+      ],
+    );
+  }
+
+  Widget _buildSMTextField({
+    required TextEditingController controller,
+    required String labelText,
+    required Key key,
+  }) {
+    return TextFormField(
+      key: key,
+      controller: controller,
+      decoration: InputDecoration(
+        labelText: labelText,
+        border: const OutlineInputBorder(),
+        isDense: true,
+      ),
+      style: const TextStyle(fontSize: 13),
+    );
+  }
+
+  Widget _buildSoftwareManufacturerFormCard(ThemeData theme) {
+    final isDark = theme.brightness == Brightness.dark;
+    final cardBg = isDark ? const Color(0xFF2D2E30) : Colors.white;
+    final borderSide = BorderSide(color: isDark ? const Color(0x1FFFFFFF) : const Color(0x1F000000));
+
+    if (_selectedSoftwareMfgConfig == null) {
+      return Card(
+        color: cardBg,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8), side: borderSide),
+        child: const Padding(
+          padding: EdgeInsets.all(24.0),
+          child: Center(
+            child: Text(
+              'Select a configuration from the list to view/configure attributes.',
+              textAlign: TextAlign.center,
+              style: TextStyle(fontStyle: FontStyle.italic, fontSize: 13, color: Colors.grey),
+            ),
+          ),
+        ),
+      );
+    }
+
+    final config = _selectedSoftwareMfgConfig!;
+    final entityLabel = '${config.targetType}: ${config.targetId}';
+
+    return Card(
+      color: cardBg,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8), side: borderSide),
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Form(
+          key: _softwareMfgFormKey,
+          child: ListView(
+            shrinkWrap: true,
+            physics: const ClampingScrollPhysics(),
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Expanded(
+                    child: const Text(
+                      'Configure Attributes',
+                      style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+                    ),
+                  ),
+                  Text(
+                    entityLabel,
+                    style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w500, color: Colors.grey),
+                  ),
+                ],
+              ),
+              const Divider(height: 24),
+              if (_smFormError != null) ...[
+                Container(
+                  padding: const EdgeInsets.all(10),
+                  decoration: BoxDecoration(
+                    color: Colors.red.withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(6),
+                    border: Border.all(color: Colors.red.withValues(alpha: 0.3)),
+                  ),
+                  child: Text(
+                    _smFormError!,
+                    style: const TextStyle(color: Colors.red, fontSize: 12),
+                  ),
+                ),
+                const SizedBox(height: 16),
+              ],
+              Text('Basic Common Entity Attributes', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: theme.brightness == Brightness.dark ? Colors.grey.shade300 : Colors.grey.shade700)),
+              const SizedBox(height: 12),
+              _buildSMTextField(controller: _smUuidController, labelText: 'UUID (uuid)', key: const ValueKey('sm_uuid_field')),
+              const SizedBox(height: 12),
+              _buildSMTextField(controller: _smNameController, labelText: 'Name (name)', key: const ValueKey('sm_name_field')),
+              const SizedBox(height: 12),
+              _buildSMTextField(controller: _smAliasController, labelText: 'Alias (alias)', key: const ValueKey('sm_alias_field')),
+              const SizedBox(height: 12),
+              _buildSMTextField(controller: _smDescController, labelText: 'Description (description)', key: const ValueKey('sm_desc_field')),
+              const SizedBox(height: 20),
+              Text('Manufacturer & Model Info', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: theme.brightness == Brightness.dark ? Colors.grey.shade300 : Colors.grey.shade700)),
+              const SizedBox(height: 12),
+              _buildSMTextField(controller: _smMfgNameController, labelText: 'Manufacturer Name (mfg-name)', key: const ValueKey('sm_mfg_field')),
+              const SizedBox(height: 12),
+              _buildSMTextField(controller: _smProductNameController, labelText: 'Product Name (product-name)', key: const ValueKey('sm_product_field')),
+              const SizedBox(height: 16),
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  key: const ValueKey('sm_save_btn'),
+                  onPressed: _saveSelectedEntityAttributes,
+                  child: const Text('Save Attributes'),
+                ),
+              ),
+              const Divider(height: 32),
+              Text('Add Software Revision Module', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: theme.brightness == Brightness.dark ? Colors.grey.shade300 : Colors.grey.shade700)),
+              const SizedBox(height: 12),
+              _buildSMTextField(controller: _newSwNameController, labelText: 'Module Name (name - key)', key: const ValueKey('sm_sw_name_field')),
+              const SizedBox(height: 12),
+              _buildSMTextField(controller: _newSwRevController, labelText: 'Version Revision (revision)', key: const ValueKey('sm_sw_rev_field')),
+              const SizedBox(height: 12),
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton.icon(
+                  key: const ValueKey('sm_add_sw_btn'),
+                  icon: const Icon(Icons.add, size: 16),
+                  label: const Text('Add Software Revision'),
+                  onPressed: _addSoftwareRevision,
+                ),
+              ),
+              const Divider(height: 32),
+              Text('Apply Software Patch', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: theme.brightness == Brightness.dark ? Colors.grey.shade300 : Colors.grey.shade700)),
+              const SizedBox(height: 12),
+              DropdownButtonFormField<String>(
+                key: const ValueKey('sm_sw_dropdown'),
+                value: _selectedSwNameForPatch,
+                decoration: const InputDecoration(
+                  labelText: 'Select Software Module',
+                  border: OutlineInputBorder(),
+                  contentPadding: EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                ),
+                items: [
+                  if (config.softwareRevisions.isEmpty)
+                    const DropdownMenuItem<String>(
+                      value: null,
+                      child: Text('-- No Modules Available --', style: TextStyle(fontSize: 13)),
+                    )
+                  else
+                    ...config.softwareRevisions.map((s) => DropdownMenuItem<String>(
+                          value: s.name,
+                          child: Text(s.name, style: const TextStyle(fontSize: 13)),
+                        )),
+                ],
+                onChanged: (val) {
+                  setState(() {
+                    _selectedSwNameForPatch = val;
+                  });
+                },
+              ),
+              const SizedBox(height: 12),
+              _buildSMTextField(controller: _newPatchRevController, labelText: 'Patch Revision (revision)', key: const ValueKey('sm_patch_rev_field')),
+              const SizedBox(height: 12),
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton.icon(
+                  key: const ValueKey('sm_apply_patch_btn'),
+                  icon: const Icon(Icons.build, size: 16),
+                  label: const Text('Apply Patch'),
+                  onPressed: _applySoftwarePatch,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSoftwareManufacturerListPane(ThemeData theme) {
+    final isDark = theme.brightness == Brightness.dark;
+    final cardBg = isDark ? const Color(0xFF2D2E30) : Colors.white;
+    final borderSide = BorderSide(color: isDark ? const Color(0x1FFFFFFF) : const Color(0x1F000000));
+
+    final listContent = ListView.separated(
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      itemCount: _softwareMfgConfigs.length,
+      separatorBuilder: (_, __) => const Divider(height: 1),
+      itemBuilder: (context, index) {
+        final config = _softwareMfgConfigs[index];
+        final isSelected = _selectedSoftwareMfgConfig?.id == config.id;
+
+        return ListTile(
+          dense: true,
+          selected: isSelected,
+          selectedTileColor: theme.primaryColor.withValues(alpha: 0.1),
+          title: Text(
+            '${config.id} (${config.targetType})',
+            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: isSelected ? theme.primaryColor : null),
+          ),
+          subtitle: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text('Mfg: ${config.mfgName} | Product: ${config.productName}'),
+              const SizedBox(height: 4),
+              if (config.softwareRevisions.isNotEmpty) ...[
+                const Text('Software Revisions:', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 11)),
+                ...config.softwareRevisions.map((rev) {
+                  final patchesText = rev.patches.isEmpty
+                      ? 'No patches'
+                      : 'Patches: ${rev.patches.map((p) => p.revision).join(', ')}';
+                  return Padding(
+                    padding: const EdgeInsets.only(left: 8.0, top: 2),
+                    child: Text('• ${rev.name} (${rev.revision}) [$patchesText]', style: const TextStyle(fontSize: 11)),
+                  );
+                }),
+              ] else
+                const Text('No software modules configured.', style: TextStyle(fontStyle: FontStyle.italic, fontSize: 11)),
+            ],
+          ),
+          onTap: () {
+            setState(() {
+              _selectedSoftwareMfgConfig = config;
+              _populateSelectedEntityData();
+            });
+          },
+        );
+      },
+    );
+
+    return Card(
+      color: cardBg,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8), side: borderSide),
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text(
+              'Configured Software & Mfg Attributes',
+              style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 16),
+            listContent,
+          ],
+        ),
+      ),
+    );
+  }
 }
 
 class SparklineWidget extends StatelessWidget {
@@ -7722,5 +8727,5 @@ class USlotGridVisualizer extends StatelessWidget {
       ),
     );
   }
-
 }
+
