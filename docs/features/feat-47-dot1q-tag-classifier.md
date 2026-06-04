@@ -1,14 +1,14 @@
 ---
-title: "Feature 47: IEEE 802.1Q Bridge Port VLAN Tag and Type Definitions (Issue #TBD)"
-epic: "Epic 16: IEEE 802.1Q Common Types (Issue #TBD)"
+title: "Feature 47: IEEE 802.1Q Bridge Port VLAN Tag and Type Definitions (Issue #139)"
+epic: "Epic 16: IEEE 802.1Q Common Types (Issue #139)"
 type: "feature"
-issue: 9999
+issue: 139
 status: proposed
 labels: ["feature", "ieee802-dot1q-types"]
 covered-nodes: ["dot1q-vlan-type", "c-vlan", "s-vlan", "name-type", "port-number-type", "vlanid", "vlan-index-type", "mstid-type", "ethertype-type", "dot1q-tag-type", "vid-range-type", "tag-type", "vlan-id", "vlan-ids"]
 ---
 
-# Feature: Feature 47: IEEE 802.1Q Bridge Port VLAN Tag and Type Definitions (Issue #TBD)
+# Feature: Feature 47: IEEE 802.1Q Bridge Port VLAN Tag and Type Definitions (Issue #139)
 
 This feature introduces standard VLAN tag type identities (C-VLAN and S-VLAN), index types, and classification criteria used to represent and validate VLAN classification configurations on Bridge ports.
 

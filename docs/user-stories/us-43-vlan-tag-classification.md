@@ -1,13 +1,13 @@
 ---
-title: "User Story 43: IEEE 802.1Q VLAN Tag Classification (Issue #TBD)"
-epic: "Epic 16: IEEE 802.1Q Common Types (Issue #TBD)"
+title: "User Story 43: IEEE 802.1Q VLAN Tag Classification (Issue #143)"
+epic: "Epic 16: IEEE 802.1Q Common Types (Issue #143)"
 type: "user-story"
-issue: 9999
+issue: 143
 status: proposed
 labels: ["user-story", "ieee802-dot1q-types"]
 ---
 
-# User Story: User Story 43: IEEE 802.1Q VLAN Tag Classification (Issue #TBD)
+# User Story: User Story 43: IEEE 802.1Q VLAN Tag Classification (Issue #143)
 
 ## Description
 As a Network Operator,

@@ -1,14 +1,14 @@
 ---
-title: "Feature 48: IEEE 802.1Q Priority and Traffic Class Mapping (Issue #TBD)"
-epic: "Epic 16: IEEE 802.1Q Common Types (Issue #TBD)"
+title: "Feature 48: IEEE 802.1Q Priority and Traffic Class Mapping (Issue #140)"
+epic: "Epic 16: IEEE 802.1Q Common Types (Issue #140)"
 type: "feature"
-issue: 9999
+issue: 140
 status: proposed
 labels: ["feature", "ieee802-dot1q-types"]
 covered-nodes: ["transmission-selection-algorithm", "strict-priority", "credit-based-shaper", "enhanced-transmission-selection", "asynchronous-traffic-shaping", "vendor-specific", "priority-type", "pcp-selection-type", "traffic-class-type", "priority0", "priority1", "priority2", "priority3", "priority4", "priority5", "priority6", "priority7", "pcp-decoding-map", "pcp", "priority-map", "priority-code-point", "priority", "drop-eligible", "pcp-encoding-map", "dei", "traffic-class-map", "available-traffic-class", "num-traffic-class", "traffic-class", "transmission-selection-algorithm-map"]
 ---
 
-# Feature: Feature 48: IEEE 802.1Q Priority and Traffic Class Mapping (Issue #TBD)
+# Feature: Feature 48: IEEE 802.1Q Priority and Traffic Class Mapping (Issue #140)
 
 This feature implements the priority regeneration tables, priority code point (PCP) decoding and encoding maps, traffic class tables, and transmission selection algorithm mappings used to determine access priorities and assign outbound traffic classes on Bridge ports.
 

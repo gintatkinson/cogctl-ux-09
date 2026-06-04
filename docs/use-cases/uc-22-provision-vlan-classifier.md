@@ -1,13 +1,13 @@
 ---
-title: "Use Case 22: Provision VLAN Interface Classifier (Issue #TBD)"
-epic: "Epic 16: IEEE 802.1Q Common Types (Issue #TBD)"
+title: "Use Case 22: Provision VLAN Interface Classifier (Issue #148)"
+epic: "Epic 16: IEEE 802.1Q Common Types (Issue #148)"
 type: "use-case"
-issue: 9999
+issue: 148
 status: proposed
 labels: ["use-case", "ieee802-dot1q-types"]
 ---
 
-# Use Case: Use Case 22: Provision VLAN Interface Classifier (Issue #TBD)
+# Use Case: Use Case 22: Provision VLAN Interface Classifier (Issue #148)
 
 ## 1. Description
 This use case describes how a Network Provisioning Controller configures VLAN tag classifiers and priority map policies on a specific Bridge Port interface.

@@ -1,13 +1,13 @@
 ---
-title: "User Story 44: Traffic Class Priority Mapping (Issue #TBD)"
-epic: "Epic 16: IEEE 802.1Q Common Types (Issue #TBD)"
+title: "User Story 44: Traffic Class Priority Mapping (Issue #144)"
+epic: "Epic 16: IEEE 802.1Q Common Types (Issue #144)"
 type: "user-story"
-issue: 9999
+issue: 144
 status: proposed
 labels: ["user-story", "ieee802-dot1q-types"]
 ---
 
-# User Story: User Story 44: Traffic Class Priority Mapping (Issue #TBD)
+# User Story: User Story 44: Traffic Class Priority Mapping (Issue #144)
 
 ## Description
 As a Network Operator,

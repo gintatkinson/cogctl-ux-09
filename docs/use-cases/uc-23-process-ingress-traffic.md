@@ -1,13 +1,13 @@
 ---
-title: "Use Case 23: Process Bridge Port Ingress Traffic (Issue #TBD)"
-epic: "Epic 16: IEEE 802.1Q Common Types (Issue #TBD)"
+title: "Use Case 23: Process Bridge Port Ingress Traffic (Issue #149)"
+epic: "Epic 16: IEEE 802.1Q Common Types (Issue #149)"
 type: "use-case"
-issue: 9999
+issue: 149
 status: proposed
 labels: ["use-case", "ieee802-dot1q-types"]
 ---
 
-# Use Case: Use Case 23: Process Bridge Port Ingress Traffic (Issue #TBD)
+# Use Case: Use Case 23: Process Bridge Port Ingress Traffic (Issue #149)
 
 ## 1. Description
 This use case describes how a Bridge Port Ingress Interface processes received Ethernet frames, classifying them, mapping priorities, looking up the Forwarding Database (FDB), forwarding or filtering, and updating performance statistics.

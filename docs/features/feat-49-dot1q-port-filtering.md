@@ -1,14 +1,14 @@
 ---
-title: "Feature 49: IEEE 802.1Q Port Maps and Forwarding Filtering Policies (Issue #TBD)"
-epic: "Epic 16: IEEE 802.1Q Common Types (Issue #TBD)"
+title: "Feature 49: IEEE 802.1Q Port Maps and Forwarding Filtering Policies (Issue #141)"
+epic: "Epic 16: IEEE 802.1Q Common Types (Issue #141)"
 type: "feature"
-issue: 9999
+issue: 141
 status: proposed
 labels: ["feature", "ieee802-dot1q-types"]
 covered-nodes: ["protocol-frame-format-type", "port-map", "port-ref", "map-type", "static-filtering-entries", "control-element", "connection-identifier", "static-vlan-registration-entries", "registrar-admin-control", "vlan-transmitted", "mac-address-registration-entries", "dynamic-vlan-registration-entries", "dynamic-reservation-entries", "dynamic-filtering-entries"]
 ---
 
-# Feature: Feature 49: IEEE 802.1Q Port Maps and Forwarding Filtering Policies (Issue #TBD)
+# Feature: Feature 49: IEEE 802.1Q Port Maps and Forwarding Filtering Policies (Issue #141)
 
 This feature implements the port mapping, protocol frame format definitions, static/dynamic forwarding database (FDB) filtering entries, and registrar administration policies used to filter and forward frames on Bridge ports.
 

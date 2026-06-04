@@ -1,13 +1,13 @@
 ---
-title: "User Story 46: Static and Dynamic Filtering Policies (Issue #TBD)"
-epic: "Epic 16: IEEE 802.1Q Common Types (Issue #TBD)"
+title: "User Story 46: Static and Dynamic Filtering Policies (Issue #146)"
+epic: "Epic 16: IEEE 802.1Q Common Types (Issue #146)"
 type: "user-story"
-issue: 9999
+issue: 146
 status: proposed
 labels: ["user-story", "ieee802-dot1q-types"]
 ---
 
-# User Story: User Story 46: Static and Dynamic Filtering Policies (Issue #TBD)
+# User Story: User Story 46: Static and Dynamic Filtering Policies (Issue #146)
 
 ## Description
 As a Network Security Administrator,

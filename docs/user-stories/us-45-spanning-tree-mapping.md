@@ -1,13 +1,13 @@
 ---
-title: "User Story 45: Spanning Tree Instance Mapping (Issue #TBD)"
-epic: "Epic 16: IEEE 802.1Q Common Types (Issue #TBD)"
+title: "User Story 45: Spanning Tree Instance Mapping (Issue #145)"
+epic: "Epic 16: IEEE 802.1Q Common Types (Issue #145)"
 type: "user-story"
-issue: 9999
+issue: 145
 status: proposed
 labels: ["user-story", "ieee802-dot1q-types"]
 ---
 
-# User Story: User Story 45: Spanning Tree Instance Mapping (Issue #TBD)
+# User Story: User Story 45: Spanning Tree Instance Mapping (Issue #145)
 
 ## Description
 As a Network Architect,

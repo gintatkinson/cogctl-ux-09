@@ -1,34 +1,22 @@
 ---
-title: "Epic 16: IEEE 802.1Q Common Types (Issue #TBD)"
+title: "Epic 16: IEEE 802.1Q Common Types (Issue #150)"
 type: "epic"
-issue: 9999
+issue: 150
 labels: ["epic", "ieee802-dot1q-types"]
 ---
 
-# Epic: Epic 16: IEEE 802.1Q Common Types (Issue #TBD)
+# Epic: Epic 16: IEEE 802.1Q Common Types (Issue #150)
 
 ## 1. Context
 This Epic covers the reverse-engineering of the `ieee802-dot1q-types@2022-10-29.yang` schema and its associated normative specifications from IEEE Std 802.1Q-2014. It models the core data types, priority maps, classification policies, and statistics definitions used to build, configure, and monitor standard Bridges and Bridged Networks.
 
 ## 2. Requirements & Checklist
-- [ ] #TBD - [Feature 47: IEEE 802.1Q Bridge Port VLAN Tag and Type Definitions](https://github.com/gintatkinson/cogctl-ux-09/blob/main/docs/features/feat-47-dot1q-tag-classifier.md)
-- [ ] #TBD - [Feature 48: IEEE 802.1Q Priority and Traffic Class Mapping](https://github.com/gintatkinson/cogctl-ux-09/blob/main/docs/features/feat-48-dot1q-priority-mapping.md)
-- [ ] #TBD - [Feature 49: IEEE 802.1Q Port Maps and Forwarding Filtering Policies](https://github.com/gintatkinson/cogctl-ux-09/blob/main/docs/features/feat-49-dot1q-port-filtering.md)
-- [ ] #TBD - [Feature 50: IEEE 802.1Q Bridge Port Performance and Error Statistics](https://github.com/gintatkinson/cogctl-ux-09/blob/main/docs/features/feat-50-dot1q-port-statistics.md)
+- [ ] #139 - [Feature 47: IEEE 802.1Q Bridge Port VLAN Tag and Type Definitions](https://github.com/gintatkinson/cogctl-ux-09/blob/main/docs/features/feat-47-dot1q-tag-classifier.md)
+- [ ] #140 - [Feature 48: IEEE 802.1Q Priority and Traffic Class Mapping](https://github.com/gintatkinson/cogctl-ux-09/blob/main/docs/features/feat-48-dot1q-priority-mapping.md)
+- [ ] #141 - [Feature 49: IEEE 802.1Q Port Maps and Forwarding Filtering Policies](https://github.com/gintatkinson/cogctl-ux-09/blob/main/docs/features/feat-49-dot1q-port-filtering.md)
+- [ ] #142 - [Feature 50: IEEE 802.1Q Bridge Port Performance and Error Statistics](https://github.com/gintatkinson/cogctl-ux-09/blob/main/docs/features/feat-50-dot1q-port-statistics.md)
 
 ## Associated Use Cases & User Stories
-
-### Associated Use Cases
-- [ ] #TBD - [Use Case 22: Provision VLAN Interface Classifier](https://github.com/gintatkinson/cogctl-ux-09/blob/main/docs/use-cases/uc-22-provision-vlan-classifier.md)
-- [ ] #TBD - [Use Case 23: Process Bridge Port Ingress Traffic](https://github.com/gintatkinson/cogctl-ux-09/blob/main/docs/use-cases/uc-23-process-ingress-traffic.md)
-
-### Associated User Stories
-- [ ] #TBD - [User Story 43: IEEE 802.1Q VLAN Tag Classification](https://github.com/gintatkinson/cogctl-ux-09/blob/main/docs/user-stories/us-43-vlan-tag-classification.md)
-- [ ] #TBD - [User Story 44: Traffic Class Priority Mapping](https://github.com/gintatkinson/cogctl-ux-09/blob/main/docs/user-stories/us-44-priority-traffic-mapping.md)
-- [ ] #TBD - [User Story 45: Spanning Tree Instance Mapping](https://github.com/gintatkinson/cogctl-ux-09/blob/main/docs/user-stories/us-45-spanning-tree-mapping.md)
-- [ ] #TBD - [User Story 46: Static and Dynamic Filtering Policies](https://github.com/gintatkinson/cogctl-ux-09/blob/main/docs/user-stories/us-46-filtering-forwarding-policies.md)
-- [ ] #TBD - [User Story 47: Port Stats Accumulation](https://github.com/gintatkinson/cogctl-ux-09/blob/main/docs/user-stories/us-47-port-stats-accumulation.md)
-
 ## 3. Architecture and System Interaction Diagrams
 
 ```mermaid

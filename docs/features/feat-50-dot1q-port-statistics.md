@@ -1,14 +1,14 @@
 ---
-title: "Feature 50: IEEE 802.1Q Bridge Port Performance and Error Statistics (Issue #TBD)"
-epic: "Epic 16: IEEE 802.1Q Common Types (Issue #TBD)"
+title: "Feature 50: IEEE 802.1Q Bridge Port Performance and Error Statistics (Issue #142)"
+epic: "Epic 16: IEEE 802.1Q Common Types (Issue #142)"
 type: "feature"
-issue: 9999
+issue: 142
 status: proposed
 labels: ["feature", "ieee802-dot1q-types"]
 covered-nodes: ["delay-exceeded-discards", "mtu-exceeded-discards", "frame-rx", "octets-rx", "frame-tx", "octets-tx", "discard-inbound", "forward-outbound", "discard-lack-of-buffers", "discard-transit-delay-exceeded", "discard-on-error"]
 ---
 
-# Feature: Feature 50: IEEE 802.1Q Bridge Port Performance and Error Statistics (Issue #TBD)
+# Feature: Feature 50: IEEE 802.1Q Bridge Port Performance and Error Statistics (Issue #142)
 
 This feature implements the performance and error statistic counters used to track, monitor, and report ingress/egress frame processing states, MTU violations, transit delays, and buffer discards on Bridge ports.
 
