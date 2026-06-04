@@ -20,11 +20,11 @@ This Epic covers the reverse-engineering of `ietf-otn-slice@2025-07-03.yang` and
 
 ### Associated Use Cases
 - [ ] #119 - [Use Case 19: Manage OTN Slice Resources (Issue #119)](https://github.com/gintatkinson/cogctl-ux-09/blob/main/docs/use-cases/uc-19-manage-otn-slice-resources.md)
-- [ ] #137 - [Use Case 20: Monitor OTN Network Slice Performance (Issue #137)](https://github.com/gintatkinson/cogctl-ux-09/blob/main/docs/use-cases/uc-20-monitor-otn-slice-performance.md)
+- [x] #137 - [Use Case 20: Monitor OTN Network Slice Performance (Issue #137)](https://github.com/gintatkinson/cogctl-ux-09/blob/main/docs/use-cases/uc-20-monitor-otn-slice-performance.md)
 
 ### Associated User Stories
 - [ ] #117 - [User Story 41: OTN Slice Lifecycle (Issue #117)](https://github.com/gintatkinson/cogctl-ux-09/blob/main/docs/user-stories/us-41-otn-slice-lifecycle.md)
-- [ ] #136 - [User Story 42: Configure OTN Slice PM Thresholds (Issue #136)](https://github.com/gintatkinson/cogctl-ux-09/blob/main/docs/user-stories/us-42-configure-otn-slice-pm-thresholds.md)
+- [x] #136 - [User Story 42: Configure OTN Slice PM Thresholds (Issue #136)](https://github.com/gintatkinson/cogctl-ux-09/blob/main/docs/user-stories/us-42-configure-otn-slice-pm-thresholds.md)
 ## 3. Architecture and System Interaction Diagrams
 ```mermaid
 classDiagram

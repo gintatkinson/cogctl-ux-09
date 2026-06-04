@@ -16,6 +16,9 @@ This Epic covers the network topology model extensions for Optical Transport Net
 
 ## Associated Use Cases & User Stories
 
+### Associated Use Cases
+- [ ] #138 - [Use Case 21: Map OTN and fg-OTN Network Topology (Issue #138)](https://github.com/gintatkinson/cogctl-ux-09/blob/main/docs/use-cases/uc-21-map-otn-topology.md)
+
 ### Associated User Stories
 - [ ] #116 - [User Story 40: OTN Bandwidth Allocation (Issue #116)](https://github.com/gintatkinson/cogctl-ux-09/blob/main/docs/user-stories/us-40-otn-bandwidth-allocation.md)
 ## 3. Architecture and System Interaction Diagrams

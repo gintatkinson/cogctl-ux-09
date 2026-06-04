@@ -21,6 +21,7 @@ This Epic covers the reverse-engineering of draft-ietf-ccamp-layer1-types (A YAN
 
 ### Associated Use Cases
 - [ ] #130 - [Use Case 18: Provision Layer 1 Client Signal (Issue #130)](https://github.com/gintatkinson/cogctl-ux-09/blob/main/docs/use-cases/uc-18-provision-layer1-client-signal.md)
+- [ ] #138 - [Use Case 21: Map OTN and fg-OTN Network Topology (Issue #138)](https://github.com/gintatkinson/cogctl-ux-09/blob/main/docs/use-cases/uc-21-map-otn-topology.md)
 
 ### Associated User Stories
 - [ ] #116 - [User Story 40: OTN Bandwidth Allocation (Issue #116)](https://github.com/gintatkinson/cogctl-ux-09/blob/main/docs/user-stories/us-40-otn-bandwidth-allocation.md)
