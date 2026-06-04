@@ -46,6 +46,16 @@ def get_all_issues():
         raise Exception(f"Failed to fetch issues: {res.stderr.strip()}")
     return json.loads(res.stdout)
 
+def fetch_single_issue(issue_num):
+    """
+    Fetches a single issue from GitHub by issue number.
+    """
+    cmd = ["gh", "issue", "view", str(issue_num), "--json", "number,title,state,labels"]
+    res = subprocess.run(cmd, capture_output=True, text=True)
+    if res.returncode == 0:
+        return json.loads(res.stdout)
+    return None
+
 def parse_markdown_file(filepath):
     try:
         with open(filepath, "r", encoding="utf-8", errors="ignore") as f:
@@ -89,7 +99,6 @@ def get_github_repo_url(cwd=None):
         return "https://github.com/gintatkinson/cogctl-ux-09"
 
 def get_current_branch(cwd=None):
-    # Requirements and specifications are branch-independent and always belong on the main branch.
     return "main"
 
 def inject_associated_section(content, associated_ucs, associated_uss, repo_url, branch, project_root):
@@ -127,7 +136,6 @@ def inject_associated_section(content, associated_ucs, associated_uss, repo_url,
             
     return content
 
-
 def update_checklist_in_file(filepath, issue_dict):
     with open(filepath, "r", encoding="utf-8") as f:
         content = f.read()
@@ -149,7 +157,6 @@ def update_checklist_in_file(filepath, issue_dict):
         target_state = "x" if (dep_issue and dep_issue["state"].upper() == "CLOSED") else " "
         
         if current_state != target_state:
-            # Replace exactly the checkbox bracket segment
             old_item = full_match
             new_item = old_item.replace(f"[{current_state}]", f"[{target_state}]")
             updated_content = updated_content.replace(old_item, new_item, 1)
@@ -217,11 +224,10 @@ def auto_generate_solution_walkthrough(project_root, feature_id, issue_num, titl
         
     print(f"  [Auto Design] Generating missing design solution for Feature {clean_feature_id} (Issue #{issue_num})...")
     
-    # 1. Query git history for related commits
+    # Query git history for related commits
     commits_info = []
     modified_files = set()
     try:
-        # Search git log for commits
         git_log_cmd = [
             "git", "log", "--all", 
             "--format=%H|%s|%an|%ad", 
@@ -253,7 +259,6 @@ def auto_generate_solution_walkthrough(project_root, feature_id, issue_num, titl
                             "author": author,
                             "date": date
                         })
-                        # Get modified files for this commit
                         show_res = subprocess.run(
                             ["git", "show", "--name-only", "--format=", commit_hash],
                             capture_output=True,
@@ -271,25 +276,22 @@ def auto_generate_solution_walkthrough(project_root, feature_id, issue_num, titl
         print(f"  [Auto Design] Skipping Feature {clean_feature_id} (Issue #{issue_num}) - no related commits found in git log.")
         return
 
-    # 2. Parse details from the feature spec file
+    # Parse details from the feature spec file
     covered_nodes = ""
     bdd_criteria = ""
     try:
         with open(filepath, "r", encoding="utf-8", errors="ignore") as sf:
             sf_content = sf.read()
-        # Find covered nodes in frontmatter
         nodes_match = re.search(r'^covered-nodes:\s*(.*?)$', sf_content, re.MULTILINE)
         if nodes_match:
             covered_nodes = nodes_match.group(1).strip()
             
-        # Extract BDD Acceptance Criteria section
         bdd_match = re.search(r'^##\s+4\.\s+BDD\s+Given-When-Then.*?(?=\n##\s|\Z)', sf_content, re.DOTALL | re.MULTILINE | re.IGNORECASE)
         if bdd_match:
             bdd_criteria = bdd_match.group(0).strip()
     except Exception as e:
         print(f"  [Auto Design Error] Feature spec parse failed: {e}")
 
-    # 3. Construct the Solution Walkthrough markdown content
     clean_title = title
     clean_title = re.sub(r'^Feature\s+\d+:\s*', '', clean_title, flags=re.IGNORECASE)
     clean_title = re.sub(r'\s*\(Issue\s*#\d+\)\s*$', '', clean_title, flags=re.IGNORECASE)
@@ -304,7 +306,6 @@ def auto_generate_solution_walkthrough(project_root, feature_id, issue_num, titl
     if modified_files:
         content += "The following files were modified and verified in the commit history:\n"
         for f in sorted(modified_files):
-            # Generate clickable file links
             f_abs_path = os.path.join(project_root, f)
             content += f"- [{f}](file://{f_abs_path})\n"
         content += "\n"
@@ -334,30 +335,158 @@ def auto_generate_solution_walkthrough(project_root, feature_id, issue_num, titl
     content += f"2. Navigate to the relevant dashboard or navigation node containing the {title} controls.\n"
     content += "3. Verify that all components render correctly according to the specified YANG nodes.\n"
 
-    # Write the file
     try:
         with open(solution_path, "w", encoding="utf-8") as wf:
             wf.write(content)
         print(f"  [Auto Design] Successfully generated {solution_path}")
-        
-        # Stage the generated file
         subprocess.run(["git", "add", solution_path], cwd=project_root)
     except Exception as e:
         print(f"  [Auto Design Error] Failed to write solution file: {e}")
 
-def main():
-    # Verify GitHub CLI authentication
+def get_modified_files(workspace_dir):
+    modified = set()
     try:
-        issues = get_all_issues()
+        status_output = subprocess.check_output(["git", "status", "--porcelain"], text=True, cwd=workspace_dir)
+        for line in status_output.splitlines():
+            if len(line) > 3:
+                filepath = line[3:].strip()
+                modified.add(os.path.normpath(os.path.join(workspace_dir, filepath)))
+        
+        if not modified:
+            diff_output = subprocess.check_output(["git", "diff", "--name-only", "HEAD~1...HEAD"], text=True, cwd=workspace_dir)
+            for line in diff_output.splitlines():
+                if line.strip():
+                    modified.add(os.path.normpath(os.path.join(workspace_dir, line.strip())))
     except Exception as e:
-        print(f"Error fetching GitHub issues: {e}")
-        print("Please ensure gh CLI is authenticated and configured.")
+        print(f"Warning: Git change detection failed: {e}")
+    return modified
+
+def find_referencing_files(issue_num, project_root):
+    referencing = set()
+    try:
+        res = subprocess.run(
+            ["git", "grep", "-l", f"#{issue_num}", "--", "docs/"],
+            capture_output=True,
+            text=True,
+            cwd=project_root
+        )
+        if res.returncode == 0:
+            for line in res.stdout.splitlines():
+                if line.strip() and line.strip().endswith(".md"):
+                    referencing.add(os.path.normpath(os.path.join(project_root, line.strip())))
+    except Exception:
+        pass
+    return referencing
+
+def find_defining_file(issue_num, project_root):
+    try:
+        res = subprocess.run(
+            ["git", "grep", "-l", f"issue: {issue_num}", "--", "docs/"],
+            capture_output=True,
+            text=True,
+            cwd=project_root
+        )
+        if res.returncode == 0:
+            for line in res.stdout.splitlines():
+                if line.strip() and line.strip().endswith(".md"):
+                    return os.path.normpath(os.path.join(project_root, line.strip()))
+    except Exception:
+        pass
+    return None
+
+def main():
+    # Determine workspace root
+    try:
+        project_root = subprocess.check_output(["git", "rev-parse", "--show-toplevel"], text=True).strip()
+    except Exception:
+        project_root = os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", ".."))
+        
+    docs_dir = os.path.join(project_root, "docs")
+    if not os.path.exists(docs_dir):
+        print(f"Docs directory not found at: {docs_dir}")
         sys.exit(1)
 
-    # Convert to issue lookup dictionary by issue number
-    issue_dict = {issue["number"]: issue for issue in issues}
+    # Command line mode
+    full_mode = "--full" in sys.argv
+    if full_mode:
+        sys.argv.remove("--full")
+    target_files = [os.path.normpath(os.path.abspath(f)) for f in sys.argv[1:] if not f.startswith("-")]
 
-    # Map normalized titles to issue numbers, segregated by labels
+    active_files = set()
+    if not full_mode:
+        modified = set()
+        if target_files:
+            modified = set(target_files)
+        else:
+            modified = get_modified_files(project_root)
+
+        # Filter only markdown files in docs/
+        for filepath in modified:
+            if filepath.endswith(".md") and "docs/" in filepath.replace("\\", "/"):
+                active_files.add(filepath)
+
+        if not active_files:
+            print("No backlog specification modifications detected. Incremental backlog reconciliation skipped.")
+            print("Run with --full to force a full backlog reconciliation.")
+            sys.exit(0)
+
+        # Expand active_files using references and dependencies to build local trace graph
+        expanded = set(active_files)
+        # We loop to resolve dependencies
+        for _ in range(4):
+            current_len = len(expanded)
+            added = set()
+            for filepath in expanded:
+                parsed = parse_markdown_file(filepath)
+                if parsed:
+                    # 1. Add files referencing this issue
+                    if parsed["issue"]:
+                        refs = find_referencing_files(parsed["issue"], project_root)
+                        added.update(refs)
+                    # 2. Add files defined by dependencies
+                    for dep in parsed["dependencies"]:
+                        dep_file = find_defining_file(dep, project_root)
+                        if dep_file:
+                            added.add(dep_file)
+            expanded.update(added)
+            if len(expanded) == current_len:
+                break
+        active_files = expanded
+        print(f"Incremental mode active. Syncing {len(active_files)} related backlog files.")
+
+    # Fetch GitHub issue states selectively in incremental mode
+    issue_dict = {}
+    if not full_mode:
+        needed_issues = set()
+        # Parse all active files first to identify needed issue numbers
+        parsed_active = {}
+        for filepath in active_files:
+            parsed = parse_markdown_file(filepath)
+            if parsed:
+                parsed_active[filepath] = parsed
+                if parsed["issue"]:
+                    needed_issues.add(parsed["issue"])
+                for dep in parsed["dependencies"]:
+                    needed_issues.add(dep)
+        
+        print(f"Querying GitHub for {len(needed_issues)} active issue states...")
+        # Query issues individually or in parallel using gh view
+        for issue_num in sorted(needed_issues):
+            issue_data = fetch_single_issue(issue_num)
+            if issue_data:
+                issue_dict[issue_num] = issue_data
+            else:
+                print(f"Warning: Issue #{issue_num} not found on GitHub.")
+    else:
+        try:
+            issues = get_all_issues()
+            issue_dict = {issue["number"]: issue for issue in issues}
+        except Exception as e:
+            print(f"Error fetching GitHub issues: {e}")
+            print("Please ensure gh CLI is authenticated and configured.")
+            sys.exit(1)
+
+    # SEGREGATE ACTIVE FILES & ISSUES
     epic_titles = {}
     story_titles = {}
     usecase_titles = {}
@@ -366,7 +495,6 @@ def main():
     for num, issue in issue_dict.items():
         norm_title = normalize_title(issue["title"])
         labels = [l["name"].lower() for l in issue.get("labels", [])]
-        
         if "epic" in labels:
             epic_titles[norm_title] = num
         elif "user-story" in labels:
@@ -376,25 +504,18 @@ def main():
         elif "feature" in labels:
             feature_titles[norm_title] = num
 
-    # Locate the docs directory relative to git root
-    try:
-        project_root = subprocess.check_output(["git", "rev-parse", "--show-toplevel"], text=True).strip()
-    except Exception:
-        project_root = os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", ".."))
-    docs_dir = os.path.join(project_root, "docs")
-    if not os.path.exists(docs_dir):
-        print(f"Docs directory not found at: {docs_dir}")
-        sys.exit(1)
-
     print(f"Scanning backlog files in {docs_dir}...")
 
-    # Build Epic-to-UC/US relationship maps and inject them into Epic markdown files
+    # Load structures
     epics = {}
     epics_dir = os.path.join(docs_dir, "epics")
     if os.path.exists(epics_dir):
         for filename in os.listdir(epics_dir):
             if filename.endswith(".md"):
-                p = parse_markdown_file(os.path.join(epics_dir, filename))
+                filepath = os.path.join(epics_dir, filename)
+                if not full_mode and filepath not in active_files:
+                    continue
+                p = parse_markdown_file(filepath)
                 if p and p["issue"]:
                     epics[p["issue"]] = p
 
@@ -404,7 +525,15 @@ def main():
     if os.path.exists(features_dir):
         for filename in os.listdir(features_dir):
             if filename.endswith(".md"):
-                p = parse_markdown_file(os.path.join(features_dir, filename))
+                filepath = os.path.join(features_dir, filename)
+                # In incremental mode we might need mapping for features not modified.
+                # Since features are small, we can load metadata (parse_markdown_file) for all feature files.
+                # But to avoid parsing everything, in incremental mode we only parse if the feature
+                # is in active_files OR if it is a dependency of active stories/epics.
+                # Actually, parsing metadata for features is very fast. Let's filter to features in active_files.
+                if not full_mode and filepath not in active_files:
+                    continue
+                p = parse_markdown_file(filepath)
                 if p and p["issue"]:
                     features[p["issue"]] = p
                     for epic_issue, epic_data in epics.items():
@@ -417,7 +546,10 @@ def main():
     if os.path.exists(stories_dir):
         for filename in os.listdir(stories_dir):
             if filename.endswith(".md"):
-                p = parse_markdown_file(os.path.join(stories_dir, filename))
+                filepath = os.path.join(stories_dir, filename)
+                if not full_mode and filepath not in active_files:
+                    continue
+                p = parse_markdown_file(filepath)
                 if p and p["issue"]:
                     user_stories[p["issue"]] = p
                     associated = set()
@@ -432,7 +564,10 @@ def main():
     if os.path.exists(usecases_dir):
         for filename in os.listdir(usecases_dir):
             if filename.endswith(".md"):
-                p = parse_markdown_file(os.path.join(usecases_dir, filename))
+                filepath = os.path.join(usecases_dir, filename)
+                if not full_mode and filepath not in active_files:
+                    continue
+                p = parse_markdown_file(filepath)
                 if p and p["issue"]:
                     use_cases[p["issue"]] = p
                     associated = set()
@@ -444,9 +579,10 @@ def main():
     repo_url = get_github_repo_url(cwd=docs_dir)
     branch = get_current_branch(cwd=docs_dir)
 
+    # Epic Injections (only for Epics in active list)
     for epic_issue, epic_data in epics.items():
-        associated_uss = [user_stories[us] for us, epics_set in story_to_epics.items() if epic_issue in epics_set]
-        associated_ucs = [use_cases[uc] for uc, epics_set in case_to_epics.items() if epic_issue in epics_set]
+        associated_uss = [user_stories[us] for us, epics_set in story_to_epics.items() if epic_issue in epics_set if us in user_stories]
+        associated_ucs = [use_cases[uc] for uc, epics_set in case_to_epics.items() if epic_issue in epics_set if uc in use_cases]
         
         with open(epic_data["filepath"], "r", encoding="utf-8") as f:
             content = f.read()
@@ -457,45 +593,30 @@ def main():
                 f.write(new_content)
             print(f"  [Epic Injection] Injected associated UCs/USs into {os.path.basename(epic_data['filepath'])}")
 
-
     # Process Epics
-    epics_dir = os.path.join(docs_dir, "epics")
-    if os.path.exists(epics_dir):
-        for filename in sorted(os.listdir(epics_dir)):
-            if not filename.endswith(".md"):
-                continue
-            filepath = os.path.join(epics_dir, filename)
-            p = parse_markdown_file(filepath)
-            if not p or not p["title"]:
-                continue
-            
-            issue_num = p.get("issue")
-            if not (issue_num and issue_num in issue_dict):
-                norm = normalize_title(p["title"])
-                issue_num = epic_titles.get(norm)
-            
-            if issue_num:
-                updated_content, completed = update_checklist_in_file(filepath, issue_dict)
-                is_open = issue_dict[issue_num]["state"].upper() == "OPEN"
-                if is_open:
-                    # Sync to keep checkbox states updated on GitHub UI
-                    sync_issue_body_to_github(issue_num, filepath, issue_type="Epic")
-                    if completed:
-                        close_issue_on_github(
-                            issue_num, 
-                            "Epic completed. All constituent features successfully delivered and verified."
-                        )
-                        issue_dict[issue_num]["state"] = "CLOSED"
-            else:
-                print(f"Warning: No GitHub Epic issue found matching: '{p['title']}'")
+    for epic_issue, epic_data in epics.items():
+        filepath = epic_data["filepath"]
+        issue_num = epic_data["issue"]
+        if issue_num in issue_dict:
+            updated_content, completed = update_checklist_in_file(filepath, issue_dict)
+            is_open = issue_dict[issue_num]["state"].upper() == "OPEN"
+            if is_open:
+                sync_issue_body_to_github(issue_num, filepath, issue_type="Epic")
+                if completed:
+                    close_issue_on_github(
+                        issue_num, 
+                        "Epic completed. All constituent features successfully delivered and verified."
+                    )
+                    issue_dict[issue_num]["state"] = "CLOSED"
 
     # Process Features
-    features_dir = os.path.join(docs_dir, "features")
     if os.path.exists(features_dir):
         for filename in sorted(os.listdir(features_dir)):
             if not filename.endswith(".md"):
                 continue
             filepath = os.path.join(features_dir, filename)
+            if not full_mode and filepath not in active_files:
+                continue
             p = parse_markdown_file(filepath)
             if not p or not p["title"]:
                 continue
@@ -505,79 +626,47 @@ def main():
                 norm = normalize_title(p["title"])
                 issue_num = feature_titles.get(norm)
             
-            if issue_num:
+            if issue_num and issue_num in issue_dict:
                 is_open = issue_dict[issue_num]["state"].upper() == "OPEN"
                 if is_open:
-                    # Sync to keep feature definition/acceptance criteria updated on GitHub UI
                     sync_issue_body_to_github(issue_num, filepath, issue_type="Feature")
                 else:
-                    # Issue is CLOSED - ensure design solution walkthrough exists
                     feat_id_match = re.search(r'feat-(\d+)-', filename)
                     if feat_id_match:
                         feature_id = feat_id_match.group(1)
                         auto_generate_solution_walkthrough(project_root, feature_id, issue_num, p["title"], filepath)
-            else:
-                print(f"Warning: No GitHub Feature issue found matching: '{p["title"]}'")
 
     # Process User Stories
-    stories_dir = os.path.join(docs_dir, "user-stories")
-    if os.path.exists(stories_dir):
-        for filename in sorted(os.listdir(stories_dir)):
-            if not filename.endswith(".md"):
-                continue
-            filepath = os.path.join(stories_dir, filename)
-            p = parse_markdown_file(filepath)
-            if not p or not p["title"]:
-                continue
-            
-            issue_num = p.get("issue")
-            if not (issue_num and issue_num in issue_dict):
-                norm = normalize_title(p["title"])
-                issue_num = story_titles.get(norm)
-            
-            if issue_num:
-                _, completed = update_checklist_in_file(filepath, issue_dict)
-                is_open = issue_dict[issue_num]["state"].upper() == "OPEN"
-                if is_open:
-                    sync_issue_body_to_github(issue_num, filepath, issue_type="User Story")
-                if completed and is_open:
-                    close_issue_on_github(
-                        issue_num,
-                        f"Resolved. All dependent features/tasks for BDD scenario '{p['title']}' have been completed and verified."
-                    )
-                    issue_dict[issue_num]["state"] = "CLOSED"
-            else:
-                print(f"Warning: No GitHub User Story issue found matching: '{p['title']}'")
+    for story_issue, story_data in user_stories.items():
+        filepath = story_data["filepath"]
+        issue_num = story_data["issue"]
+        if issue_num in issue_dict:
+            _, completed = update_checklist_in_file(filepath, issue_dict)
+            is_open = issue_dict[issue_num]["state"].upper() == "OPEN"
+            if is_open:
+                sync_issue_body_to_github(issue_num, filepath, issue_type="User Story")
+            if completed and is_open:
+                close_issue_on_github(
+                    issue_num,
+                    f"Resolved. All dependent features/tasks for BDD scenario '{story_data['title']}' have been completed and verified."
+                )
+                issue_dict[issue_num]["state"] = "CLOSED"
 
     # Process Use Cases
-    usecases_dir = os.path.join(docs_dir, "use-cases")
-    if os.path.exists(usecases_dir):
-        for filename in sorted(os.listdir(usecases_dir)):
-            if not filename.endswith(".md"):
-                continue
-            filepath = os.path.join(usecases_dir, filename)
-            p = parse_markdown_file(filepath)
-            if not p or not p["title"]:
-                continue
-            
-            issue_num = p.get("issue")
-            if not (issue_num and issue_num in issue_dict):
-                norm = normalize_title(p["title"])
-                issue_num = usecase_titles.get(norm)
-            
-            if issue_num:
-                _, completed = update_checklist_in_file(filepath, issue_dict)
-                is_open = issue_dict[issue_num]["state"].upper() == "OPEN"
-                if is_open:
-                    sync_issue_body_to_github(issue_num, filepath, issue_type="Use Case")
-                if completed and is_open:
-                    close_issue_on_github(
-                        issue_num,
-                        f"Resolved. All dependent user stories and features for use case '{p['title']}' are completed."
-                    )
-                    issue_dict[issue_num]["state"] = "CLOSED"
-            else:
-                print(f"Warning: No GitHub Use Case issue found matching: '{p['title']}'")
+    for uc_issue, uc_data in use_cases.items():
+        filepath = uc_data["filepath"]
+        issue_num = uc_data["issue"]
+        if issue_num in issue_dict:
+            _, completed = update_checklist_in_file(filepath, issue_dict)
+            is_open = issue_dict[issue_num]["state"].upper() == "OPEN"
+            if is_open:
+                sync_issue_body_to_github(issue_num, filepath, issue_type="Use Case")
+            if completed and is_open:
+                close_issue_on_github(
+                    issue_num,
+                    f"Resolved. All dependent user stories and features for use case '{uc_data['title']}' are completed."
+                )
+                issue_dict[issue_num]["state"] = "CLOSED"
 
     print("Backlog reconciliation complete.")
 
