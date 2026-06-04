@@ -28,8 +28,8 @@ spec_source: "draft-ietf-ccamp-otn-topo-yang"
 ## Required Features Matrix
 - [ ] #127 - [Feature 39: OTN Tributary Slot and Label Structure](https://github.com/gintatkinson/cogctl-ux-09/blob/main/docs/features/feat-39-otn-tributary-slot-label.md)
 - [ ] #128 - [Feature 40: OTN Bandwidth and GFP Payload Capabilities](https://github.com/gintatkinson/cogctl-ux-09/blob/main/docs/features/feat-40-otn-bandwidth-payload.md)
-- [x] #110 - [Feature 43: fg-OTN Network Topology and Bandwidth Allocation](https://github.com/gintatkinson/cogctl-ux-09/blob/main/docs/features/feat-43-fgotn-topology-bandwidth.md)
-- [x] #111 - [Feature 44: OTN Topology Node and Link Attributes](https://github.com/gintatkinson/cogctl-ux-09/blob/main/docs/features/feat-44-otn-topology-node-link.md)
+- [ ] #110 - [Feature 43: fg-OTN Network Topology and Bandwidth Allocation](https://github.com/gintatkinson/cogctl-ux-09/blob/main/docs/features/feat-43-fgotn-topology-bandwidth.md)
+- [ ] #111 - [Feature 44: OTN Topology Node and Link Attributes](https://github.com/gintatkinson/cogctl-ux-09/blob/main/docs/features/feat-44-otn-topology-node-link.md)
 
 ## Source References
 YANG Schema: [ietf-fgotn-topology.yang](https://github.com/gintatkinson/cogctl-ux-09/blob/main/yang/ietf-fgotn-topology.yang)  

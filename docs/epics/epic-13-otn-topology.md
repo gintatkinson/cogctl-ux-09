@@ -11,13 +11,13 @@ labels: ["epic", "ietf-fgotn-topology"]
 This Epic covers the network topology model extensions for Optical Transport Networks (OTN) and fine-grain OTN (fg-OTN). It reverse-engineers the model defined in `ietf-fgotn-topology@2026-02-27.yang` and the base `ietf-otn-topology@2024-06-21.yang` which augment standard Traffic Engineering (TE) topology models to represent client/server layer mappings, link bandwidth allocations, and disjoint timeslot resources.
 
 ## 2. Requirements & Checklist
-- [x] #110 - [Feature 43: fg-OTN Network Topology and Bandwidth Allocation](https://github.com/gintatkinson/cogctl-ux-09/blob/main/docs/features/feat-43-fgotn-topology-bandwidth.md)
-- [x] #111 - [Feature 44: OTN Topology Node and Link Attributes](https://github.com/gintatkinson/cogctl-ux-09/blob/main/docs/features/feat-44-otn-topology-node-link.md)
+- [ ] #110 - [Feature 43: fg-OTN Network Topology and Bandwidth Allocation](https://github.com/gintatkinson/cogctl-ux-09/blob/main/docs/features/feat-43-fgotn-topology-bandwidth.md)
+- [ ] #111 - [Feature 44: OTN Topology Node and Link Attributes](https://github.com/gintatkinson/cogctl-ux-09/blob/main/docs/features/feat-44-otn-topology-node-link.md)
 
 ## Associated Use Cases & User Stories
 
 ### Associated User Stories
-- [x] #116 - [User Story 40: OTN Bandwidth Allocation (Issue #116)](https://github.com/gintatkinson/cogctl-ux-09/blob/main/docs/user-stories/us-40-otn-bandwidth-allocation.md)
+- [ ] #116 - [User Story 40: OTN Bandwidth Allocation (Issue #116)](https://github.com/gintatkinson/cogctl-ux-09/blob/main/docs/user-stories/us-40-otn-bandwidth-allocation.md)
 ## 3. Architecture and System Interaction Diagrams
 
 ```mermaid
