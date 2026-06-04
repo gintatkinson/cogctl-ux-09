@@ -1,10 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:cogctl_ux/main.dart';
-import 'package:cogctl_ux/models/inventory_type_reference.dart';
-import 'package:cogctl_ux/services/mock_types_references_service.dart';
+import 'package:cogctl_ux/features/software_configuration/domain/inventory_type_reference.dart';
+import 'package:cogctl_ux/features/software_configuration/data/mock_types_references_service.dart';
+import 'package:cogctl_ux/core/di/service_locator.dart';
 
 void main() {
+  setUpAll(() {
+    initServiceLocator();
+  });
   group('IETF YANG Types and References Validation Logic Tests', () {
     late MockTypesReferencesService service;
 

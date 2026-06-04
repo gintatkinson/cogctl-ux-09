@@ -1,10 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:cogctl_ux/main.dart';
-import 'package:cogctl_ux/models/equipment_rack.dart';
-import 'package:cogctl_ux/services/mock_equipment_rack_service.dart';
+import 'package:cogctl_ux/features/infrastructure/domain/equipment_rack.dart';
+import 'package:cogctl_ux/features/infrastructure/data/mock_equipment_rack_service.dart';
+import 'package:cogctl_ux/core/di/service_locator.dart';
 
 void main() {
+  setUpAll(() {
+    initServiceLocator();
+  });
   group('Equipment Rack Validation Logic Tests', () {
     test('Valid equipment rack details should validate successfully', () {
       expect(
@@ -816,5 +820,4 @@ void main() {
     });
   });
 }
-
 

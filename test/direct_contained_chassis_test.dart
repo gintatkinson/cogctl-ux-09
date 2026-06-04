@@ -1,10 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:cogctl_ux/main.dart';
-import 'package:cogctl_ux/models/inventory_location.dart';
-import 'package:cogctl_ux/services/mock_inventory_location_service.dart';
+import 'package:cogctl_ux/features/infrastructure/domain/inventory_location.dart';
+import 'package:cogctl_ux/features/infrastructure/data/mock_inventory_location_service.dart';
+import 'package:cogctl_ux/core/di/service_locator.dart';
 
 void main() {
+  setUpAll(() {
+    initServiceLocator();
+  });
   group('Contained Chassis Validation Logic Tests', () {
     test('Validate uint32 bounds for chassisId', () {
       final valid = ContainedChassis(chassisId: 10, neRef: 'ne-1', componentRef: 'comp-1');
@@ -186,6 +190,10 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.textContaining('already in use'), findsOneWidget);
+      
+      // Dismiss the SnackBar to clear the queue for subsequent success SnackBars
+      ScaffoldMessenger.of(tester.element(find.byType(Scaffold))).hideCurrentSnackBar();
+      await tester.pumpAndSettle();
 
       // 5. Delete chassis 1 from the list inside formCard
       final chassis1Row = find.descendant(
@@ -206,7 +214,7 @@ void main() {
       final saveBtn = find.widgetWithText(ElevatedButton, 'Update Location');
       await tester.tap(saveBtn);
       await tester.pumpAndSettle();
-
+      print('DEBUG WIDGETS: ${tester.allWidgets.map((w) => w.toString()).where((s) => s.contains('Successfully') || s.contains('SnackBar') || s.contains('Text(')).toList()}');
       // Verify success snackbar and updated tree lists
       expect(find.textContaining('Successfully updated'), findsOneWidget);
       expect(find.textContaining('Chassis #2'), findsWidgets);

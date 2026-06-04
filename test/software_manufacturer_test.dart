@@ -1,10 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:cogctl_ux/main.dart';
-import 'package:cogctl_ux/models/software_manufacturer.dart';
-import 'package:cogctl_ux/services/mock_software_manufacturer_service.dart';
+import 'package:cogctl_ux/features/software_configuration/domain/software_manufacturer.dart';
+import 'package:cogctl_ux/features/software_configuration/data/mock_software_manufacturer_service.dart';
+import 'package:cogctl_ux/core/di/service_locator.dart';
 
 void main() {
+  setUpAll(() {
+    initServiceLocator();
+  });
   group('Software & Manufacturer Validation Logic Tests', () {
     late MockSoftwareManufacturerService service;
 

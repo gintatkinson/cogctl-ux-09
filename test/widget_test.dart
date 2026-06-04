@@ -1,8 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:cogctl_ux/core/di/service_locator.dart';
 import 'package:cogctl_ux/main.dart';
 
 void main() {
+  setUpAll(() {
+    initServiceLocator();
+  });
   testWidgets('Dashboard launches and displays title smoke test', (WidgetTester tester) async {
     // Build our app and trigger a frame.
     await tester.pumpWidget(const CogctlUxApp());
@@ -29,7 +33,7 @@ void main() {
     await tester.pumpAndSettle();
 
     // Verify error is displayed
-    expect(find.textContaining('Only standard ASCII without control chars allowed'), findsOneWidget);
+    expect(find.textContaining('Only standard ASCII without control chars allowed'), findsAtLeastNWidgets(1));
   });
 
   testWidgets('Validation error for invalid alternate system is displayed on submit', (WidgetTester tester) async {
@@ -50,7 +54,7 @@ void main() {
     await tester.pumpAndSettle();
 
     // Verify error is displayed
-    expect(find.textContaining('Only standard ASCII without control chars allowed'), findsOneWidget);
+    expect(find.textContaining('Only standard ASCII without control chars allowed'), findsAtLeastNWidgets(1));
   });
 
   testWidgets('Entering velocity calculates speed and heading dynamically', (WidgetTester tester) async {

@@ -1,9 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:cogctl_ux/main.dart';
-import 'package:cogctl_ux/models/identifiers_references.dart';
+import 'package:cogctl_ux/features/yang_telemetry/domain/identifiers_references.dart';
+import 'package:cogctl_ux/core/di/service_locator.dart';
 
 void main() {
+  setUpAll(() {
+    initServiceLocator();
+  });
   group('YANG Identifiers & OID Validation Logic Tests', () {
     String? getValidationError(YangIdentifierType type, String value) {
       try {
