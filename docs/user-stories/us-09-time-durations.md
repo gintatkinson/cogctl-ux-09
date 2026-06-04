@@ -20,7 +20,7 @@ spec_source: "RFC 9911 Section 5"
 > Durations support time period representations ranging from hours down to nanoseconds. Timeticks track intervals modulo 2^32 in centiseconds, and associated timestamps mark specific epochs relative to timeticks.
 
 ## Required Features Matrix
-- [ ] #20 - [Feature 9: Time Durations](https://github.com/gintatkinson/cogctl-ux-09/blob/feat/epic-2-common-types/docs/features/feat-09-time-durations.md)
+- [x] #20 - [Feature 9: Time Durations](https://github.com/gintatkinson/cogctl-ux-09/blob/feat/epic-2-common-types/docs/features/feat-09-time-durations.md)
 
 ## Source References
 YANG Schema: [ietf-yang-types.yang](https://github.com/YangModels/yang/blob/main/standard/ietf/RFC/ietf-yang-types%402025-12-22.yang)

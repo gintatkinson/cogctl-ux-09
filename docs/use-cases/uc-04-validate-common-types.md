@@ -27,8 +27,8 @@ spec_source: "RFC 9911"
 - [x] #23 - [User Story 6: Numeric Counters and Gauges](https://github.com/gintatkinson/cogctl-ux-09/blob/feat/epic-2-common-types/docs/user-stories/us-06-counters-gauges.md)
 - [x] #24 - [User Story 7: Identifiers and Object References](https://github.com/gintatkinson/cogctl-ux-09/blob/feat/epic-2-common-types/docs/user-stories/us-07-identifiers-references.md)
 - [x] #25 - [User Story 8: Date and Time Types](https://github.com/gintatkinson/cogctl-ux-09/blob/feat/epic-2-common-types/docs/user-stories/us-08-date-time.md)
-- [ ] #26 - [User Story 9: Time Durations](https://github.com/gintatkinson/cogctl-ux-09/blob/feat/epic-2-common-types/docs/user-stories/us-09-time-durations.md)
-- [ ] #27 - [User Story 10: General Address, Identity, and Language Tags](https://github.com/gintatkinson/cogctl-ux-09/blob/feat/epic-2-common-types/docs/user-stories/us-10-addresses-tags.md)
+- [x] #26 - [User Story 9: Time Durations](https://github.com/gintatkinson/cogctl-ux-09/blob/feat/epic-2-common-types/docs/user-stories/us-09-time-durations.md)
+- [x] #27 - [User Story 10: General Address, Identity, and Language Tags](https://github.com/gintatkinson/cogctl-ux-09/blob/feat/epic-2-common-types/docs/user-stories/us-10-addresses-tags.md)
 
 ## Source References
 YANG Schema: [ietf-yang-types.yang](https://github.com/YangModels/yang/blob/main/standard/ietf/RFC/ietf-yang-types%402025-12-22.yang)

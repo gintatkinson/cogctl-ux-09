@@ -20,7 +20,7 @@ spec_source: "RFC 9911 Section 6"
 > Address and identity types represent low-level hardware tags (MAC/physical), network markers (dotted-quad), expressions (XPath), and language tags conforming to BCP 47.
 
 ## Required Features Matrix
-- [ ] #21 - [Feature 10: General Address, Identity, and Language Tags](https://github.com/gintatkinson/cogctl-ux-09/blob/feat/epic-2-common-types/docs/features/feat-10-addresses-tags.md)
+- [x] #21 - [Feature 10: General Address, Identity, and Language Tags](https://github.com/gintatkinson/cogctl-ux-09/blob/feat/epic-2-common-types/docs/features/feat-10-addresses-tags.md)
 
 ## Source References
 YANG Schema: [ietf-yang-types.yang](https://github.com/YangModels/yang/blob/main/standard/ietf/RFC/ietf-yang-types%402025-12-22.yang)
