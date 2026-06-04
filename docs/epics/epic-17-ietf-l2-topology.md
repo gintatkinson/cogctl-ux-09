@@ -25,7 +25,6 @@ This Epic covers the network topology modeling, nodes, links, and termination po
 - [ ] #154 - [User Story 48: Layer 2 Network Topology Discovery and Auditing (Issue #154)](https://github.com/gintatkinson/cogctl-ux-09/blob/main/docs/user-stories/us-48-l2-topology-discovery.md)
 - [ ] #155 - [User Story 49: Layer 2 Link Connectivity and Performance Tuning (Issue #155)](https://github.com/gintatkinson/cogctl-ux-09/blob/main/docs/user-stories/us-49-l2-link-connectivity.md)
 - [ ] #156 - [User Story 50: Layer 2 Interface Encapsulation and Logical Partitioning (Issue #156)](https://github.com/gintatkinson/cogctl-ux-09/blob/main/docs/user-stories/us-50-l2-port-encapsulation.md)
-
 ## 3. Architecture and System Interaction Diagrams
 
 ```mermaid
