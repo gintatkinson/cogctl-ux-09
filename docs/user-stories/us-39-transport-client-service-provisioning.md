@@ -26,9 +26,9 @@ spec_source: "draft-ietf-ccamp-otn-topo-yang"
 > Transport client services are configured by mapping client signal access parameters to physical or logical Link Termination Points (LTPs) and associating them with traffic engineering tunnels.
 
 ## Required Features Matrix
-- [ ] #108 - [Feature 41: Transport Client Service Core Attributes](https://github.com/gintatkinson/cogctl-ux-09/blob/feat/16-rack-contained-chassis-electricity/docs/features/feat-41-trans-client-service-core.md)
-- [ ] #109 - [Feature 42: Transport Client Service Port Mapping and Tunnels](https://github.com/gintatkinson/cogctl-ux-09/blob/feat/16-rack-contained-chassis-electricity/docs/features/feat-42-trans-client-service-ports.md)
+- [ ] #108 - [Feature 41: Transport Client Service Core Attributes](https://github.com/gintatkinson/cogctl-ux-09/blob/main/docs/features/feat-41-trans-client-service-core.md)
+- [ ] #109 - [Feature 42: Transport Client Service Port Mapping and Tunnels](https://github.com/gintatkinson/cogctl-ux-09/blob/main/docs/features/feat-42-trans-client-service-ports.md)
 
 ## Source References
-- YANG Schema: [ietf-trans-client-service.yang](https://github.com/gintatkinson/cogctl-ux-09/blob/feat/16-rack-contained-chassis-electricity/yang/ietf-trans-client-service.yang)
+- YANG Schema: [ietf-trans-client-service.yang](https://github.com/gintatkinson/cogctl-ux-09/blob/main/yang/ietf-trans-client-service.yang)
 - Normative Specification: [draft-ietf-ccamp-otn-topo-yang](https://datatracker.ietf.org/doc/draft-ietf-ccamp-otn-topo-yang/)

@@ -18,12 +18,12 @@ This Epic covers the digital engineering reverse-engineering of the IETF YANG mo
 ## Associated Use Cases & User Stories
 
 ### Associated Use Cases
-- [ ] #71 - [Use Case 11: Document Cable Concatenation Splicing (Issue #71)](https://github.com/gintatkinson/cogctl-ux-09/blob/feat/16-rack-contained-chassis-electricity/docs/use-cases/uc-11-document-cable-concatenation.md)
-- [ ] #72 - [Use Case 12: Track Passive Port Mappings (Issue #72)](https://github.com/gintatkinson/cogctl-ux-09/blob/feat/16-rack-contained-chassis-electricity/docs/use-cases/uc-12-track-passive-ports.md)
+- [ ] #71 - [Use Case 11: Document Cable Concatenation Splicing (Issue #71)](https://github.com/gintatkinson/cogctl-ux-09/blob/main/docs/use-cases/uc-11-document-cable-concatenation.md)
+- [ ] #72 - [Use Case 12: Track Passive Port Mappings (Issue #72)](https://github.com/gintatkinson/cogctl-ux-09/blob/main/docs/use-cases/uc-12-track-passive-ports.md)
 
 ### Associated User Stories
-- [ ] #69 - [User Story 24: Optical Fiber Cable Asset Ingestion (Issue #69)](https://github.com/gintatkinson/cogctl-ux-09/blob/feat/16-rack-contained-chassis-electricity/docs/user-stories/us-24-fiber-optic-cables.md)
-- [ ] #70 - [User Story 25: Passive ODF and Splitter Inventory Registry (Issue #70)](https://github.com/gintatkinson/cogctl-ux-09/blob/feat/16-rack-contained-chassis-electricity/docs/user-stories/us-25-odf-splitter-inventory.md)
+- [ ] #69 - [User Story 24: Optical Fiber Cable Asset Ingestion (Issue #69)](https://github.com/gintatkinson/cogctl-ux-09/blob/main/docs/user-stories/us-24-fiber-optic-cables.md)
+- [ ] #70 - [User Story 25: Passive ODF and Splitter Inventory Registry (Issue #70)](https://github.com/gintatkinson/cogctl-ux-09/blob/main/docs/user-stories/us-25-odf-splitter-inventory.md)
 ## 3. Architecture and System Interaction Diagrams
 ```mermaid
 classDiagram

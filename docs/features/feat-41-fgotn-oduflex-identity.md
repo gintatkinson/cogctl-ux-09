@@ -64,5 +64,5 @@ stateDiagram-v2
 
 ## 6. Source References
 
-YANG Schema: [ietf-fgotn-types.yang](https://github.com/gintatkinson/cogctl-ux-09/blob/feat/16-rack-contained-chassis-electricity/yang/ietf-fgotn-types.yang)
+YANG Schema: [ietf-fgotn-types.yang](https://github.com/gintatkinson/cogctl-ux-09/blob/main/yang/ietf-fgotn-types.yang)
 Normative Specification: [draft-tan-ccamp-fgotn-yang](https://datatracker.ietf.org/doc/draft-tan-ccamp-fgotn-yang/)

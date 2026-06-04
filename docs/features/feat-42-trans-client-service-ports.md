@@ -10,7 +10,7 @@ covered-nodes: ["access-node-id", "access-node-uri", "access-ltp-id", "access-lt
 
 # Feature: Feature 42: Transport Client Service Port Mapping and Tunnels (Issue #109)
 
-**Parent Epic:** [Epic 15: Transport Client Service (Issue #121)](https://github.com/gintatkinson/cogctl-ux-09/blob/feat/16-rack-contained-chassis-electricity/docs/epics/epic-15-trans-client-service.md)
+**Parent Epic:** [Epic 15: Transport Client Service (Issue #121)](https://github.com/gintatkinson/cogctl-ux-09/blob/main/docs/epics/epic-15-trans-client-service.md)
 
 This feature establishes the logical port mapping, access termination points, service tunnel assignments, and error/performance diagnostics for Point-to-Point (P2P) Transport Client Services.
 
@@ -110,5 +110,5 @@ stateDiagram-v2
 >   }
 
 ## 6. Source References
-- **YANG Schema:** [ietf-trans-client-service.yang](https://github.com/gintatkinson/cogctl-ux-09/blob/feat/16-rack-contained-chassis-electricity/yang/ietf-trans-client-service.yang)
+- **YANG Schema:** [ietf-trans-client-service.yang](https://github.com/gintatkinson/cogctl-ux-09/blob/main/yang/ietf-trans-client-service.yang)
 - **Normative Document:** [draft-ietf-ccamp-otn-topo-yang](https://datatracker.ietf.org/doc/draft-ietf-ccamp-otn-topo-yang/)

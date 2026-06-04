@@ -89,10 +89,8 @@ def get_github_repo_url(cwd=None):
         return "https://github.com/gintatkinson/cogctl-ux-09"
 
 def get_current_branch(cwd=None):
-    try:
-        return subprocess.check_output(["git", "rev-parse", "--abbrev-ref", "HEAD"], cwd=cwd, text=True).strip()
-    except Exception:
-        return "main"
+    # Requirements and specifications are branch-independent and always belong on the main branch.
+    return "main"
 
 def inject_associated_section(content, associated_ucs, associated_uss, repo_url, branch, project_root):
     # Format the lists

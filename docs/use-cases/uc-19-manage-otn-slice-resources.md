@@ -45,11 +45,11 @@ spec_source: "draft-ietf-ccamp-otn-topo-yang Section 3"
 ## 8. Realization Matrix
 
 ### Required User Stories
-- [ ] #117 - [User Story 41: OTN Slice Lifecycle](https://github.com/gintatkinson/cogctl-ux-09/blob/feat/16-rack-contained-chassis-electricity/docs/user-stories/us-41-otn-slice-lifecycle.md)
+- [ ] #117 - [User Story 41: OTN Slice Lifecycle](https://github.com/gintatkinson/cogctl-ux-09/blob/main/docs/user-stories/us-41-otn-slice-lifecycle.md)
 
 ### Required Features
-- [ ] #113 - [Feature 46: OTN Network Resource Partition MPI Mapping](https://github.com/gintatkinson/cogctl-ux-09/blob/feat/16-rack-contained-chassis-electricity/docs/features/feat-46-otn-slice-mpi-mapping.md)
+- [ ] #113 - [Feature 46: OTN Network Resource Partition MPI Mapping](https://github.com/gintatkinson/cogctl-ux-09/blob/main/docs/features/feat-46-otn-slice-mpi-mapping.md)
 
 ## Source References
-YANG Schema: [ietf-otn-slice-mpi.yang](https://github.com/gintatkinson/cogctl-ux-09/blob/feat/16-rack-contained-chassis-electricity/yang/ietf-otn-slice-mpi.yang)
+YANG Schema: [ietf-otn-slice-mpi.yang](https://github.com/gintatkinson/cogctl-ux-09/blob/main/yang/ietf-otn-slice-mpi.yang)
 Normative Specification: [draft-ietf-ccamp-otn-topo-yang](https://datatracker.ietf.org/doc/draft-ietf-ccamp-otn-topo-yang/)

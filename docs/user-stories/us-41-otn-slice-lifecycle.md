@@ -26,8 +26,8 @@ spec_source: "draft-ietf-ccamp-otn-topo-yang"
 > Network slicing enables physical network isolation into multiple logically distinct networks. The OTN slice MPI model allows dynamic tuning and allocation of partition properties.
 
 ## Required Features Matrix
-- [ ] #113 - [Feature 46: OTN Network Resource Partition MPI Mapping](https://github.com/gintatkinson/cogctl-ux-09/blob/feat/16-rack-contained-chassis-electricity/docs/features/feat-46-otn-slice-mpi-mapping.md)
+- [ ] #113 - [Feature 46: OTN Network Resource Partition MPI Mapping](https://github.com/gintatkinson/cogctl-ux-09/blob/main/docs/features/feat-46-otn-slice-mpi-mapping.md)
 
 ## Source References
-YANG Schema: [ietf-otn-slice-mpi.yang](https://github.com/gintatkinson/cogctl-ux-09/blob/feat/16-rack-contained-chassis-electricity/yang/ietf-otn-slice-mpi.yang)
+YANG Schema: [ietf-otn-slice-mpi.yang](https://github.com/gintatkinson/cogctl-ux-09/blob/main/yang/ietf-otn-slice-mpi.yang)
 Normative Specification: [draft-ietf-ccamp-otn-topo-yang](https://datatracker.ietf.org/doc/draft-ietf-ccamp-otn-topo-yang/)

@@ -26,8 +26,8 @@ spec_source: "draft-tan-ccamp-fgotn-yang"
 > The YANG data models defined in this document are designed to meet the requirements for efficient transmission of sub-1Gbit/s client signals in transport network.
 
 ## Required Features Matrix
-- [ ] #132 - [Feature 41: Fine-Grain ODUflex Type Definition](https://github.com/gintatkinson/cogctl-ux-09/blob/feat/16-rack-contained-chassis-electricity/docs/features/feat-41-fgotn-oduflex-identity.md)
+- [ ] #132 - [Feature 41: Fine-Grain ODUflex Type Definition](https://github.com/gintatkinson/cogctl-ux-09/blob/main/docs/features/feat-41-fgotn-oduflex-identity.md)
 
 ## Source References
-YANG Schema: [ietf-fgotn-types.yang](https://github.com/gintatkinson/cogctl-ux-09/blob/feat/16-rack-contained-chassis-electricity/yang/ietf-fgotn-types.yang)  
+YANG Schema: [ietf-fgotn-types.yang](https://github.com/gintatkinson/cogctl-ux-09/blob/main/yang/ietf-fgotn-types.yang)  
 Normative Specification: [draft-tan-ccamp-fgotn-yang](https://datatracker.ietf.org/doc/draft-tan-ccamp-fgotn-yang/)

@@ -20,15 +20,15 @@ This Epic covers the digital engineering reverse-engineering of the IETF YANG mo
 ## Associated Use Cases & User Stories
 
 ### Associated Use Cases
-- [x] #55 - [Use Case 7: Validate Network Element and Component Inventory (Issue #55)](https://github.com/gintatkinson/cogctl-ux-09/blob/feat/16-rack-contained-chassis-electricity/docs/use-cases/uc-07-validate-inventory-elements.md)
-- [x] #56 - [Use Case 8: Validate Component Containment Hierarchy and Roles (Issue #56)](https://github.com/gintatkinson/cogctl-ux-09/blob/feat/16-rack-contained-chassis-electricity/docs/use-cases/uc-08-validate-component-hierarchy.md)
+- [x] #55 - [Use Case 7: Validate Network Element and Component Inventory (Issue #55)](https://github.com/gintatkinson/cogctl-ux-09/blob/main/docs/use-cases/uc-07-validate-inventory-elements.md)
+- [x] #56 - [Use Case 8: Validate Component Containment Hierarchy and Roles (Issue #56)](https://github.com/gintatkinson/cogctl-ux-09/blob/main/docs/use-cases/uc-08-validate-component-hierarchy.md)
 
 ### Associated User Stories
-- [x] #50 - [User Story 17: Inventory Type Definitions & References (Issue #50)](https://github.com/gintatkinson/cogctl-ux-09/blob/feat/16-rack-contained-chassis-electricity/docs/user-stories/us-17-types-references.md)
-- [x] #51 - [User Story 18: Common Entity Software & Manufacturer Attributes (Issue #51)](https://github.com/gintatkinson/cogctl-ux-09/blob/feat/16-rack-contained-chassis-electricity/docs/user-stories/us-18-software-manufacturer.md)
-- [x] #52 - [User Story 19: Network Element Management (Issue #52)](https://github.com/gintatkinson/cogctl-ux-09/blob/feat/16-rack-contained-chassis-electricity/docs/user-stories/us-19-ne-management.md)
-- [x] #53 - [User Story 20: Component Identification & Hardware Attributes (Issue #53)](https://github.com/gintatkinson/cogctl-ux-09/blob/feat/16-rack-contained-chassis-electricity/docs/user-stories/us-20-component-hardware.md)
-- [x] #54 - [User Story 21: Component Containment & Roles (Issue #54)](https://github.com/gintatkinson/cogctl-ux-09/blob/feat/16-rack-contained-chassis-electricity/docs/user-stories/us-21-component-containment-roles.md)
+- [x] #50 - [User Story 17: Inventory Type Definitions & References (Issue #50)](https://github.com/gintatkinson/cogctl-ux-09/blob/main/docs/user-stories/us-17-types-references.md)
+- [x] #51 - [User Story 18: Common Entity Software & Manufacturer Attributes (Issue #51)](https://github.com/gintatkinson/cogctl-ux-09/blob/main/docs/user-stories/us-18-software-manufacturer.md)
+- [x] #52 - [User Story 19: Network Element Management (Issue #52)](https://github.com/gintatkinson/cogctl-ux-09/blob/main/docs/user-stories/us-19-ne-management.md)
+- [x] #53 - [User Story 20: Component Identification & Hardware Attributes (Issue #53)](https://github.com/gintatkinson/cogctl-ux-09/blob/main/docs/user-stories/us-20-component-hardware.md)
+- [x] #54 - [User Story 21: Component Containment & Roles (Issue #54)](https://github.com/gintatkinson/cogctl-ux-09/blob/main/docs/user-stories/us-21-component-containment-roles.md)
 ## 3. Architecture and System Interaction Diagrams
 ```mermaid
 classDiagram

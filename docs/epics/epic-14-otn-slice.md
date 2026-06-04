@@ -11,15 +11,15 @@ labels: ["epic", "ietf-otn-slice", "ietf-otn-slice-mpi"]
 This Epic covers the reverse-engineering of `ietf-otn-slice-mpi@2025-07-03.yang`. It defines a standard Optical Transport Network (OTN) slicing Multi-Point Interface (MPI) framework to support modeling, validating, and provisioning of Network Resource Partitions (NRPs) and their slice realization over OTN TE links.
 
 ## 2. Requirements & Checklist
-- [ ] #113 - [Feature 46: OTN Network Resource Partition MPI Mapping](https://github.com/gintatkinson/cogctl-ux-09/blob/feat/16-rack-contained-chassis-electricity/docs/features/feat-46-otn-slice-mpi-mapping.md)
+- [ ] #113 - [Feature 46: OTN Network Resource Partition MPI Mapping](https://github.com/gintatkinson/cogctl-ux-09/blob/main/docs/features/feat-46-otn-slice-mpi-mapping.md)
 
 ## Associated Use Cases & User Stories
 
 ### Associated Use Cases
-- [ ] #119 - [Use Case 19: Manage OTN Slice Resources (Issue #119)](https://github.com/gintatkinson/cogctl-ux-09/blob/feat/16-rack-contained-chassis-electricity/docs/use-cases/uc-19-manage-otn-slice-resources.md)
+- [ ] #119 - [Use Case 19: Manage OTN Slice Resources (Issue #119)](https://github.com/gintatkinson/cogctl-ux-09/blob/main/docs/use-cases/uc-19-manage-otn-slice-resources.md)
 
 ### Associated User Stories
-- [ ] #117 - [User Story 41: OTN Slice Lifecycle (Issue #117)](https://github.com/gintatkinson/cogctl-ux-09/blob/feat/16-rack-contained-chassis-electricity/docs/user-stories/us-41-otn-slice-lifecycle.md)
+- [ ] #117 - [User Story 41: OTN Slice Lifecycle (Issue #117)](https://github.com/gintatkinson/cogctl-ux-09/blob/main/docs/user-stories/us-41-otn-slice-lifecycle.md)
 ## 3. Architecture and System Interaction Diagrams
 ```mermaid
 classDiagram

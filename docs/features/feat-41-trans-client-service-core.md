@@ -10,7 +10,7 @@ covered-nodes: ["client-svc", "client-svc-instances", "client-svc-name", "client
 
 # Feature: Feature 41: Transport Client Service Core Attributes (Issue #108)
 
-**Parent Epic:** [Epic 15: Transport Client Service (Issue #121)](https://github.com/gintatkinson/cogctl-ux-09/blob/feat/16-rack-contained-chassis-electricity/docs/epics/epic-15-trans-client-service.md)
+**Parent Epic:** [Epic 15: Transport Client Service (Issue #121)](https://github.com/gintatkinson/cogctl-ux-09/blob/main/docs/epics/epic-15-trans-client-service.md)
 
 This feature establishes the core administrative configuration, performance alarm thresholds, resilience placeholders, metadata, and lifecycle states for Point-to-Point (P2P) Transport Client Services.
 
@@ -89,5 +89,5 @@ stateDiagram-v2
 >   }
 
 ## 6. Source References
-- **YANG Schema:** [ietf-trans-client-service.yang](https://github.com/gintatkinson/cogctl-ux-09/blob/feat/16-rack-contained-chassis-electricity/yang/ietf-trans-client-service.yang)
+- **YANG Schema:** [ietf-trans-client-service.yang](https://github.com/gintatkinson/cogctl-ux-09/blob/main/yang/ietf-trans-client-service.yang)
 - **Normative Document:** [draft-ietf-ccamp-otn-topo-yang](https://datatracker.ietf.org/doc/draft-ietf-ccamp-otn-topo-yang/)

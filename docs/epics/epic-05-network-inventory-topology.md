@@ -18,12 +18,12 @@ This Epic covers the digital engineering reverse-engineering of the IETF YANG mo
 ## Associated Use Cases & User Stories
 
 ### Associated Use Cases
-- [x] #63 - [Use Case 9: Ingest Inventory Underlay Topology (Issue #63)](https://github.com/gintatkinson/cogctl-ux-09/blob/feat/16-rack-contained-chassis-electricity/docs/use-cases/uc-09-ingest-underlay-topology.md)
-- [x] #64 - [Use Case 10: Query Port Breakout Channels (Issue #64)](https://github.com/gintatkinson/cogctl-ux-09/blob/feat/16-rack-contained-chassis-electricity/docs/use-cases/uc-10-query-port-breakouts.md)
+- [x] #63 - [Use Case 9: Ingest Inventory Underlay Topology (Issue #63)](https://github.com/gintatkinson/cogctl-ux-09/blob/main/docs/use-cases/uc-09-ingest-underlay-topology.md)
+- [x] #64 - [Use Case 10: Query Port Breakout Channels (Issue #64)](https://github.com/gintatkinson/cogctl-ux-09/blob/main/docs/use-cases/uc-10-query-port-breakouts.md)
 
 ### Associated User Stories
-- [x] #61 - [User Story 22: Underlay Network Topology Mapping (Issue #61)](https://github.com/gintatkinson/cogctl-ux-09/blob/feat/16-rack-contained-chassis-electricity/docs/user-stories/us-22-underlay-topology-mapping.md)
-- [x] #62 - [User Story 23: Topology Mapping of Port Breakouts (Issue #62)](https://github.com/gintatkinson/cogctl-ux-09/blob/feat/16-rack-contained-chassis-electricity/docs/user-stories/us-23-port-breakout-topology.md)
+- [x] #61 - [User Story 22: Underlay Network Topology Mapping (Issue #61)](https://github.com/gintatkinson/cogctl-ux-09/blob/main/docs/user-stories/us-22-underlay-topology-mapping.md)
+- [x] #62 - [User Story 23: Topology Mapping of Port Breakouts (Issue #62)](https://github.com/gintatkinson/cogctl-ux-09/blob/main/docs/user-stories/us-23-port-breakout-topology.md)
 ## 3. Architecture and System Interaction Diagrams
 ```mermaid
 classDiagram

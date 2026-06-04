@@ -20,10 +20,10 @@ This Epic covers the reverse-engineering of draft-ietf-ccamp-layer1-types (A YAN
 ## Associated Use Cases & User Stories
 
 ### Associated Use Cases
-- [ ] #130 - [Use Case 18: Provision Layer 1 Client Signal (Issue #130)](https://github.com/gintatkinson/cogctl-ux-09/blob/feat/16-rack-contained-chassis-electricity/docs/use-cases/uc-18-provision-layer1-client-signal.md)
+- [ ] #130 - [Use Case 18: Provision Layer 1 Client Signal (Issue #130)](https://github.com/gintatkinson/cogctl-ux-09/blob/main/docs/use-cases/uc-18-provision-layer1-client-signal.md)
 
 ### Associated User Stories
-- [ ] #129 - [User Story 38: Layer 1 Client Protocol Configuration (Issue #129)](https://github.com/gintatkinson/cogctl-ux-09/blob/feat/16-rack-contained-chassis-electricity/docs/user-stories/us-38-layer1-client-protocol.md)
+- [ ] #129 - [User Story 38: Layer 1 Client Protocol Configuration (Issue #129)](https://github.com/gintatkinson/cogctl-ux-09/blob/main/docs/user-stories/us-38-layer1-client-protocol.md)
 ## 3. Architecture and System Interaction Diagrams
 ```mermaid
 classDiagram

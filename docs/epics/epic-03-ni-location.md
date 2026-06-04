@@ -21,16 +21,16 @@ This Epic covers the digital engineering reverse-engineering of the IETF draft "
 ## Associated Use Cases & User Stories
 
 ### Associated Use Cases
-- [x] #42 - [Use Case 5: Validate Hierarchical Locations (Issue #42)](https://github.com/gintatkinson/cogctl-ux-09/blob/feat/16-rack-contained-chassis-electricity/docs/use-cases/uc-05-validate-hierarchical-locations.md)
-- [x] #43 - [Use Case 6: Validate Racks and Contained Chassis (Issue #43)](https://github.com/gintatkinson/cogctl-ux-09/blob/feat/16-rack-contained-chassis-electricity/docs/use-cases/uc-06-validate-racks-contained-chassis.md)
+- [x] #42 - [Use Case 5: Validate Hierarchical Locations (Issue #42)](https://github.com/gintatkinson/cogctl-ux-09/blob/main/docs/use-cases/uc-05-validate-hierarchical-locations.md)
+- [x] #43 - [Use Case 6: Validate Racks and Contained Chassis (Issue #43)](https://github.com/gintatkinson/cogctl-ux-09/blob/main/docs/use-cases/uc-06-validate-racks-contained-chassis.md)
 
 ### Associated User Stories
-- [x] #36 - [User Story 11: Hierarchical Inventory Locations (Issue #36)](https://github.com/gintatkinson/cogctl-ux-09/blob/feat/16-rack-contained-chassis-electricity/docs/user-stories/us-11-hierarchical-locations.md)
-- [x] #37 - [User Story 12: Location Physical Addresses (Issue #37)](https://github.com/gintatkinson/cogctl-ux-09/blob/feat/16-rack-contained-chassis-electricity/docs/user-stories/us-12-physical-addresses.md)
-- [x] #38 - [User Story 13: Direct Location-contained Chassis (Issue #38)](https://github.com/gintatkinson/cogctl-ux-09/blob/feat/16-rack-contained-chassis-electricity/docs/user-stories/us-13-direct-contained-chassis.md)
-- [x] #39 - [User Story 14: Equipment Racks Classification & Physical Bounds (Issue #39)](https://github.com/gintatkinson/cogctl-ux-09/blob/feat/16-rack-contained-chassis-electricity/docs/user-stories/us-14-racks-physical-bounds.md)
-- [x] #40 - [User Story 15: Rack Locations & Grid Coordinates (Issue #40)](https://github.com/gintatkinson/cogctl-ux-09/blob/feat/16-rack-contained-chassis-electricity/docs/user-stories/us-15-rack-locations-grid.md)
-- [x] #41 - [User Story 16: Rack-contained Chassis & Electricity Attributes (Issue #41)](https://github.com/gintatkinson/cogctl-ux-09/blob/feat/16-rack-contained-chassis-electricity/docs/user-stories/us-16-rack-contained-chassis-electricity.md)
+- [x] #36 - [User Story 11: Hierarchical Inventory Locations (Issue #36)](https://github.com/gintatkinson/cogctl-ux-09/blob/main/docs/user-stories/us-11-hierarchical-locations.md)
+- [x] #37 - [User Story 12: Location Physical Addresses (Issue #37)](https://github.com/gintatkinson/cogctl-ux-09/blob/main/docs/user-stories/us-12-physical-addresses.md)
+- [x] #38 - [User Story 13: Direct Location-contained Chassis (Issue #38)](https://github.com/gintatkinson/cogctl-ux-09/blob/main/docs/user-stories/us-13-direct-contained-chassis.md)
+- [x] #39 - [User Story 14: Equipment Racks Classification & Physical Bounds (Issue #39)](https://github.com/gintatkinson/cogctl-ux-09/blob/main/docs/user-stories/us-14-racks-physical-bounds.md)
+- [x] #40 - [User Story 15: Rack Locations & Grid Coordinates (Issue #40)](https://github.com/gintatkinson/cogctl-ux-09/blob/main/docs/user-stories/us-15-rack-locations-grid.md)
+- [x] #41 - [User Story 16: Rack-contained Chassis & Electricity Attributes (Issue #41)](https://github.com/gintatkinson/cogctl-ux-09/blob/main/docs/user-stories/us-16-rack-contained-chassis-electricity.md)
 ## 3. Architecture and System Interaction Diagrams
 ```mermaid
 classDiagram

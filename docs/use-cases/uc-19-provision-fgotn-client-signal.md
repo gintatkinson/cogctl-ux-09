@@ -41,11 +41,11 @@ The provisioning system receives a request to route and establish a 40 Mbps (4 f
 ## 8. Realization Matrix
 
 ### Required User Stories
-- [ ] #133 - [User Story 39: Fine-Grain ODUflex Protocol Integration](https://github.com/gintatkinson/cogctl-ux-09/blob/feat/16-rack-contained-chassis-electricity/docs/user-stories/us-39-fgotn-oduflex-integration.md)
+- [ ] #133 - [User Story 39: Fine-Grain ODUflex Protocol Integration](https://github.com/gintatkinson/cogctl-ux-09/blob/main/docs/user-stories/us-39-fgotn-oduflex-integration.md)
 
 ### Required Features
-- [ ] #132 - [Feature 41: Fine-Grain ODUflex Type Definition](https://github.com/gintatkinson/cogctl-ux-09/blob/feat/16-rack-contained-chassis-electricity/docs/features/feat-41-fgotn-oduflex-identity.md)
+- [ ] #132 - [Feature 41: Fine-Grain ODUflex Type Definition](https://github.com/gintatkinson/cogctl-ux-09/blob/main/docs/features/feat-41-fgotn-oduflex-identity.md)
 
 ## Source References
-YANG Schema: [ietf-fgotn-types.yang](https://github.com/gintatkinson/cogctl-ux-09/blob/feat/16-rack-contained-chassis-electricity/yang/ietf-fgotn-types.yang)  
+YANG Schema: [ietf-fgotn-types.yang](https://github.com/gintatkinson/cogctl-ux-09/blob/main/yang/ietf-fgotn-types.yang)  
 Normative Specification: [draft-tan-ccamp-fgotn-yang](https://datatracker.ietf.org/doc/draft-tan-ccamp-fgotn-yang/)

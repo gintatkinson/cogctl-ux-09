@@ -18,12 +18,12 @@ This Epic covers the reverse-engineering of RFC 9093 (A YANG Data Model for Laye
 ## Associated Use Cases & User Stories
 
 ### Associated Use Cases
-- [ ] #100 - [Use Case 17: Layer 0 Optical Frequency Slot Validation (Issue #100)](https://github.com/gintatkinson/cogctl-ux-09/blob/feat/16-rack-contained-chassis-electricity/docs/use-cases/uc-17-layer0-optical-frequency-slot.md)
+- [ ] #100 - [Use Case 17: Layer 0 Optical Frequency Slot Validation (Issue #100)](https://github.com/gintatkinson/cogctl-ux-09/blob/main/docs/use-cases/uc-17-layer0-optical-frequency-slot.md)
 
 ### Associated User Stories
-- [ ] #97 - [User Story 35: WSON Grid Provisioning (Issue #97)](https://github.com/gintatkinson/cogctl-ux-09/blob/feat/16-rack-contained-chassis-electricity/docs/user-stories/us-35-wson-grid-provisioning.md)
-- [ ] #98 - [User Story 36: Flexi-Grid Frequency Slots (Issue #98)](https://github.com/gintatkinson/cogctl-ux-09/blob/feat/16-rack-contained-chassis-electricity/docs/user-stories/us-36-flexi-grid-frequency-slots.md)
-- [ ] #99 - [User Story 37: Optical Label Ranges (Issue #99)](https://github.com/gintatkinson/cogctl-ux-09/blob/feat/16-rack-contained-chassis-electricity/docs/user-stories/us-37-optical-label-ranges.md)
+- [ ] #97 - [User Story 35: WSON Grid Provisioning (Issue #97)](https://github.com/gintatkinson/cogctl-ux-09/blob/main/docs/user-stories/us-35-wson-grid-provisioning.md)
+- [ ] #98 - [User Story 36: Flexi-Grid Frequency Slots (Issue #98)](https://github.com/gintatkinson/cogctl-ux-09/blob/main/docs/user-stories/us-36-flexi-grid-frequency-slots.md)
+- [ ] #99 - [User Story 37: Optical Label Ranges (Issue #99)](https://github.com/gintatkinson/cogctl-ux-09/blob/main/docs/user-stories/us-37-optical-label-ranges.md)
 ## 3. Architecture and System Interaction Diagrams
 ```mermaid
 classDiagram

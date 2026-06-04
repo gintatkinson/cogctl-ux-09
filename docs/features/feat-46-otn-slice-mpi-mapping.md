@@ -10,7 +10,7 @@ covered-nodes: ["containers", "link", "link-resource", "nrp-bandwidth", "nrp-id"
 
 # Feature: Feature 46: OTN Network Resource Partition MPI Mapping (Issue #113)
 
-**Parent Epic:** [Epic 14: OTN Network Slice (Issue #123)](https://github.com/gintatkinson/cogctl-ux-09/blob/feat/16-rack-contained-chassis-electricity/docs/epics/epic-14-otn-slice.md)
+**Parent Epic:** [Epic 14: OTN Network Slice (Issue #123)](https://github.com/gintatkinson/cogctl-ux-09/blob/main/docs/epics/epic-14-otn-slice.md)
 
 This feature introduces the capability to map OTN Network Resource Partitions (NRPs) onto physical and logical links over the Multi-Point Interface (MPI), augmenting the Traffic Engineering (TE) link attributes.
 
