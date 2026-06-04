@@ -20,3 +20,6 @@ So that I can identify packet loss, MTU violations, and transit delay exceedance
   - **Given** the ingress MTU of a port is 1500 bytes
   - **When** 5 frames of size 1600 bytes are received on the port
   - **Then** the `mtu-exceeded-discards` counter increments by 5, and the `discard-inbound` counter increments by 5.
+
+## Normative Specification
+- [IEEE Std 802.1Q-2014](../std/802.1Q-2014.pdf)

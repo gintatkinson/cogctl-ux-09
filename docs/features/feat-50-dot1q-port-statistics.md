@@ -70,4 +70,4 @@ graph TD
 
 ## 6. Source References
 - **YANG Schema:** [ieee802-dot1q-types.yang](https://github.com/gintatkinson/cogctl-ux-09/blob/main/yang/ieee802-dot1q-types.yang)
-- **Normative Specification:** IEEE Std 802.1Q-2014, Clause 12.6.1.1.3.
+- **Normative Specification:** [IEEE Std 802.1Q-2014](../std/802.1Q-2014.pdf), Clause 12.6.1.1.3.

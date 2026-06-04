@@ -8,7 +8,7 @@ labels: ["epic", "ieee802-dot1q-types"]
 # Epic: Epic 16: IEEE 802.1Q Common Types (Issue #150)
 
 ## 1. Context
-This Epic covers the reverse-engineering of the `ieee802-dot1q-types@2022-10-29.yang` schema and its associated normative specifications from IEEE Std 802.1Q-2014. It models the core data types, priority maps, classification policies, and statistics definitions used to build, configure, and monitor standard Bridges and Bridged Networks.
+This Epic covers the reverse-engineering of the `ieee802-dot1q-types@2022-10-29.yang` schema and its associated normative specifications from [IEEE Std 802.1Q-2014](../std/802.1Q-2014.pdf). It models the core data types, priority maps, classification policies, and statistics definitions used to build, configure, and monitor standard Bridges and Bridged Networks.
 
 ## 2. Requirements & Checklist
 - [ ] #139 - [Feature 47: IEEE 802.1Q Bridge Port VLAN Tag and Type Definitions](https://github.com/gintatkinson/cogctl-ux-09/blob/main/docs/features/feat-47-dot1q-tag-classifier.md)
@@ -63,4 +63,4 @@ classDiagram
 
 ## 6. Source References
 - **YANG Schema:** [ieee802-dot1q-types.yang](https://github.com/gintatkinson/cogctl-ux-09/blob/main/yang/ieee802-dot1q-types.yang)
-- **Normative Specification:** IEEE Std 802.1Q-2014, Bridges and Bridged Networks.
+- **Normative Specification:** [IEEE Std 802.1Q-2014](../std/802.1Q-2014.pdf), Bridges and Bridged Networks.

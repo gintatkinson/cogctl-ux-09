@@ -35,3 +35,6 @@ This use case describes how a Bridge Port Ingress Interface processes received E
 ## 4. Realisations
 - **Features**: Feature 47, Feature 48, Feature 49, Feature 50
 - **User Stories**: User Story 44, User Story 46, User Story 47
+
+## 5. Normative Specification
+- [IEEE Std 802.1Q-2014](../std/802.1Q-2014.pdf)

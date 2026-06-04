@@ -20,3 +20,6 @@ So that incoming priority code points (PCPs) map to the correct traffic class qu
   - **Given** a bridge port's PCP decoding table is set to defaults
   - **When** the operator maps PCP 6 and 7 to traffic class 5
   - **Then** frames received with PCP 6 or 7 are successfully queued in traffic class queue 5.
+
+## Normative Specification
+- [IEEE Std 802.1Q-2014](../std/802.1Q-2014.pdf)

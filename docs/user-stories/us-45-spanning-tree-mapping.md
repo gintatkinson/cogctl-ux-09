@@ -20,3 +20,6 @@ So that I can optimize loop prevention topology based on VLAN groupings.
   - **Given** MSTID 2 is inactive
   - **When** the architect associates VLAN range `10-20,50` with MSTID 2
   - **Then** the association is validated and Spanning Tree protocols apply the topology of MSTID 2 to those VLANs.
+
+## Normative Specification
+- [IEEE Std 802.1Q-2014](../std/802.1Q-2014.pdf)

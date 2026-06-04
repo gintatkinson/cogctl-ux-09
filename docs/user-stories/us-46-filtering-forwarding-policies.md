@@ -20,3 +20,6 @@ So that unauthorized MAC addresses on specific VLANs are filtered/dropped at the
   - **Given** port 1 has default FDB settings
   - **When** the administrator configures a static filtering entry for MAC address `AA-BB-CC-DD-EE-FF` on VLAN 20 with drop policy
   - **Then** all ingress frames from `AA-BB-CC-DD-EE-FF` on VLAN 20 are dropped at port 1.
+
+## Normative Specification
+- [IEEE Std 802.1Q-2014](../std/802.1Q-2014.pdf)

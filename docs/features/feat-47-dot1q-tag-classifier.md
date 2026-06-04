@@ -101,4 +101,4 @@ stateDiagram-v2
 
 ## 6. Source References
 - **YANG Schema:** [ieee802-dot1q-types.yang](https://github.com/gintatkinson/cogctl-ux-09/blob/main/yang/ieee802-dot1q-types.yang)
-- **Normative Specification:** IEEE Std 802.1Q-2014, Clauses 5.5 and 5.6.
+- **Normative Specification:** [IEEE Std 802.1Q-2014](../std/802.1Q-2014.pdf), Clauses 5.5 and 5.6.

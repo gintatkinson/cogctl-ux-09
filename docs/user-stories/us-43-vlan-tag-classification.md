@@ -20,3 +20,6 @@ So that incoming traffic can be correctly assigned to Customer or Service VLAN t
   - **Given** a bridge port has no active tag classifiers
   - **When** the operator provisions a classifier with `tag-type` set to `c-vlan` and `vlan-id` set to `100`
   - **Then** the configuration is validated, saved, and applied to match ingress Customer VLAN frames with tag EtherType `81-00` and ID 100.
+
+## Normative Specification
+- [IEEE Std 802.1Q-2014](../std/802.1Q-2014.pdf)

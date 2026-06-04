@@ -34,3 +34,6 @@ This use case describes how a Network Provisioning Controller configures VLAN ta
 ## 4. Realisations
 - **Features**: Feature 47, Feature 48
 - **User Stories**: User Story 43, User Story 44
+
+## 5. Normative Specification
+- [IEEE Std 802.1Q-2014](../std/802.1Q-2014.pdf)
