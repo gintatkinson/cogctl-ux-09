@@ -41,3 +41,10 @@ classDiagram
 ## 4. Verification and Validation Plan
 - Execute automated Python test parsing to verify that model coverage check returns 100% parity.
 - Execute the reconciliation tool to verify that checklists synchronize seamlessly with GitHub Issue states.
+
+## 5. Specification Context
+> This YANG module specifies standard Fine-Grain Optical Transport Network (fgOTN) identities—specifically the `fgODUflex` identity—to support modeling, validating, and provisioning of sub-1Gbit/s flexible rate optical client containers.
+
+## 6. Source References
+YANG Schema: [ietf-fgotn-types.yang](https://github.com/YangModels/yang/blob/954277fad0534e9b0b495774255b0c4ce854f8b2/experimental/ietf-extracted-YANG-modules/ietf-fgotn-types%402026-02-27.yang)
+Normative Specification: [draft-ietf-ccamp-otn-topo-yang](https://datatracker.ietf.org/doc/draft-ietf-ccamp-otn-topo-yang/)

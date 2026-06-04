@@ -51,3 +51,10 @@ classDiagram
 ## 4. Verification and Validation Plan
 - Execute automated Python test parsing to verify that model coverage check returns 100% parity.
 - Execute the reconciliation tool to verify that checklists synchronize seamlessly with GitHub Issue states.
+
+## 5. Specification Context
+> This YANG module defines standard Layer 0 Fixed Grid (CWDM/DWDM) and Flexi-Grid identities, central frequency/wavelength formulas, and slot configurations to model optical link characteristics.
+
+## 6. Source References
+YANG Schema: [ietf-layer0-types.yang](https://github.com/YangModels/yang/blob/954277fad0534e9b0b495774255b0c4ce854f8b2/experimental/ietf-extracted-YANG-modules/ietf-layer0-types%402021-02-22.yang)
+Normative Specification: [RFC 9093 A YANG Data Model for Layer 0 Types](https://datatracker.ietf.org/doc/rfc9093/)

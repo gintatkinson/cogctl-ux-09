@@ -80,3 +80,10 @@ classDiagram
 ## 4. Verification and Validation Plan
 - Execute automated Python test parsing to verify that model coverage check returns 100% parity.
 - Execute the reconciliation tool to verify that checklists synchronize seamlessly with GitHub Issue states.
+
+## 5. Specification Context
+> This YANG module defines standard Layer 1 client signal protocols, physical interface transceivers, PMD functions, and Optical Data Unit (ODU) multiplexing structures to model optical path capacities and constraints.
+
+## 6. Source References
+YANG Schema: [ietf-layer1-types.yang](https://github.com/YangModels/yang/blob/954277fad0534e9b0b495774255b0c4ce854f8b2/experimental/ietf-extracted-YANG-modules/ietf-layer1-types%402024-02-22.yang)
+Normative Specification: [draft-ietf-ccamp-layer1-types](https://datatracker.ietf.org/doc/draft-ietf-ccamp-layer1-types/)
