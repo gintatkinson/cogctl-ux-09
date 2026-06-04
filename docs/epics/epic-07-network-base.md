@@ -16,10 +16,10 @@ This Epic covers the digital engineering reverse-engineering of the IETF YANG mo
 ## Associated Use Cases & User Stories
 
 ### Associated Use Cases
-- [ ] #77 - [Use Case 13: Ingest Base Network Topology (Issue #77)](https://github.com/gintatkinson/cogctl-ux-09/blob/main/docs/use-cases/uc-13-ingest-base-network.md)
+- [ ] #77 - [Use Case 13: Ingest Base Network Topology (Issue #77)](https://github.com/gintatkinson/cogctl-ux-09/blob/feat/16-rack-contained-chassis-electricity/docs/use-cases/uc-13-ingest-base-network.md)
 
 ### Associated User Stories
-- [ ] #75 - [User Story 26: Multi-Layer Network Mapping (Issue #75)](https://github.com/gintatkinson/cogctl-ux-09/blob/main/docs/user-stories/us-26-multi-layer-network-topology.md)
+- [ ] #75 - [User Story 26: Multi-Layer Network Mapping (Issue #75)](https://github.com/gintatkinson/cogctl-ux-09/blob/feat/16-rack-contained-chassis-electricity/docs/user-stories/us-26-multi-layer-network-topology.md)
 ## 3. Architecture and System Interaction Diagrams
 ```mermaid
 classDiagram

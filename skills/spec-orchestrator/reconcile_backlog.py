@@ -467,12 +467,15 @@ def main():
             if not filename.endswith(".md"):
                 continue
             filepath = os.path.join(epics_dir, filename)
-            title = extract_title(filepath)
-            if not title:
+            p = parse_markdown_file(filepath)
+            if not p or not p["title"]:
                 continue
             
-            norm = normalize_title(title)
-            issue_num = epic_titles.get(norm)
+            issue_num = p.get("issue")
+            if not (issue_num and issue_num in issue_dict):
+                norm = normalize_title(p["title"])
+                issue_num = epic_titles.get(norm)
+            
             if issue_num:
                 updated_content, completed = update_checklist_in_file(filepath, issue_dict)
                 is_open = issue_dict[issue_num]["state"].upper() == "OPEN"
@@ -486,7 +489,7 @@ def main():
                         )
                         issue_dict[issue_num]["state"] = "CLOSED"
             else:
-                print(f"Warning: No GitHub Epic issue found matching: '{title}'")
+                print(f"Warning: No GitHub Epic issue found matching: '{p['title']}'")
 
     # Process Features
     features_dir = os.path.join(docs_dir, "features")
@@ -495,12 +498,15 @@ def main():
             if not filename.endswith(".md"):
                 continue
             filepath = os.path.join(features_dir, filename)
-            title = extract_title(filepath)
-            if not title:
+            p = parse_markdown_file(filepath)
+            if not p or not p["title"]:
                 continue
             
-            norm = normalize_title(title)
-            issue_num = feature_titles.get(norm)
+            issue_num = p.get("issue")
+            if not (issue_num and issue_num in issue_dict):
+                norm = normalize_title(p["title"])
+                issue_num = feature_titles.get(norm)
+            
             if issue_num:
                 is_open = issue_dict[issue_num]["state"].upper() == "OPEN"
                 if is_open:
@@ -511,9 +517,9 @@ def main():
                     feat_id_match = re.search(r'feat-(\d+)-', filename)
                     if feat_id_match:
                         feature_id = feat_id_match.group(1)
-                        auto_generate_solution_walkthrough(project_root, feature_id, issue_num, title, filepath)
+                        auto_generate_solution_walkthrough(project_root, feature_id, issue_num, p["title"], filepath)
             else:
-                print(f"Warning: No GitHub Feature issue found matching: '{title}'")
+                print(f"Warning: No GitHub Feature issue found matching: '{p["title"]}'")
 
     # Process User Stories
     stories_dir = os.path.join(docs_dir, "user-stories")
@@ -522,12 +528,15 @@ def main():
             if not filename.endswith(".md"):
                 continue
             filepath = os.path.join(stories_dir, filename)
-            title = extract_title(filepath)
-            if not title:
+            p = parse_markdown_file(filepath)
+            if not p or not p["title"]:
                 continue
             
-            norm = normalize_title(title)
-            issue_num = story_titles.get(norm)
+            issue_num = p.get("issue")
+            if not (issue_num and issue_num in issue_dict):
+                norm = normalize_title(p["title"])
+                issue_num = story_titles.get(norm)
+            
             if issue_num:
                 _, completed = update_checklist_in_file(filepath, issue_dict)
                 is_open = issue_dict[issue_num]["state"].upper() == "OPEN"
@@ -536,11 +545,11 @@ def main():
                 if completed and is_open:
                     close_issue_on_github(
                         issue_num,
-                        f"Resolved. All dependent features/tasks for BDD scenario '{title}' have been completed and verified."
+                        f"Resolved. All dependent features/tasks for BDD scenario '{p['title']}' have been completed and verified."
                     )
                     issue_dict[issue_num]["state"] = "CLOSED"
             else:
-                print(f"Warning: No GitHub User Story issue found matching: '{title}'")
+                print(f"Warning: No GitHub User Story issue found matching: '{p['title']}'")
 
     # Process Use Cases
     usecases_dir = os.path.join(docs_dir, "use-cases")
@@ -549,12 +558,15 @@ def main():
             if not filename.endswith(".md"):
                 continue
             filepath = os.path.join(usecases_dir, filename)
-            title = extract_title(filepath)
-            if not title:
+            p = parse_markdown_file(filepath)
+            if not p or not p["title"]:
                 continue
             
-            norm = normalize_title(title)
-            issue_num = usecase_titles.get(norm)
+            issue_num = p.get("issue")
+            if not (issue_num and issue_num in issue_dict):
+                norm = normalize_title(p["title"])
+                issue_num = usecase_titles.get(norm)
+            
             if issue_num:
                 _, completed = update_checklist_in_file(filepath, issue_dict)
                 is_open = issue_dict[issue_num]["state"].upper() == "OPEN"
@@ -563,11 +575,11 @@ def main():
                 if completed and is_open:
                     close_issue_on_github(
                         issue_num,
-                        f"Resolved. All dependent user stories and features for use case '{title}' are completed."
+                        f"Resolved. All dependent user stories and features for use case '{p['title']}' are completed."
                     )
                     issue_dict[issue_num]["state"] = "CLOSED"
             else:
-                print(f"Warning: No GitHub Use Case issue found matching: '{title}'")
+                print(f"Warning: No GitHub Use Case issue found matching: '{p['title']}'")
 
     print("Backlog reconciliation complete.")
 

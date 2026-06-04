@@ -131,6 +131,51 @@ def load_feature_files(features_dir):
         })
     return features
 
+def audit_epics_structure(workspace_dir):
+    """
+    Audits all epic markdown files in docs/epics/ to ensure they contain the required headers:
+      - ## 1. Context
+      - ## 2. Requirements & Checklist
+      - ## 3. Architecture and System Interaction Diagrams
+      - ## 4. (State Machine Definitions OR Verification and Validation Plan)
+      - ## 5. Specification Context
+      - ## 6. Source References
+    """
+    epics_dir = os.path.join(workspace_dir, "docs", "epics")
+    errors = {}
+    if not os.path.exists(epics_dir):
+        return errors
+
+    required_headers = [
+        (r"^## 1\.\s+Context\b", "## 1. Context"),
+        (r"^## 2\.\s+Requirements\s+&\s+Checklist\b", "## 2. Requirements & Checklist"),
+        (r"^## 3\.\s+Architecture\s+and\s+System\s+Interaction\s+Diagrams\b", "## 3. Architecture and System Interaction Diagrams"),
+        (r"^## 4\.\s+(State\s+Machine\s+Definitions|Verification\s+and\s+Validation\s+Plan)\b", "## 4. State Machine Definitions / Verification and Validation Plan"),
+        (r"^## 5\.\s+Specification\s+Context\b", "## 5. Specification Context"),
+        (r"^## 6\.\s+Source\s+References\b", "## 6. Source References")
+    ]
+
+    for filename in os.listdir(epics_dir):
+        if not filename.endswith(".md"):
+            continue
+        filepath = os.path.join(epics_dir, filename)
+        try:
+            with open(filepath, "r", encoding="utf-8") as f:
+                content = f.read()
+        except Exception as e:
+            errors[filename] = [f"Failed to read file: {e}"]
+            continue
+
+        missing = []
+        for pattern, header_name in required_headers:
+            if not re.search(pattern, content, re.MULTILINE):
+                missing.append(header_name)
+        
+        if missing:
+            errors[filename] = missing
+            
+    return errors
+
 def main():
     try:
         workspace_dir = subprocess.check_output(["git", "rev-parse", "--show-toplevel"], text=True).strip()
@@ -347,7 +392,9 @@ def main():
         print("No target schema nodes found to verify.")
         sys.exit(1)
 
-    if coverage_gaps or semantic_violations or invalid_declarations or missing_designs:
+    epic_errors = audit_epics_structure(workspace_dir)
+
+    if coverage_gaps or semantic_violations or invalid_declarations or missing_designs or epic_errors:
         if coverage_gaps:
             print("\n[!] Coverage Gaps Identified:")
             for module_name, missing in sorted(coverage_gaps.items()):
@@ -369,10 +416,16 @@ def main():
             print("\n[!] Design / Solution Walkthrough Gaps Identified:")
             for feat_file, design_file in missing_designs:
                 print(f"  Feature spec '{feat_file}' is missing a corresponding solution document (e.g. '{design_file}') under 'docs/designs/'")
-        print("\nError: Parity validation failed (either model coverage, semantic requirements, invalid declarations, or missing design documents present).")
+        if epic_errors:
+            print("\n[!] Epic Document Structure Violations Identified:")
+            for filename, missing in sorted(epic_errors.items()):
+                print(f"  Epic file '{filename}' is missing mandated sections:")
+                for m in missing:
+                    print(f"    - {m}")
+        print("\nError: Parity validation failed (either model coverage, semantic requirements, invalid declarations, missing design documents, or epic structure violations present).")
         sys.exit(1)
     else:
-        print("\nSuccess: 100% model coverage, semantic requirements, and design solution documents verified across all specification files.")
+        print("\nSuccess: 100% model coverage, semantic requirements, epic structures, and design solution documents verified across all specification files.")
         sys.exit(0)
 
 if __name__ == "__main__":
