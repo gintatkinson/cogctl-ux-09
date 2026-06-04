@@ -2,7 +2,7 @@
 title: "User Story 41: OTN Slice Lifecycle (Issue #117)"
 type: "user-story"
 issue: 117
-spec_source: "draft-ietf-ccamp-otn-topo-yang"
+spec_source: "draft-ietf-ccamp-yang-otn-slicing"
 ---
 
 # User Story 41: OTN Slice Lifecycle (Issue #117)
@@ -30,4 +30,4 @@ spec_source: "draft-ietf-ccamp-otn-topo-yang"
 
 ## Source References
 YANG Schema: [ietf-otn-slice-mpi.yang](https://github.com/gintatkinson/cogctl-ux-09/blob/main/yang/ietf-otn-slice-mpi.yang)
-Normative Specification: [draft-ietf-ccamp-otn-topo-yang](https://datatracker.ietf.org/doc/draft-ietf-ccamp-otn-topo-yang/)
+Normative Specification: [draft-ietf-ccamp-yang-otn-slicing](https://datatracker.ietf.org/doc/draft-ietf-ccamp-yang-otn-slicing/)

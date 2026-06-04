@@ -29,4 +29,4 @@ spec_source: "draft-ietf-ccamp-yang-otn-slicing"
 
 ## Source References
 YANG Schema: [ietf-otn-slice.yang](https://github.com/gintatkinson/cogctl-ux-09/blob/main/yang/ietf-otn-slice.yang)
-Normative Specification: [draft-ietf-ccamp-otn-topo-yang](https://datatracker.ietf.org/doc/draft-ietf-ccamp-otn-topo-yang/)
+Normative Specification: [draft-ietf-ccamp-yang-otn-slicing](https://datatracker.ietf.org/doc/draft-ietf-ccamp-yang-otn-slicing/)
