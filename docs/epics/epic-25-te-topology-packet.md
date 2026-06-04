@@ -8,7 +8,10 @@ labels: ["epic", "ietf-te-topology-packet"]
 # Epic: Epic 25: Packet Traffic Engineering Topologies Model (Issue #204)
 
 ## 1. Context
-This Epic covers the reverse-engineering of `ietf-te-topology-packet@2024-06-08.yang` as specified in `RFC 8795`. The model defines a YANG data model for representing and manipulating PSC (Packet Switching Capable) Traffic Engineering (TE) topologies. It augments the base TE topology model (RFC 8795) with packet-specific attributes like interface MTU and minimum LSP bandwidth.
+This Epic covers the reverse-engineering of `ietf-te-topology-packet@2024-06-08.yang` as specified in `draft-ietf-teas-yang-l3-te-topo-18`. The model defines a YANG data model for representing and manipulating PSC (Packet Switching Capable) Traffic Engineering (TE) topologies. It augments the base TE topology model (RFC 8795) with packet-specific attributes like interface MTU and minimum LSP bandwidth.
+
+### Companion State Modules
+The non-NMDA companion state modules (`ietf-l3-te-topology-state` and `ietf-te-topology-packet-state`) defined in Appendix A of the draft are redundant and are omitted from this implementation in alignment with the draft's recommendation for NMDA-compliant systems: *"The companion modules, ietf-l3-te-topology-state and ietf-te-topology-packet-state, are redundant and SHOULD NOT be supported by implementations that support NMDA."*
 
 ## 2. Requirements & Checklist
 - [ ] #201 - [Feature 69: Packet Traffic Engineering Topologies Core](https://github.com/gintatkinson/cogctl-ux-09/blob/main/docs/features/feat-69-te-topology-packet-core.md)
@@ -50,4 +53,4 @@ stateDiagram-v2
 
 ## 6. Source References
 YANG Schema: [ietf-te-topology-packet.yang](https://github.com/gintatkinson/cogctl-ux-09/blob/main/yang/ietf-te-topology-packet.yang)
-Normative Specification: [RFC 8795](https://datatracker.ietf.org/doc/rfc8795/)
+Normative Specification: [draft-ietf-teas-yang-l3-te-topo-18](https://www.ietf.org/archive/id/draft-ietf-teas-yang-l3-te-topo-18.txt)

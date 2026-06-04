@@ -105,7 +105,7 @@ module ietf-l3-te-topology {
     uses l3-te-node-attributes;
   }
 
-  augment "/nw:networks/nw:node/nt:termination-point/"
+  augment "/nw:networks/nw:network/nw:node/nt:termination-point/"
     + "l3t:l3-termination-point-attributes" {
     when "../../../nw:network-types/l3t:l3-unicast-topology/"
       + "l3tet:l3-te" {

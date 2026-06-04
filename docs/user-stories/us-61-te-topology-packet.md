@@ -2,7 +2,7 @@
 title: "User Story 61: Manage Packet Traffic Engineering Topologies (Issue #202)"
 type: "user-story"
 issue: 202
-spec_source: "RFC 8795"
+spec_source: "draft-ietf-teas-yang-l3-te-topo-18"
 ---
 
 # User Story 61: Manage Packet Traffic Engineering Topologies (Issue #202)
@@ -30,4 +30,4 @@ spec_source: "RFC 8795"
 
 ## Source References
 YANG Schema: [ietf-te-topology-packet.yang](https://github.com/gintatkinson/cogctl-ux-09/blob/main/yang/ietf-te-topology-packet.yang)
-Normative Specification: [RFC 8795](https://datatracker.ietf.org/doc/rfc8795/)
+Normative Specification: [draft-ietf-teas-yang-l3-te-topo-18](https://www.ietf.org/archive/id/draft-ietf-teas-yang-l3-te-topo-18.txt)
