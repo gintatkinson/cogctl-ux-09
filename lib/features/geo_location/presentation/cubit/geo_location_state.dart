@@ -1,8 +1,9 @@
+import 'package:equatable/equatable.dart';
 import 'package:cogctl_ux/features/geo_location/domain/geo_location.dart';
 
 enum GeoLocationStatus { initial, success, failure }
 
-class GeoLocationState {
+class GeoLocationState extends Equatable {
   final List<GeoLocation> records;
   final String coordinateMode;
   final bool alternateSystemsEnabled;
@@ -54,6 +55,34 @@ class GeoLocationState {
     this.computedSpeed,
     this.computedHeading,
   });
+
+  @override
+  List<Object?> get props => [
+        records,
+        coordinateMode,
+        alternateSystemsEnabled,
+        selectedNetworkDomain,
+        status,
+        generalError,
+        bodyError,
+        altSystemError,
+        datumError,
+        coordAccError,
+        heightAccError,
+        latError,
+        lonError,
+        heightError,
+        xError,
+        yError,
+        zError,
+        vNorthError,
+        vEastError,
+        vUpError,
+        timestampError,
+        validUntilError,
+        computedSpeed,
+        computedHeading,
+      ];
 
   GeoLocationState copyWith({
     List<GeoLocation>? records,

@@ -1,8 +1,9 @@
+import 'package:equatable/equatable.dart';
 import 'package:cogctl_ux/features/software_configuration/domain/software_manufacturer.dart';
 
 enum SoftwareManufacturerStatus { initial, success, failure }
 
-class SoftwareManufacturerState {
+class SoftwareManufacturerState extends Equatable {
   final List<MockSoftwareManufacturerConfig> configs;
   final MockSoftwareManufacturerConfig? selectedConfig;
   final SoftwareManufacturerStatus status;
@@ -14,6 +15,9 @@ class SoftwareManufacturerState {
     this.status = SoftwareManufacturerStatus.initial,
     this.generalError,
   });
+
+  @override
+  List<Object?> get props => [configs, selectedConfig, status, generalError];
 
   SoftwareManufacturerState copyWith({
     List<MockSoftwareManufacturerConfig>? configs,

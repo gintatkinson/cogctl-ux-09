@@ -1,8 +1,9 @@
+import 'package:equatable/equatable.dart';
 import 'package:cogctl_ux/features/infrastructure/domain/equipment_rack.dart';
 
 enum EquipmentRackStatus { initial, success, failure }
 
-class EquipmentRackState {
+class EquipmentRackState extends Equatable {
   final List<EquipmentRack> racks;
   final EquipmentRack? selectedRack;
   final List<String> validLocationIds;
@@ -40,6 +41,27 @@ class EquipmentRackState {
     this.chassisError,
     this.isEditing = false,
   });
+
+  @override
+  List<Object?> get props => [
+        racks,
+        selectedRack,
+        validLocationIds,
+        status,
+        generalError,
+        idError,
+        heightError,
+        widthError,
+        depthError,
+        timestampError,
+        validUntilError,
+        rowError,
+        colError,
+        maxVoltageError,
+        maxAllocatedPowerError,
+        chassisError,
+        isEditing,
+      ];
 
   EquipmentRackState copyWith({
     List<EquipmentRack>? racks,

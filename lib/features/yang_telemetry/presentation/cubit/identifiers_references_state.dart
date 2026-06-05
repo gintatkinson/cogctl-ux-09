@@ -1,8 +1,9 @@
+import 'package:equatable/equatable.dart';
 import 'package:cogctl_ux/features/yang_telemetry/domain/identifiers_references.dart';
 
 enum IdentifiersReferencesStatus { initial, success, failure }
 
-class IdentifiersReferencesState {
+class IdentifiersReferencesState extends Equatable {
   final List<YangIdentifierReference> nodes;
   final YangIdentifierReference? selectedNode;
   final IdentifiersReferencesStatus status;
@@ -16,6 +17,9 @@ class IdentifiersReferencesState {
     this.valueError,
     this.generalError,
   });
+
+  @override
+  List<Object?> get props => [nodes, selectedNode, status, valueError, generalError];
 
   IdentifiersReferencesState copyWith({
     List<YangIdentifierReference>? nodes,
