@@ -74,7 +74,7 @@ class EquipmentRackCubit extends Cubit<EquipmentRackState> {
           final h = int.parse(trimmed);
           if (h <= 0) throw const FormatException();
           emit(state.copyWith(heightError: () => null));
-        } catch (_) {
+        } on FormatException {
           emit(state.copyWith(heightError: () => 'Must be a positive integer.'));
         }
         break;
@@ -87,7 +87,7 @@ class EquipmentRackCubit extends Cubit<EquipmentRackState> {
           final w = int.parse(trimmed);
           if (w <= 0) throw const FormatException();
           emit(state.copyWith(widthError: () => null));
-        } catch (_) {
+        } on FormatException {
           emit(state.copyWith(widthError: () => 'Must be a positive integer.'));
         }
         break;
@@ -100,7 +100,7 @@ class EquipmentRackCubit extends Cubit<EquipmentRackState> {
           final d = int.parse(trimmed);
           if (d <= 0) throw const FormatException();
           emit(state.copyWith(depthError: () => null));
-        } catch (_) {
+        } on FormatException {
           emit(state.copyWith(depthError: () => 'Must be a positive integer.'));
         }
         break;
@@ -112,7 +112,7 @@ class EquipmentRackCubit extends Cubit<EquipmentRackState> {
         try {
           DateTime.parse(trimmed);
           emit(state.copyWith(timestampError: () => null));
-        } catch (_) {
+        } on FormatException {
           emit(state.copyWith(timestampError: () => 'Invalid ISO-8601 format.'));
         }
         break;
@@ -124,7 +124,7 @@ class EquipmentRackCubit extends Cubit<EquipmentRackState> {
         try {
           DateTime.parse(trimmed);
           emit(state.copyWith(validUntilError: () => null));
-        } catch (_) {
+        } on FormatException {
           emit(state.copyWith(validUntilError: () => 'Invalid ISO-8601 format.'));
         }
         break;
@@ -137,7 +137,7 @@ class EquipmentRackCubit extends Cubit<EquipmentRackState> {
           final r = int.parse(trimmed);
           if (r < 0) throw const FormatException();
           emit(state.copyWith(rowError: () => null));
-        } catch (_) {
+        } on FormatException {
           emit(state.copyWith(rowError: () => 'Must be a non-negative integer.'));
         }
         break;
@@ -150,7 +150,7 @@ class EquipmentRackCubit extends Cubit<EquipmentRackState> {
           final c = int.parse(trimmed);
           if (c < 0) throw const FormatException();
           emit(state.copyWith(colError: () => null));
-        } catch (_) {
+        } on FormatException {
           emit(state.copyWith(colError: () => 'Must be a non-negative integer.'));
         }
         break;
@@ -163,7 +163,7 @@ class EquipmentRackCubit extends Cubit<EquipmentRackState> {
           final v = double.parse(trimmed);
           if (v <= 0) throw const FormatException();
           emit(state.copyWith(maxVoltageError: () => null));
-        } catch (_) {
+        } on FormatException {
           emit(state.copyWith(maxVoltageError: () => 'Must be a positive number.'));
         }
         break;
@@ -176,7 +176,7 @@ class EquipmentRackCubit extends Cubit<EquipmentRackState> {
           final p = double.parse(trimmed);
           if (p <= 0) throw const FormatException();
           emit(state.copyWith(maxAllocatedPowerError: () => null));
-        } catch (_) {
+        } on FormatException {
           emit(state.copyWith(maxAllocatedPowerError: () => 'Must be a positive number.'));
         }
         break;

@@ -514,7 +514,7 @@ class _InventoryLocationViewState extends State<_InventoryLocationView> {
       try {
         InventoryLocationValidator.detectCircularLoop(state.selectedLocation!.id, loc.id, state.locations);
         return true;
-      } catch (_) {
+      } on FormatException {
         return false;
       }
     }).toList();

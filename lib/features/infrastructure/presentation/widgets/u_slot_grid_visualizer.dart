@@ -157,12 +157,9 @@ class USlotGridVisualizer extends StatelessWidget {
                 itemBuilder: (context, index) {
                   final uIndex = units - index; // Numbered top to bottom
                   
-                  RackContainedChassis? chassis;
-                  try {
-                    chassis = rack.containedChassis.firstWhere((c) => c.relativePosition == uIndex);
-                  } catch (_) {
-                    chassis = null;
-                  }
+                  final RackContainedChassis? chassis = rack.containedChassis
+                      .where((c) => c.relativePosition == uIndex)
+                      .firstOrNull;
 
                   final bool isFilled = chassis != null;
                   final Color moduleColor = isFilled 
