@@ -1,4 +1,6 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:cogctl_ux/core/utils/format_error.dart';
+import 'package:cogctl_ux/features/geo_location/domain/geo_location.dart';
 import 'package:cogctl_ux/features/infrastructure/domain/equipment_rack.dart';
 import 'package:cogctl_ux/features/infrastructure/domain/repositories/i_equipment_rack_repository.dart';
 import 'package:cogctl_ux/features/infrastructure/domain/repositories/i_inventory_location_repository.dart';
@@ -109,10 +111,10 @@ class EquipmentRackCubit extends Cubit<EquipmentRackState> {
           break;
         }
         try {
-          DateTime.parse(trimmed);
+          ReferenceFrameValidator.parseDateTime(trimmed, 'Timestamp');
           emit(state.copyWith(timestampError: () => null));
-        } catch (_) {
-          emit(state.copyWith(timestampError: () => 'Invalid ISO-8601 format.'));
+        } catch (e) {
+          emit(state.copyWith(timestampError: () => formatError(e)));
         }
         break;
       case 'validUntil':
@@ -121,10 +123,10 @@ class EquipmentRackCubit extends Cubit<EquipmentRackState> {
           break;
         }
         try {
-          DateTime.parse(trimmed);
+          ReferenceFrameValidator.parseDateTime(trimmed, 'Valid-until');
           emit(state.copyWith(validUntilError: () => null));
-        } catch (_) {
-          emit(state.copyWith(validUntilError: () => 'Invalid ISO-8601 format.'));
+        } catch (e) {
+          emit(state.copyWith(validUntilError: () => formatError(e)));
         }
         break;
       case 'rowNumber':
@@ -202,12 +204,18 @@ class EquipmentRackCubit extends Cubit<EquipmentRackState> {
       final height = int.parse(rawHeight.trim());
       final width = int.parse(rawWidth.trim());
       final depth = int.parse(rawDepth.trim());
-      final timestamp = DateTime.parse(rawTimestamp.trim());
+      final timestamp = ReferenceFrameValidator.parseDateTime(rawTimestamp.trim(), 'Timestamp');
+      if (timestamp == null) {
+        throw const FormatException('Timestamp is required');
+      }
       final rawVU = (rawValidUntil ?? '').trim();
       if (rawVU.isEmpty) {
         throw const FormatException('Valid-until is required');
       }
-      final validUntil = DateTime.parse(rawVU);
+      final validUntil = ReferenceFrameValidator.parseDateTime(rawVU, 'Valid-until');
+      if (validUntil == null) {
+        throw const FormatException('Valid-until is required');
+      }
       final row = locationRef.isNotEmpty ? int.parse(rawRow.trim()) : 0;
       final col = locationRef.isNotEmpty ? int.parse(rawCol.trim()) : 0;
       final maxVoltage = int.parse(rawMaxVoltage.trim());
@@ -236,7 +244,7 @@ class EquipmentRackCubit extends Cubit<EquipmentRackState> {
       _repository.addRack(newRack, validLocationIds: Set.from(state.validLocationIds));
       loadData();
     } catch (e) {
-      emit(state.copyWith(generalError: () => e.toString().replaceFirst('FormatException: ', '')));
+      emit(state.copyWith(generalError: () => formatError(e)));
     }
   }
 
@@ -260,12 +268,18 @@ class EquipmentRackCubit extends Cubit<EquipmentRackState> {
       final height = int.parse(rawHeight.trim());
       final width = int.parse(rawWidth.trim());
       final depth = int.parse(rawDepth.trim());
-      final timestamp = DateTime.parse(rawTimestamp.trim());
+      final timestamp = ReferenceFrameValidator.parseDateTime(rawTimestamp.trim(), 'Timestamp');
+      if (timestamp == null) {
+        throw const FormatException('Timestamp is required');
+      }
       final rawVU = (rawValidUntil ?? '').trim();
       if (rawVU.isEmpty) {
         throw const FormatException('Valid-until is required');
       }
-      final validUntil = DateTime.parse(rawVU);
+      final validUntil = ReferenceFrameValidator.parseDateTime(rawVU, 'Valid-until');
+      if (validUntil == null) {
+        throw const FormatException('Valid-until is required');
+      }
       final row = locationRef.isNotEmpty ? int.parse(rawRow.trim()) : 0;
       final col = locationRef.isNotEmpty ? int.parse(rawCol.trim()) : 0;
       final maxVoltage = int.parse(rawMaxVoltage.trim());
@@ -294,7 +308,7 @@ class EquipmentRackCubit extends Cubit<EquipmentRackState> {
       _repository.updateRack(id, updatedRack, validLocationIds: Set.from(state.validLocationIds));
       loadData();
     } catch (e) {
-      emit(state.copyWith(generalError: () => e.toString().replaceFirst('FormatException: ', '')));
+      emit(state.copyWith(generalError: () => formatError(e)));
     }
   }
 

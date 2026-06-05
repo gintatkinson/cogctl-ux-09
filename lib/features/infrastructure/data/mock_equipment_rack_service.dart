@@ -133,7 +133,11 @@ class MockEquipmentRackService {
   }
 
   void deleteRack(String id) {
-    _racks.removeWhere((r) => r.id == id);
+    final index = _racks.indexWhere((r) => r.id == id);
+    if (index == -1) {
+      throw FormatException("Rack with ID '$id' not found");
+    }
+    _racks.removeAt(index);
   }
 
   void reset() {

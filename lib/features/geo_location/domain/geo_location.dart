@@ -105,6 +105,9 @@ class CartesianCoordinate extends LocationCoordinate {
       };
 
   factory CartesianCoordinate.fromJson(Map<String, dynamic> json) {
+    if (json['x'] == null || json['y'] == null || json['z'] == null) {
+      throw const FormatException('Cartesian coordinates require x, y, and z values');
+    }
     return CartesianCoordinate(
       x: (json['x'] as num).toDouble(),
       y: (json['y'] as num).toDouble(),
