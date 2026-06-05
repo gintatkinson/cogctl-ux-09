@@ -50,6 +50,7 @@ def fetch_single_issue(issue_num):
     """
     Fetches a single issue from GitHub by issue number.
     """
+    issue_num = int(issue_num)
     cmd = ["gh", "issue", "view", str(issue_num), "--json", "number,title,state,labels"]
     res = subprocess.run(cmd, capture_output=True, text=True)
     if res.returncode == 0:
@@ -172,6 +173,7 @@ def update_checklist_in_file(filepath, issue_dict):
     return updated_content, (has_deps and all_deps_closed)
 
 def sync_issue_body_to_github(issue_num, filepath, issue_type="Issue"):
+    issue_num = _sanitize_issue_num(issue_num)
     print(f"  [{issue_type} Sync] Syncing #{issue_num} body to GitHub...")
     temp_path = filepath + ".tmp_body"
     try:
@@ -206,7 +208,16 @@ def sync_issue_body_to_github(issue_num, filepath, issue_type="Issue"):
         if os.path.exists(temp_path):
             os.remove(temp_path)
 
+def _sanitize_issue_num(issue_num):
+    """Validate issue_num is a positive integer to prevent argument injection."""
+    num = int(issue_num)
+    if num <= 0:
+        raise ValueError(f"Invalid issue number: {num}")
+    return num
+
 def close_issue_on_github(issue_num, comment):
+    issue_num = _sanitize_issue_num(issue_num)
+    comment = str(comment)[:65536]
     print(f"  [Close Issue] Closing issue #{issue_num} on GitHub...")
     try:
         subprocess.run(["gh", "issue", "close", str(issue_num), "--comment", comment], check=True, capture_output=True)
