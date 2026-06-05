@@ -19,6 +19,11 @@ import 'models/network_element.dart';
 import 'services/mock_network_inventory_service.dart';
 import 'models/equipment_rack.dart';
 import 'services/mock_equipment_rack_service.dart';
+import 'utils/format_utils.dart';
+import 'utils/snackbar_utils.dart';
+import 'utils/theme_utils.dart';
+import 'utils/validation_utils.dart';
+import 'widgets/dashboard_header.dart';
 
 
 void main() {
@@ -332,233 +337,91 @@ class _ReferenceFrameDashboardState extends State<ReferenceFrameDashboard> {
       }
     });
 
-    _timestampController.addListener(() {
-      final text = _timestampController.text.trim();
-      if (text.isEmpty) {
-        if (_timestampError != null) setState(() => _timestampError = null);
-        return;
-      }
-      try {
-        ReferenceFrameValidator.parseDateTime(text, 'timestamp');
-        if (_timestampError != null) setState(() => _timestampError = null);
-      } catch (e) {
-        setState(() => _timestampError = e.toString().replaceFirst('FormatException: ', ''));
-      }
-    });
+    addValidationListener(
+      controller: _timestampController,
+      setError: (e) => setState(() => _timestampError = e),
+      validate: (text) => ReferenceFrameValidator.parseDateTime(text, 'timestamp'),
+    );
+    addValidationListener(
+      controller: _validUntilController,
+      setError: (e) => setState(() => _validUntilError = e),
+      validate: (text) => ReferenceFrameValidator.parseDateTime(text, 'valid-until'),
+    );
+    addValidationListener(
+      controller: _bodyController,
+      setError: (e) => setState(() => _bodyError = e),
+      validate: (text) => ReferenceFrameValidator.validateAstronomicalBody(ReferenceFrameValidator.normalize(text)),
+    );
+    addValidationListener(
+      controller: _altSystemController,
+      setError: (e) => setState(() => _altSystemError = e),
+      validate: (text) => ReferenceFrameValidator.validateAlternateSystem(ReferenceFrameValidator.normalize(text)),
+    );
+    addValidationListener(
+      controller: _datumController,
+      setError: (e) => setState(() => _datumError = e),
+      validate: (text) => ReferenceFrameValidator.validateGeodeticDatum(ReferenceFrameValidator.normalize(text)),
+    );
+    addValidationListener(
+      controller: _coordAccController,
+      setError: (e) => setState(() => _coordAccError = e),
+      validate: (text) => ReferenceFrameValidator.parseAccuracy(text),
+    );
+    addValidationListener(
+      controller: _heightAccController,
+      setError: (e) => setState(() => _heightAccError = e),
+      validate: (text) => ReferenceFrameValidator.parseAccuracy(text),
+    );
+    addValidationListener(
+      controller: _latController,
+      setError: (e) => setState(() => _latError = e),
+      validate: (text) => ReferenceFrameValidator.parseLatitude(text),
+    );
+    addValidationListener(
+      controller: _lonController,
+      setError: (e) => setState(() => _lonError = e),
+      validate: (text) => ReferenceFrameValidator.parseLongitude(text),
+    );
+    addValidationListener(
+      controller: _heightController,
+      setError: (e) => setState(() => _heightError = e),
+      validate: (text) => ReferenceFrameValidator.parseHeight(text),
+    );
 
-    _validUntilController.addListener(() {
-      final text = _validUntilController.text.trim();
-      if (text.isEmpty) {
-        if (_validUntilError != null) setState(() => _validUntilError = null);
-        return;
-      }
-      try {
-        ReferenceFrameValidator.parseDateTime(text, 'valid-until');
-        if (_validUntilError != null) setState(() => _validUntilError = null);
-      } catch (e) {
-        setState(() => _validUntilError = e.toString().replaceFirst('FormatException: ', ''));
-      }
-    });
-
-    _bodyController.addListener(() {
-      final text = _bodyController.text.trim();
-      if (text.isEmpty) {
-        if (_bodyError != null) setState(() => _bodyError = null);
-        return;
-      }
-      try {
-        ReferenceFrameValidator.validateAstronomicalBody(ReferenceFrameValidator.normalize(text));
-        if (_bodyError != null) setState(() => _bodyError = null);
-      } catch (e) {
-        setState(() => _bodyError = e.toString().replaceFirst('FormatException: ', ''));
-      }
-    });
-
-    _altSystemController.addListener(() {
-      final text = _altSystemController.text.trim();
-      if (text.isEmpty) {
-        if (_altSystemError != null) setState(() => _altSystemError = null);
-        return;
-      }
-      try {
-        ReferenceFrameValidator.validateAlternateSystem(ReferenceFrameValidator.normalize(text));
-        if (_altSystemError != null) setState(() => _altSystemError = null);
-      } catch (e) {
-        setState(() => _altSystemError = e.toString().replaceFirst('FormatException: ', ''));
-      }
-    });
-
-    _datumController.addListener(() {
-      final text = _datumController.text.trim();
-      if (text.isEmpty) {
-        if (_datumError != null) setState(() => _datumError = null);
-        return;
-      }
-      try {
-        ReferenceFrameValidator.validateGeodeticDatum(ReferenceFrameValidator.normalize(text));
-        if (_datumError != null) setState(() => _datumError = null);
-      } catch (e) {
-        setState(() => _datumError = e.toString().replaceFirst('FormatException: ', ''));
-      }
-    });
-
-    _coordAccController.addListener(() {
-      final text = _coordAccController.text.trim();
-      if (text.isEmpty) {
-        if (_coordAccError != null) setState(() => _coordAccError = null);
-        return;
-      }
-      try {
-        ReferenceFrameValidator.parseAccuracy(text);
-        if (_coordAccError != null) setState(() => _coordAccError = null);
-      } catch (e) {
-        setState(() => _coordAccError = e.toString().replaceFirst('FormatException: ', ''));
-      }
-    });
-
-    _heightAccController.addListener(() {
-      final text = _heightAccController.text.trim();
-      if (text.isEmpty) {
-        if (_heightAccError != null) setState(() => _heightAccError = null);
-        return;
-      }
-      try {
-        ReferenceFrameValidator.parseAccuracy(text);
-        if (_heightAccError != null) setState(() => _heightAccError = null);
-      } catch (e) {
-        setState(() => _heightAccError = e.toString().replaceFirst('FormatException: ', ''));
-      }
-    });
-
-    _latController.addListener(() {
-      final text = _latController.text.trim();
-      if (text.isEmpty) {
-        if (_latError != null) setState(() => _latError = null);
-        return;
-      }
-      try {
-        ReferenceFrameValidator.parseLatitude(text);
-        if (_latError != null) setState(() => _latError = null);
-      } catch (e) {
-        setState(() => _latError = e.toString().replaceFirst('FormatException: ', ''));
-      }
-    });
-
-    _lonController.addListener(() {
-      final text = _lonController.text.trim();
-      if (text.isEmpty) {
-        if (_lonError != null) setState(() => _lonError = null);
-        return;
-      }
-      try {
-        ReferenceFrameValidator.parseLongitude(text);
-        if (_lonError != null) setState(() => _lonError = null);
-      } catch (e) {
-        setState(() => _lonError = e.toString().replaceFirst('FormatException: ', ''));
-      }
-    });
-
-    _heightController.addListener(() {
-      final text = _heightController.text.trim();
-      if (text.isEmpty) {
-        if (_heightError != null) setState(() => _heightError = null);
-        return;
-      }
-      try {
-        ReferenceFrameValidator.parseHeight(text);
-        if (_heightError != null) setState(() => _heightError = null);
-      } catch (e) {
-        setState(() => _heightError = e.toString().replaceFirst('FormatException: ', ''));
-      }
-    });
-
-    _xController.addListener(() {
-      final text = _xController.text.trim();
-      if (text.isEmpty) {
-        if (_xError != null) setState(() => _xError = null);
-        return;
-      }
-      try {
-        ReferenceFrameValidator.parseCartesianCoordinate(text, 'X');
-        if (_xError != null) setState(() => _xError = null);
-      } catch (e) {
-        setState(() => _xError = e.toString().replaceFirst('FormatException: ', ''));
-      }
-    });
-
-    _yController.addListener(() {
-      final text = _yController.text.trim();
-      if (text.isEmpty) {
-        if (_yError != null) setState(() => _yError = null);
-        return;
-      }
-      try {
-        ReferenceFrameValidator.parseCartesianCoordinate(text, 'Y');
-        if (_yError != null) setState(() => _yError = null);
-      } catch (e) {
-        setState(() => _yError = e.toString().replaceFirst('FormatException: ', ''));
-      }
-    });
-
-    _zController.addListener(() {
-      final text = _zController.text.trim();
-      if (text.isEmpty) {
-        if (_zError != null) setState(() => _zError = null);
-        return;
-      }
-      try {
-        ReferenceFrameValidator.parseCartesianCoordinate(text, 'Z');
-        if (_zError != null) setState(() => _zError = null);
-      } catch (e) {
-        setState(() => _zError = e.toString().replaceFirst('FormatException: ', ''));
-      }
-    });
-
-    _vNorthController.addListener(() {
-      final text = _vNorthController.text.trim();
-      if (text.isEmpty) {
-        if (_vNorthError != null) setState(() => _vNorthError = null);
-        _recalculateVelocity();
-        return;
-      }
-      try {
-        ReferenceFrameValidator.parseVelocityComponent(text, 'v-north');
-        if (_vNorthError != null) setState(() => _vNorthError = null);
-      } catch (e) {
-        setState(() => _vNorthError = e.toString().replaceFirst('FormatException: ', ''));
-      }
-      _recalculateVelocity();
-    });
-
-    _vEastController.addListener(() {
-      final text = _vEastController.text.trim();
-      if (text.isEmpty) {
-        if (_vEastError != null) setState(() => _vEastError = null);
-        _recalculateVelocity();
-        return;
-      }
-      try {
-        ReferenceFrameValidator.parseVelocityComponent(text, 'v-east');
-        if (_vEastError != null) setState(() => _vEastError = null);
-      } catch (e) {
-        setState(() => _vEastError = e.toString().replaceFirst('FormatException: ', ''));
-      }
-      _recalculateVelocity();
-    });
-
-    _vUpController.addListener(() {
-      final text = _vUpController.text.trim();
-      if (text.isEmpty) {
-        if (_vUpError != null) setState(() => _vUpError = null);
-        return;
-      }
-      try {
-        ReferenceFrameValidator.parseVelocityComponent(text, 'v-up');
-        if (_vUpError != null) setState(() => _vUpError = null);
-      } catch (e) {
-        setState(() => _vUpError = e.toString().replaceFirst('FormatException: ', ''));
-      }
-    });
+    addValidationListener(
+      controller: _xController,
+      setError: (e) => setState(() => _xError = e),
+      validate: (text) => ReferenceFrameValidator.parseCartesianCoordinate(text, 'X'),
+    );
+    addValidationListener(
+      controller: _yController,
+      setError: (e) => setState(() => _yError = e),
+      validate: (text) => ReferenceFrameValidator.parseCartesianCoordinate(text, 'Y'),
+    );
+    addValidationListener(
+      controller: _zController,
+      setError: (e) => setState(() => _zError = e),
+      validate: (text) => ReferenceFrameValidator.parseCartesianCoordinate(text, 'Z'),
+    );
+    addValidationListener(
+      controller: _vNorthController,
+      setError: (e) => setState(() => _vNorthError = e),
+      validate: (text) => ReferenceFrameValidator.parseVelocityComponent(text, 'v-north'),
+      onEmpty: () { setState(() => _vNorthError = null); _recalculateVelocity(); },
+      onChanged: _recalculateVelocity,
+    );
+    addValidationListener(
+      controller: _vEastController,
+      setError: (e) => setState(() => _vEastError = e),
+      validate: (text) => ReferenceFrameValidator.parseVelocityComponent(text, 'v-east'),
+      onEmpty: () { setState(() => _vEastError = null); _recalculateVelocity(); },
+      onChanged: _recalculateVelocity,
+    );
+    addValidationListener(
+      controller: _vUpController,
+      setError: (e) => setState(() => _vUpError = e),
+      validate: (text) => ReferenceFrameValidator.parseVelocityComponent(text, 'v-up'),
+    );
   }
 
   void _recalculateVelocity() {
@@ -681,15 +544,10 @@ class _ReferenceFrameDashboardState extends State<ReferenceFrameDashboard> {
 
       _refreshCounterGaugeList();
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Successfully updated ${_selectedCounterGaugeNode!.name} to $newValue'),
-          backgroundColor: Colors.green,
-        ),
-      );
+      showSuccessSnackBar(context, 'Successfully updated ${_selectedCounterGaugeNode!.name} to $newValue');
     } catch (e) {
       setState(() {
-        _counterGaugeValueError = e.toString().replaceFirst('FormatException: ', '');
+        _counterGaugeValueError = formatExceptionMessage(e);
       });
     }
   }
@@ -734,15 +592,10 @@ class _ReferenceFrameDashboardState extends State<ReferenceFrameDashboard> {
 
       _refreshIdentifierList();
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Successfully updated ${_selectedIdentifierNode!.name} to $text'),
-          backgroundColor: Colors.green,
-        ),
-      );
+      showSuccessSnackBar(context, 'Successfully updated ${_selectedIdentifierNode!.name} to $text');
     } catch (e) {
       setState(() {
-        _identifierValueError = e.toString().replaceFirst('FormatException: ', '');
+        _identifierValueError = formatExceptionMessage(e);
       });
     }
   }
@@ -787,15 +640,10 @@ class _ReferenceFrameDashboardState extends State<ReferenceFrameDashboard> {
 
       _refreshDateTimeList();
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Successfully updated ${_selectedDateTimeNode!.name} to $text'),
-          backgroundColor: Colors.green,
-        ),
-      );
+      showSuccessSnackBar(context, 'Successfully updated ${_selectedDateTimeNode!.name} to $text');
     } catch (e) {
       setState(() {
-        _dateTimeValueError = e.toString().replaceFirst('FormatException: ', '');
+        _dateTimeValueError = formatExceptionMessage(e);
       });
     }
   }
@@ -883,15 +731,10 @@ class _ReferenceFrameDashboardState extends State<ReferenceFrameDashboard> {
 
       _refreshTimeDurationList();
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Successfully updated ${_selectedTimeDurationNode!.name} to $text'),
-          backgroundColor: Colors.green,
-        ),
-      );
+      showSuccessSnackBar(context, 'Successfully updated ${_selectedTimeDurationNode!.name} to $text');
     } catch (e) {
       setState(() {
-        _timeDurationValueError = e.toString().replaceFirst('FormatException: ', '');
+        _timeDurationValueError = formatExceptionMessage(e);
       });
     }
   }
@@ -944,15 +787,10 @@ class _ReferenceFrameDashboardState extends State<ReferenceFrameDashboard> {
 
       _refreshAddressTagList();
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Successfully updated ${_selectedAddressTagNode!.name}'),
-          backgroundColor: Colors.green,
-        ),
-      );
+      showSuccessSnackBar(context, 'Successfully updated ${_selectedAddressTagNode!.name}');
     } catch (e) {
       setState(() {
-        _addressTagValueError = e.toString().replaceFirst('FormatException: ', '');
+        _addressTagValueError = formatExceptionMessage(e);
       });
     }
   }
@@ -1068,7 +906,7 @@ class _ReferenceFrameDashboardState extends State<ReferenceFrameDashboard> {
       ReferenceFrameValidator.validateAstronomicalBody(astronomicalBody);
     } catch (e) {
       setState(() {
-        _bodyError = e.toString().replaceFirst('FormatException: ', '');
+        _bodyError = formatExceptionMessage(e);
       });
       hasError = true;
     }
@@ -1082,7 +920,7 @@ class _ReferenceFrameDashboardState extends State<ReferenceFrameDashboard> {
         ReferenceFrameValidator.validateAlternateSystem(alternateSystem);
       } catch (e) {
         setState(() {
-          _altSystemError = e.toString().replaceFirst('FormatException: ', '');
+          _altSystemError = formatExceptionMessage(e);
         });
         hasError = true;
       }
@@ -1092,7 +930,7 @@ class _ReferenceFrameDashboardState extends State<ReferenceFrameDashboard> {
       ReferenceFrameValidator.validateGeodeticDatum(geodeticDatum);
     } catch (e) {
       setState(() {
-        _datumError = e.toString().replaceFirst('FormatException: ', '');
+        _datumError = formatExceptionMessage(e);
       });
       hasError = true;
     }
@@ -1104,7 +942,7 @@ class _ReferenceFrameDashboardState extends State<ReferenceFrameDashboard> {
         coordAccuracy = ReferenceFrameValidator.parseAccuracy(rawCoord);
       } catch (e) {
         setState(() {
-          _coordAccError = e.toString().replaceFirst('FormatException: ', '');
+          _coordAccError = formatExceptionMessage(e);
         });
         hasError = true;
       }
@@ -1117,7 +955,7 @@ class _ReferenceFrameDashboardState extends State<ReferenceFrameDashboard> {
         heightAccuracy = ReferenceFrameValidator.parseAccuracy(rawHeightAcc);
       } catch (e) {
         setState(() {
-          _heightAccError = e.toString().replaceFirst('FormatException: ', '');
+          _heightAccError = formatExceptionMessage(e);
         });
         hasError = true;
       }
@@ -1153,7 +991,7 @@ class _ReferenceFrameDashboardState extends State<ReferenceFrameDashboard> {
           latitude = ReferenceFrameValidator.parseLatitude(rawLat);
         } catch (e) {
           setState(() {
-            _latError = e.toString().replaceFirst('FormatException: ', '');
+            _latError = formatExceptionMessage(e);
           });
           hasError = true;
         }
@@ -1164,7 +1002,7 @@ class _ReferenceFrameDashboardState extends State<ReferenceFrameDashboard> {
           longitude = ReferenceFrameValidator.parseLongitude(rawLon);
         } catch (e) {
           setState(() {
-            _lonError = e.toString().replaceFirst('FormatException: ', '');
+            _lonError = formatExceptionMessage(e);
           });
           hasError = true;
         }
@@ -1175,7 +1013,7 @@ class _ReferenceFrameDashboardState extends State<ReferenceFrameDashboard> {
           height = ReferenceFrameValidator.parseHeight(rawHeightVal);
         } catch (e) {
           setState(() {
-            _heightError = e.toString().replaceFirst('FormatException: ', '');
+            _heightError = formatExceptionMessage(e);
           });
           hasError = true;
         }
@@ -1197,7 +1035,7 @@ class _ReferenceFrameDashboardState extends State<ReferenceFrameDashboard> {
           xVal = ReferenceFrameValidator.parseCartesianCoordinate(rawX, 'X');
         } catch (e) {
           setState(() {
-            _xError = e.toString().replaceFirst('FormatException: ', '');
+            _xError = formatExceptionMessage(e);
           });
           hasError = true;
         }
@@ -1208,7 +1046,7 @@ class _ReferenceFrameDashboardState extends State<ReferenceFrameDashboard> {
           yVal = ReferenceFrameValidator.parseCartesianCoordinate(rawY, 'Y');
         } catch (e) {
           setState(() {
-            _yError = e.toString().replaceFirst('FormatException: ', '');
+            _yError = formatExceptionMessage(e);
           });
           hasError = true;
         }
@@ -1219,7 +1057,7 @@ class _ReferenceFrameDashboardState extends State<ReferenceFrameDashboard> {
           zVal = ReferenceFrameValidator.parseCartesianCoordinate(rawZ, 'Z');
         } catch (e) {
           setState(() {
-            _zError = e.toString().replaceFirst('FormatException: ', '');
+            _zError = formatExceptionMessage(e);
           });
           hasError = true;
         }
@@ -1239,7 +1077,7 @@ class _ReferenceFrameDashboardState extends State<ReferenceFrameDashboard> {
         vNorth = ReferenceFrameValidator.parseVelocityComponent(rawVNorth, 'v-north');
       } catch (e) {
         setState(() {
-          _vNorthError = e.toString().replaceFirst('FormatException: ', '');
+          _vNorthError = formatExceptionMessage(e);
         });
         hasError = true;
       }
@@ -1249,7 +1087,7 @@ class _ReferenceFrameDashboardState extends State<ReferenceFrameDashboard> {
         vEast = ReferenceFrameValidator.parseVelocityComponent(rawVEast, 'v-east');
       } catch (e) {
         setState(() {
-          _vEastError = e.toString().replaceFirst('FormatException: ', '');
+          _vEastError = formatExceptionMessage(e);
         });
         hasError = true;
       }
@@ -1259,7 +1097,7 @@ class _ReferenceFrameDashboardState extends State<ReferenceFrameDashboard> {
         vUp = ReferenceFrameValidator.parseVelocityComponent(rawVUp, 'v-up');
       } catch (e) {
         setState(() {
-          _vUpError = e.toString().replaceFirst('FormatException: ', '');
+          _vUpError = formatExceptionMessage(e);
         });
         hasError = true;
       }
@@ -1274,7 +1112,7 @@ class _ReferenceFrameDashboardState extends State<ReferenceFrameDashboard> {
         timestampVal = ReferenceFrameValidator.parseDateTime(rawTimestamp, 'timestamp');
       } catch (e) {
         setState(() {
-          _timestampError = e.toString().replaceFirst('FormatException: ', '');
+          _timestampError = formatExceptionMessage(e);
         });
         hasError = true;
       }
@@ -1286,7 +1124,7 @@ class _ReferenceFrameDashboardState extends State<ReferenceFrameDashboard> {
         validUntilVal = ReferenceFrameValidator.parseDateTime(rawValidUntil, 'valid-until');
       } catch (e) {
         setState(() {
-          _validUntilError = e.toString().replaceFirst('FormatException: ', '');
+          _validUntilError = formatExceptionMessage(e);
         });
         hasError = true;
       }
@@ -1297,8 +1135,8 @@ class _ReferenceFrameDashboardState extends State<ReferenceFrameDashboard> {
         ReferenceFrameValidator.validateTemporalValidity(timestampVal, validUntilVal);
       } catch (e) {
         setState(() {
-          _generalError = e.toString().replaceFirst('FormatException: ', '');
-          _validUntilError = e.toString().replaceFirst('FormatException: ', '');
+          _generalError = formatExceptionMessage(e);
+          _validUntilError = formatExceptionMessage(e);
         });
         hasError = true;
       }
@@ -1371,7 +1209,7 @@ class _ReferenceFrameDashboardState extends State<ReferenceFrameDashboard> {
       );
     } catch (e) {
       setState(() {
-        _generalError = e.toString().replaceFirst('FormatException: ', '');
+        _generalError = formatExceptionMessage(e);
       });
     }
   }
@@ -1542,7 +1380,7 @@ class _ReferenceFrameDashboardState extends State<ReferenceFrameDashboard> {
                           ? Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                _buildCountersGaugesHeader(theme),
+                                const DashboardHeader(title: 'Counters & Gauges Dashboard', badgeLabel: 'RFC 9911 / ietf-yang-types'),
                                 const SizedBox(height: 12),
                                 _buildCountersGaugesSummary(theme),
                                 const SizedBox(height: 24),
@@ -1562,7 +1400,7 @@ class _ReferenceFrameDashboardState extends State<ReferenceFrameDashboard> {
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  _buildCountersGaugesHeader(theme),
+                                  const DashboardHeader(title: 'Counters & Gauges Dashboard', badgeLabel: 'RFC 9911 / ietf-yang-types'),
                                   const SizedBox(height: 12),
                                   _buildCountersGaugesSummary(theme),
                                   const SizedBox(height: 24),
@@ -1577,7 +1415,7 @@ class _ReferenceFrameDashboardState extends State<ReferenceFrameDashboard> {
                               ? Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    _buildIdentifiersReferencesHeader(theme),
+                                    const DashboardHeader(title: 'Identifiers & References Dashboard', badgeLabel: 'RFC 9911 / RFC 7950'),
                                     const SizedBox(height: 12),
                                     _buildIdentifiersReferencesSummary(theme),
                                     const SizedBox(height: 24),
@@ -1597,7 +1435,7 @@ class _ReferenceFrameDashboardState extends State<ReferenceFrameDashboard> {
                                   child: Column(
                                     crossAxisAlignment: CrossAxisAlignment.start,
                                     children: [
-                                      _buildIdentifiersReferencesHeader(theme),
+                                      const DashboardHeader(title: 'Identifiers & References Dashboard', badgeLabel: 'RFC 9911 / RFC 7950'),
                                       const SizedBox(height: 12),
                                       _buildIdentifiersReferencesSummary(theme),
                                       const SizedBox(height: 24),
@@ -1612,7 +1450,7 @@ class _ReferenceFrameDashboardState extends State<ReferenceFrameDashboard> {
                                   ? Column(
                                       crossAxisAlignment: CrossAxisAlignment.start,
                                       children: [
-                                        _buildDateTimeHeader(theme),
+                                        const DashboardHeader(title: 'Date & Time Types Dashboard', badgeLabel: 'RFC 9911 Date-Time Specs'),
                                         const SizedBox(height: 12),
                                         _buildDateTimeSummary(theme),
                                         const SizedBox(height: 24),
@@ -1632,7 +1470,7 @@ class _ReferenceFrameDashboardState extends State<ReferenceFrameDashboard> {
                                       child: Column(
                                         crossAxisAlignment: CrossAxisAlignment.start,
                                         children: [
-                                          _buildDateTimeHeader(theme),
+                                          const DashboardHeader(title: 'Date & Time Types Dashboard', badgeLabel: 'RFC 9911 Date-Time Specs'),
                                           const SizedBox(height: 12),
                                           _buildDateTimeSummary(theme),
                                           const SizedBox(height: 24),
@@ -1647,7 +1485,7 @@ class _ReferenceFrameDashboardState extends State<ReferenceFrameDashboard> {
                                       ? Column(
                                           crossAxisAlignment: CrossAxisAlignment.start,
                                           children: [
-                                            _buildTimeDurationHeader(theme),
+                                            const DashboardHeader(title: 'Time Durations Dashboard', badgeLabel: 'RFC 9911 Time-Duration Specs'),
                                             const SizedBox(height: 12),
                                             _buildTimeDurationSummary(theme),
                                             const SizedBox(height: 24),
@@ -1667,7 +1505,7 @@ class _ReferenceFrameDashboardState extends State<ReferenceFrameDashboard> {
                                           child: Column(
                                             crossAxisAlignment: CrossAxisAlignment.start,
                                             children: [
-                                              _buildTimeDurationHeader(theme),
+                                              const DashboardHeader(title: 'Time Durations Dashboard', badgeLabel: 'RFC 9911 Time-Duration Specs'),
                                               const SizedBox(height: 12),
                                               _buildTimeDurationSummary(theme),
                                               const SizedBox(height: 24),
@@ -1682,7 +1520,7 @@ class _ReferenceFrameDashboardState extends State<ReferenceFrameDashboard> {
                                           ? Column(
                                               crossAxisAlignment: CrossAxisAlignment.start,
                                               children: [
-                                                _buildAddressTagHeader(theme),
+                                                const DashboardHeader(title: 'Addresses & Tags Dashboard', badgeLabel: 'RFC 9911 Address Specs'),
                                                 const SizedBox(height: 12),
                                                 _buildAddressTagSummary(theme),
                                                 const SizedBox(height: 24),
@@ -1702,7 +1540,7 @@ class _ReferenceFrameDashboardState extends State<ReferenceFrameDashboard> {
                                               child: Column(
                                                 crossAxisAlignment: CrossAxisAlignment.start,
                                                 children: [
-                                                  _buildAddressTagHeader(theme),
+                                                  const DashboardHeader(title: 'Addresses & Tags Dashboard', badgeLabel: 'RFC 9911 Address Specs'),
                                                   const SizedBox(height: 12),
                                                   _buildAddressTagSummary(theme),
                                                   const SizedBox(height: 24),
@@ -1718,7 +1556,7 @@ class _ReferenceFrameDashboardState extends State<ReferenceFrameDashboard> {
                                                   child: Column(
                                                     crossAxisAlignment: CrossAxisAlignment.start,
                                                     children: [
-                                                      _buildEquipmentRacksHeader(theme),
+                                                      _buildEquipmentRacksHeader(),
                                                       const SizedBox(height: 12),
                                                       _buildEquipmentRacksSummary(theme),
                                                       const SizedBox(height: 24),
@@ -1739,7 +1577,7 @@ class _ReferenceFrameDashboardState extends State<ReferenceFrameDashboard> {
                                                   child: Column(
                                                     crossAxisAlignment: CrossAxisAlignment.start,
                                                     children: [
-                                                      _buildEquipmentRacksHeader(theme),
+                                                      _buildEquipmentRacksHeader(),
                                                       const SizedBox(height: 12),
                                                       _buildEquipmentRacksSummary(theme),
                                                       const SizedBox(height: 24),
@@ -1755,7 +1593,7 @@ class _ReferenceFrameDashboardState extends State<ReferenceFrameDashboard> {
                                               ? Column(
                                                   crossAxisAlignment: CrossAxisAlignment.start,
                                                   children: [
-                                                    _buildInventoryLocationHeader(theme),
+                                                    const DashboardHeader(title: 'Inventory Locations Dashboard', badgeLabel: 'IETF NI-Location Specs'),
                                                     const SizedBox(height: 12),
                                                     _buildInventoryLocationSummary(theme),
                                                     const SizedBox(height: 16),
@@ -1777,7 +1615,7 @@ class _ReferenceFrameDashboardState extends State<ReferenceFrameDashboard> {
                                                   child: Column(
                                                     crossAxisAlignment: CrossAxisAlignment.start,
                                                     children: [
-                                                      _buildInventoryLocationHeader(theme),
+                                                      const DashboardHeader(title: 'Inventory Locations Dashboard', badgeLabel: 'IETF NI-Location Specs'),
                                                       const SizedBox(height: 12),
                                                       _buildInventoryLocationSummary(theme),
                                                       const SizedBox(height: 16),
@@ -1797,12 +1635,8 @@ class _ReferenceFrameDashboardState extends State<ReferenceFrameDashboard> {
   }
 
   Widget _buildSDNStatusSummary(ThemeData theme) {
-    final isDark = theme.brightness == Brightness.dark;
-    final cardBg = isDark ? const Color(0xFF2D2E30) : Colors.white;
-    final borderSide = BorderSide(
-      color: isDark ? const Color(0x1FFFFFFF) : const Color(0x1F000000),
-      width: 1,
-    );
+    final cardBg = cardBackground(theme);
+    final borderSide = subtleBorder(theme);
 
     int total = _records.length;
     int terrestrial = _records.where((r) => r.referenceFrame.astronomicalBody == 'earth' && ((r.networkDomain?.contains('Terrestrial') ?? false) || (r.networkDomain?.contains('Mobile') ?? false))).length;
@@ -1914,10 +1748,7 @@ class _ReferenceFrameDashboardState extends State<ReferenceFrameDashboard> {
     final expandedWidth = 240.0;
     final isDark = theme.brightness == Brightness.dark;
     final sidebarBg = isDark ? const Color(0xFF202124) : Colors.white;
-    final borderSide = BorderSide(
-      color: isDark ? const Color(0x1FFFFFFF) : const Color(0x1F000000),
-      width: 1,
-    );
+    final borderSide = subtleBorder(theme);
     final isDesktop = MediaQuery.of(context).size.width > 900;
 
     return AnimatedContainer(
@@ -2119,8 +1950,7 @@ class _ReferenceFrameDashboardState extends State<ReferenceFrameDashboard> {
   }
 
   Widget _buildFormCard(ThemeData theme) {
-    final isDark = theme.brightness == Brightness.dark;
-    final cardBg = isDark ? const Color(0xFF2D2E30) : Colors.white;
+    final cardBg = cardBackground(theme);
 
     return Card(
       color: cardBg,
@@ -3086,45 +2916,9 @@ class _ReferenceFrameDashboardState extends State<ReferenceFrameDashboard> {
     );
   }
 
-  Widget _buildCountersGaugesHeader(ThemeData theme) {
-    return Row(
-      children: [
-        Text(
-          'Counters & Gauges Dashboard',
-          style: TextStyle(
-            fontSize: 20,
-            fontWeight: FontWeight.bold,
-            color: theme.primaryColor,
-          ),
-        ),
-        const SizedBox(width: 8),
-        Container(
-          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-          decoration: BoxDecoration(
-            color: Colors.blue.withValues(alpha: 0.15),
-            border: Border.all(color: Colors.blue.withValues(alpha: 0.5)),
-            borderRadius: BorderRadius.circular(4),
-          ),
-          child: const Text(
-            'RFC 9911 / ietf-yang-types',
-            style: TextStyle(
-              color: Colors.blue,
-              fontSize: 10,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-
   Widget _buildCountersGaugesSummary(ThemeData theme) {
-    final isDark = theme.brightness == Brightness.dark;
-    final cardBg = isDark ? const Color(0xFF2D2E30) : Colors.white;
-    final borderSide = BorderSide(
-      color: isDark ? const Color(0x1FFFFFFF) : const Color(0x1F000000),
-      width: 1,
-    );
+    final cardBg = cardBackground(theme);
+    final borderSide = subtleBorder(theme);
 
     int total = _counterGaugeNodes.length;
     int counters = _counterGaugeNodes.where((n) => n.isCounter).length;
@@ -3146,8 +2940,7 @@ class _ReferenceFrameDashboardState extends State<ReferenceFrameDashboard> {
   }
 
   Widget _buildCounterGaugeFormCard(ThemeData theme) {
-    final isDark = theme.brightness == Brightness.dark;
-    final cardBg = isDark ? const Color(0xFF2D2E30) : Colors.white;
+    final cardBg = cardBackground(theme);
 
     return Card(
       color: cardBg,
@@ -3299,7 +3092,7 @@ class _ReferenceFrameDashboardState extends State<ReferenceFrameDashboard> {
                           );
                         } catch (e) {
                           setState(() {
-                            _counterGaugeValueError = e.toString().replaceFirst('FormatException: ', '');
+                            _counterGaugeValueError = formatExceptionMessage(e);
                           });
                         }
                       }
@@ -3317,8 +3110,7 @@ class _ReferenceFrameDashboardState extends State<ReferenceFrameDashboard> {
 }
 
   Widget _buildCounterGaugeListPane(ThemeData theme) {
-    final isDark = theme.brightness == Brightness.dark;
-    final cardBg = isDark ? const Color(0xFF2D2E30) : Colors.white;
+    final cardBg = cardBackground(theme);
     final isDesktop = MediaQuery.of(context).size.width > 900;
 
     final Widget listContent = _counterGaugeNodes.isEmpty
@@ -3499,12 +3291,7 @@ class _ReferenceFrameDashboardState extends State<ReferenceFrameDashboard> {
                               ),
                             );
                           } catch (e) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(
-                                content: Text('Failed to reset: ${e.toString()}'),
-                                backgroundColor: Colors.red,
-                              ),
-                            );
+                            showErrorSnackBar(context, 'Failed to reset: ${e.toString()}');
                           }
                         },
                       ),
@@ -3533,47 +3320,9 @@ class _ReferenceFrameDashboardState extends State<ReferenceFrameDashboard> {
       ),
     );
   }
-  Widget _buildIdentifiersReferencesHeader(ThemeData theme) {
-    return Wrap(
-      crossAxisAlignment: WrapCrossAlignment.center,
-      spacing: 8,
-      runSpacing: 8,
-      children: [
-        Text(
-          'Identifiers & References Dashboard',
-          style: TextStyle(
-            fontSize: 20,
-            fontWeight: FontWeight.bold,
-            color: theme.primaryColor,
-          ),
-        ),
-        Container(
-          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-          decoration: BoxDecoration(
-            color: Colors.blue.withValues(alpha: 0.15),
-            border: Border.all(color: Colors.blue.withValues(alpha: 0.5)),
-            borderRadius: BorderRadius.circular(4),
-          ),
-          child: const Text(
-            'RFC 9911 / RFC 7950',
-            style: TextStyle(
-              color: Colors.blue,
-              fontSize: 10,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-
   Widget _buildIdentifiersReferencesSummary(ThemeData theme) {
-    final isDark = theme.brightness == Brightness.dark;
-    final cardBg = isDark ? const Color(0xFF2D2E30) : Colors.white;
-    final borderSide = BorderSide(
-      color: isDark ? const Color(0x1FFFFFFF) : const Color(0x1F000000),
-      width: 1,
-    );
+    final cardBg = cardBackground(theme);
+    final borderSide = subtleBorder(theme);
 
     int total = _identifierNodes.length;
     int oids = _identifierNodes.where((n) => n.type == YangIdentifierType.objectIdentifier).length;
@@ -3593,8 +3342,7 @@ class _ReferenceFrameDashboardState extends State<ReferenceFrameDashboard> {
   }
 
   Widget _buildIdentifierFormCard(ThemeData theme) {
-    final isDark = theme.brightness == Brightness.dark;
-    final cardBg = isDark ? const Color(0xFF2D2E30) : Colors.white;
+    final cardBg = cardBackground(theme);
 
     return Card(
       color: cardBg,
@@ -3715,8 +3463,7 @@ class _ReferenceFrameDashboardState extends State<ReferenceFrameDashboard> {
   }
 
   Widget _buildIdentifierListPane(ThemeData theme) {
-    final isDark = theme.brightness == Brightness.dark;
-    final cardBg = isDark ? const Color(0xFF2D2E30) : Colors.white;
+    final cardBg = cardBackground(theme);
     final isDesktop = MediaQuery.of(context).size.width > 900;
 
     final Widget listContent = _identifierNodes.isEmpty
@@ -3855,47 +3602,9 @@ class _ReferenceFrameDashboardState extends State<ReferenceFrameDashboard> {
     );
   }
 
-  Widget _buildDateTimeHeader(ThemeData theme) {
-    return Wrap(
-      crossAxisAlignment: WrapCrossAlignment.center,
-      spacing: 8,
-      runSpacing: 8,
-      children: [
-        Text(
-          'Date & Time Types Dashboard',
-          style: TextStyle(
-            fontSize: 20,
-            fontWeight: FontWeight.bold,
-            color: theme.primaryColor,
-          ),
-        ),
-        Container(
-          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-          decoration: BoxDecoration(
-            color: Colors.blue.withValues(alpha: 0.15),
-            border: Border.all(color: Colors.blue.withValues(alpha: 0.5)),
-            borderRadius: BorderRadius.circular(4),
-          ),
-          child: const Text(
-            'RFC 9911 Date-Time Specs',
-            style: TextStyle(
-              color: Colors.blue,
-              fontSize: 10,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-
   Widget _buildDateTimeSummary(ThemeData theme) {
-    final isDark = theme.brightness == Brightness.dark;
-    final cardBg = isDark ? const Color(0xFF2D2E30) : Colors.white;
-    final borderSide = BorderSide(
-      color: isDark ? const Color(0x1FFFFFFF) : const Color(0x1F000000),
-      width: 1,
-    );
+    final cardBg = cardBackground(theme);
+    final borderSide = subtleBorder(theme);
 
     int total = _dateTimeNodes.length;
     int datetimes = _dateTimeNodes.where((n) => n.type == YangDateTimeType.dateAndTime).length;
@@ -3915,8 +3624,7 @@ class _ReferenceFrameDashboardState extends State<ReferenceFrameDashboard> {
   }
 
   Widget _buildDateTimeFormCard(ThemeData theme) {
-    final isDark = theme.brightness == Brightness.dark;
-    final cardBg = isDark ? const Color(0xFF2D2E30) : Colors.white;
+    final cardBg = cardBackground(theme);
 
     return Card(
       color: cardBg,
@@ -4045,8 +3753,7 @@ class _ReferenceFrameDashboardState extends State<ReferenceFrameDashboard> {
   }
 
   Widget _buildDateTimeListPane(ThemeData theme) {
-    final isDark = theme.brightness == Brightness.dark;
-    final cardBg = isDark ? const Color(0xFF2D2E30) : Colors.white;
+    final cardBg = cardBackground(theme);
     final isDesktop = MediaQuery.of(context).size.width > 900;
 
     final Widget listContent = _dateTimeNodes.isEmpty
@@ -4193,47 +3900,9 @@ class _ReferenceFrameDashboardState extends State<ReferenceFrameDashboard> {
     );
   }
 
-  Widget _buildTimeDurationHeader(ThemeData theme) {
-    return Wrap(
-      crossAxisAlignment: WrapCrossAlignment.center,
-      spacing: 8,
-      runSpacing: 8,
-      children: [
-        Text(
-          'Time Durations Dashboard',
-          style: TextStyle(
-            fontSize: 20,
-            fontWeight: FontWeight.bold,
-            color: theme.primaryColor,
-          ),
-        ),
-        Container(
-          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-          decoration: BoxDecoration(
-            color: Colors.blue.withValues(alpha: 0.15),
-            border: Border.all(color: Colors.blue.withValues(alpha: 0.5)),
-            borderRadius: BorderRadius.circular(4),
-          ),
-          child: const Text(
-            'RFC 9911 Time-Duration Specs',
-            style: TextStyle(
-              color: Colors.blue,
-              fontSize: 10,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-
   Widget _buildTimeDurationSummary(ThemeData theme) {
-    final isDark = theme.brightness == Brightness.dark;
-    final cardBg = isDark ? const Color(0xFF2D2E30) : Colors.white;
-    final borderSide = BorderSide(
-      color: isDark ? const Color(0x1FFFFFFF) : const Color(0x1F000000),
-      width: 1,
-    );
+    final cardBg = cardBackground(theme);
+    final borderSide = subtleBorder(theme);
 
     int total = _timeDurationNodes.length;
     int ticks = _timeDurationNodes.where((n) => n.type == YangTimeDurationType.timeticks || n.type == YangTimeDurationType.timestamp).length;
@@ -4251,8 +3920,7 @@ class _ReferenceFrameDashboardState extends State<ReferenceFrameDashboard> {
   }
 
   Widget _buildTimeDurationFormCard(ThemeData theme) {
-    final isDark = theme.brightness == Brightness.dark;
-    final cardBg = isDark ? const Color(0xFF2D2E30) : Colors.white;
+    final cardBg = cardBackground(theme);
 
     return Card(
       color: cardBg,
@@ -4390,8 +4058,7 @@ class _ReferenceFrameDashboardState extends State<ReferenceFrameDashboard> {
   }
 
   Widget _buildTimeDurationListPane(ThemeData theme) {
-    final isDark = theme.brightness == Brightness.dark;
-    final cardBg = isDark ? const Color(0xFF2D2E30) : Colors.white;
+    final cardBg = cardBackground(theme);
     final isDesktop = MediaQuery.of(context).size.width > 900;
 
     final Widget listContent = _timeDurationNodes.isEmpty
@@ -4558,47 +4225,9 @@ class _ReferenceFrameDashboardState extends State<ReferenceFrameDashboard> {
     );
   }
 
-  Widget _buildAddressTagHeader(ThemeData theme) {
-    return Wrap(
-      crossAxisAlignment: WrapCrossAlignment.center,
-      spacing: 8,
-      runSpacing: 8,
-      children: [
-        Text(
-          'Addresses & Tags Dashboard',
-          style: TextStyle(
-            fontSize: 20,
-            fontWeight: FontWeight.bold,
-            color: theme.primaryColor,
-          ),
-        ),
-        Container(
-          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-          decoration: BoxDecoration(
-            color: Colors.blue.withValues(alpha: 0.15),
-            border: Border.all(color: Colors.blue.withValues(alpha: 0.5)),
-            borderRadius: BorderRadius.circular(4),
-          ),
-          child: const Text(
-            'RFC 9911 Address Specs',
-            style: TextStyle(
-              color: Colors.blue,
-              fontSize: 10,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-
   Widget _buildAddressTagSummary(ThemeData theme) {
-    final isDark = theme.brightness == Brightness.dark;
-    final cardBg = isDark ? const Color(0xFF2D2E30) : Colors.white;
-    final borderSide = BorderSide(
-      color: isDark ? const Color(0x1FFFFFFF) : const Color(0x1F000000),
-      width: 1,
-    );
+    final cardBg = cardBackground(theme);
+    final borderSide = subtleBorder(theme);
 
     int total = _addressTagNodes.length;
     int addresses = _addressTagNodes.where((n) => n.type == YangAddressTagType.physAddress || n.type == YangAddressTagType.macAddress || n.type == YangAddressTagType.dottedQuad).length;
@@ -4616,8 +4245,7 @@ class _ReferenceFrameDashboardState extends State<ReferenceFrameDashboard> {
   }
 
   Widget _buildAddressTagFormCard(ThemeData theme) {
-    final isDark = theme.brightness == Brightness.dark;
-    final cardBg = isDark ? const Color(0xFF2D2E30) : Colors.white;
+    final cardBg = cardBackground(theme);
 
     return Card(
       color: cardBg,
@@ -4734,8 +4362,7 @@ class _ReferenceFrameDashboardState extends State<ReferenceFrameDashboard> {
   }
 
   Widget _buildAddressTagListPane(ThemeData theme) {
-    final isDark = theme.brightness == Brightness.dark;
-    final cardBg = isDark ? const Color(0xFF2D2E30) : Colors.white;
+    final cardBg = cardBackground(theme);
     final isDesktop = MediaQuery.of(context).size.width > 900;
 
     final Widget listContent = _addressTagNodes.isEmpty
@@ -4888,7 +4515,8 @@ class _ReferenceFrameDashboardState extends State<ReferenceFrameDashboard> {
     );
   }
 
-  Widget _buildEquipmentRacksHeader(ThemeData theme) {
+  Widget _buildEquipmentRacksHeader() {
+    final theme = Theme.of(context);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -4911,12 +4539,8 @@ class _ReferenceFrameDashboardState extends State<ReferenceFrameDashboard> {
   }
 
   Widget _buildEquipmentRacksSummary(ThemeData theme) {
-    final isDark = theme.brightness == Brightness.dark;
-    final cardBg = isDark ? const Color(0xFF2D2E30) : Colors.white;
-    final borderSide = BorderSide(
-      color: isDark ? const Color(0x1FFFFFFF) : const Color(0x1F000000),
-      width: 1,
-    );
+    final cardBg = cardBackground(theme);
+    final borderSide = subtleBorder(theme);
 
     final total = _equipmentRacks.length;
     final standard = _equipmentRacks.where((r) => r.rackClass == 'rack-standard').length;
@@ -4948,8 +4572,7 @@ class _ReferenceFrameDashboardState extends State<ReferenceFrameDashboard> {
   }
 
   Widget _buildEquipmentRackFormCard(ThemeData theme) {
-    final isDark = theme.brightness == Brightness.dark;
-    final cardBg = isDark ? const Color(0xFF2D2E30) : Colors.white;
+    final cardBg = cardBackground(theme);
 
     return Card(
       color: cardBg,
@@ -5286,7 +4909,7 @@ class _ReferenceFrameDashboardState extends State<ReferenceFrameDashboard> {
 
   Widget _buildEquipmentRackListPane(ThemeData theme) {
     final isDark = theme.brightness == Brightness.dark;
-    final cardBg = isDark ? const Color(0xFF2D2E30) : Colors.white;
+    final cardBg = cardBackground(theme);
     final isDesktop = MediaQuery.of(context).size.width > 900;
 
     final listContent = ListView.builder(
@@ -5457,7 +5080,7 @@ class _ReferenceFrameDashboardState extends State<ReferenceFrameDashboard> {
 
   Widget _buildFacilityFloorPlanCard(ThemeData theme) {
     final isDark = theme.brightness == Brightness.dark;
-    final cardBg = isDark ? const Color(0xFF2D2E30) : Colors.white;
+    final cardBg = cardBackground(theme);
 
     final activeLocationId = _selectedPlacementLocationId ?? '';
     final placedRacks = _equipmentRacks.where((rack) =>
@@ -5838,12 +5461,7 @@ class _ReferenceFrameDashboardState extends State<ReferenceFrameDashboard> {
           updatedRack,
           validLocationIds: validLocationIds,
         );
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Successfully updated rack ${_selectedEquipmentRack!.id}'),
-            backgroundColor: Colors.green,
-          ),
-        );
+        showSuccessSnackBar(context, 'Successfully updated rack ${_selectedEquipmentRack!.id}');
       } else {
         final newRack = EquipmentRack(
           id: id,
@@ -5856,12 +5474,7 @@ class _ReferenceFrameDashboardState extends State<ReferenceFrameDashboard> {
           rackLocation: rackLocation,
         );
         _equipmentRackService.addRack(newRack, validLocationIds: validLocationIds);
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Successfully added rack $id'),
-            backgroundColor: Colors.green,
-          ),
-        );
+        showSuccessSnackBar(context, 'Successfully added rack $id');
       }
 
       // Reset form and refresh list
@@ -5881,7 +5494,7 @@ class _ReferenceFrameDashboardState extends State<ReferenceFrameDashboard> {
       _refreshEquipmentRackList();
     } catch (e) {
       setState(() {
-        _rackFormError = e.toString().replaceFirst('FormatException: ', '');
+        _rackFormError = formatExceptionMessage(e);
       });
     }
   }
@@ -5967,7 +5580,7 @@ class _ReferenceFrameDashboardState extends State<ReferenceFrameDashboard> {
         try {
           InventoryLocationValidator.validateCountryCode(countryCode);
         } catch (e) {
-          setState(() => _locationCountryCodeError = e.toString().replaceFirst('FormatException: ', ''));
+          setState(() => _locationCountryCodeError = formatExceptionMessage(e));
           hasError = true;
         }
       }
@@ -5995,12 +5608,7 @@ class _ReferenceFrameDashboardState extends State<ReferenceFrameDashboard> {
           physicalAddress: physicalAddress,
           containedChassis: _editingContainedChassis,
         );
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Successfully updated location ${_selectedInventoryLocation!.id}'),
-            backgroundColor: Colors.green,
-          ),
-        );
+        showSuccessSnackBar(context, 'Successfully updated location ${_selectedInventoryLocation!.id}');
       } else {
         final newLoc = InventoryLocation(
           id: id,
@@ -6012,12 +5620,7 @@ class _ReferenceFrameDashboardState extends State<ReferenceFrameDashboard> {
           containedChassis: _editingContainedChassis,
         );
         _inventoryLocationService.addLocation(newLoc);
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Successfully added location $id'),
-            backgroundColor: Colors.green,
-          ),
-        );
+        showSuccessSnackBar(context, 'Successfully added location $id');
       }
 
       // Reset form and refresh list
@@ -6044,7 +5647,7 @@ class _ReferenceFrameDashboardState extends State<ReferenceFrameDashboard> {
       _refreshInventoryLocationList();
     } catch (e) {
       setState(() {
-        _locationFormError = e.toString().replaceFirst('FormatException: ', '');
+        _locationFormError = formatExceptionMessage(e);
       });
     }
   }
@@ -6100,7 +5703,7 @@ class _ReferenceFrameDashboardState extends State<ReferenceFrameDashboard> {
 
   Widget _buildNetworkInventoryManager(ThemeData theme) {
     final isDark = theme.brightness == Brightness.dark;
-    final cardBg = isDark ? const Color(0xFF2D2E30) : Colors.white;
+    final cardBg = cardBackground(theme);
     final neList = _networkInventoryService.getNetworkElements();
 
     return Card(
@@ -6166,7 +5769,7 @@ class _ReferenceFrameDashboardState extends State<ReferenceFrameDashboard> {
                             _neManagerError = null;
                           });
                         } catch (e) {
-                          setState(() => _neManagerError = e.toString().replaceFirst('FormatException: ', ''));
+                          setState(() => _neManagerError = formatExceptionMessage(e));
                         }
                       },
                       child: const Text('Add NE'),
@@ -6297,7 +5900,7 @@ class _ReferenceFrameDashboardState extends State<ReferenceFrameDashboard> {
                                           _neManagerError = null;
                                         });
                                       } catch (e) {
-                                        setState(() => _neManagerError = e.toString().replaceFirst('FormatException: ', ''));
+                                        setState(() => _neManagerError = formatExceptionMessage(e));
                                       }
                                     },
                                     child: const Text('Add'),
@@ -6318,47 +5921,9 @@ class _ReferenceFrameDashboardState extends State<ReferenceFrameDashboard> {
     );
   }
 
-  Widget _buildInventoryLocationHeader(ThemeData theme) {
-    return Wrap(
-      crossAxisAlignment: WrapCrossAlignment.center,
-      spacing: 8,
-      runSpacing: 8,
-      children: [
-        Text(
-          'Inventory Locations Dashboard',
-          style: TextStyle(
-            fontSize: 20,
-            fontWeight: FontWeight.bold,
-            color: theme.primaryColor,
-          ),
-        ),
-        Container(
-          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-          decoration: BoxDecoration(
-            color: Colors.blue.withValues(alpha: 0.15),
-            border: Border.all(color: Colors.blue.withValues(alpha: 0.5)),
-            borderRadius: BorderRadius.circular(4),
-          ),
-          child: const Text(
-            'IETF NI-Location Specs',
-            style: TextStyle(
-              color: Colors.blue,
-              fontSize: 10,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-
   Widget _buildInventoryLocationSummary(ThemeData theme) {
-    final isDark = theme.brightness == Brightness.dark;
-    final cardBg = isDark ? const Color(0xFF2D2E30) : Colors.white;
-    final borderSide = BorderSide(
-      color: isDark ? const Color(0x1FFFFFFF) : const Color(0x1F000000),
-      width: 1,
-    );
+    final cardBg = cardBackground(theme);
+    final borderSide = subtleBorder(theme);
 
     int total = _inventoryLocations.length;
     int active = _inventoryLocations.where((l) => !l.isExpired).length;
@@ -6376,8 +5941,7 @@ class _ReferenceFrameDashboardState extends State<ReferenceFrameDashboard> {
   }
 
   Widget _buildInventoryLocationFormCard(ThemeData theme) {
-    final isDark = theme.brightness == Brightness.dark;
-    final cardBg = isDark ? const Color(0xFF2D2E30) : Colors.white;
+    final cardBg = cardBackground(theme);
 
     // Filter potential parent locations to avoid circular loops
     final potentialParents = _inventoryLocations.where((loc) {
@@ -6763,7 +6327,7 @@ class _ReferenceFrameDashboardState extends State<ReferenceFrameDashboard> {
                                 _chassisError = null;
                               });
                             } catch (e) {
-                              setState(() => _chassisError = e.toString().replaceFirst('FormatException: ', ''));
+                              setState(() => _chassisError = formatExceptionMessage(e));
                             }
                           },
                           icon: const Icon(Icons.add, size: 14),
@@ -6801,8 +6365,7 @@ class _ReferenceFrameDashboardState extends State<ReferenceFrameDashboard> {
   }
 
   Widget _buildInventoryLocationListPane(ThemeData theme) {
-    final isDark = theme.brightness == Brightness.dark;
-    final cardBg = isDark ? const Color(0xFF2D2E30) : Colors.white;
+    final cardBg = cardBackground(theme);
     final isDesktop = MediaQuery.of(context).size.width > 900;
 
     final treeNodes = _buildFlattenedTree();
