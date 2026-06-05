@@ -1,9 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:cogctl_ux/main.dart';
-import 'package:cogctl_ux/models/counter_gauge.dart';
+import 'package:cogctl_ux/features/yang_telemetry/domain/counter_gauge.dart';
+import 'package:cogctl_ux/core/di/service_locator.dart';
 
 void main() {
+  setUpAll(() {
+    initServiceLocator();
+  });
   group('YANG Counters and Gauges Logic Tests', () {
     String? getValidationError(YangCounterGauge node, BigInt newValue, bool discontinuity) {
       try {

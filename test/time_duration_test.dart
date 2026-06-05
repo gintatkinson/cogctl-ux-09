@@ -1,10 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:cogctl_ux/main.dart';
-import 'package:cogctl_ux/models/time_duration.dart';
-import 'package:cogctl_ux/services/mock_time_duration_service.dart';
+import 'package:cogctl_ux/features/yang_telemetry/domain/time_duration.dart';
+import 'package:cogctl_ux/features/yang_telemetry/data/mock_time_duration_service.dart';
+import 'package:cogctl_ux/core/di/service_locator.dart';
 
 void main() {
+  setUpAll(() {
+    initServiceLocator();
+  });
   group('YANG Time Duration Validation Logic Tests', () {
     String? getValidationError(YangTimeDurationType type, String value) {
       try {

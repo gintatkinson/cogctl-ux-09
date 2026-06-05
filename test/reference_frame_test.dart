@@ -1,7 +1,11 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:cogctl_ux/models/geo_location.dart';
+import 'package:cogctl_ux/features/geo_location/domain/geo_location.dart';
+import 'package:cogctl_ux/core/di/service_locator.dart';
 
 void main() {
+  setUpAll(() {
+    initServiceLocator();
+  });
   group('Reference Frame Validation Logic Tests', () {
     test('Default Astronomical Body and Geodetic Datum Normalization', () {
       expect(ReferenceFrameValidator.normalize('Earth '), 'earth');

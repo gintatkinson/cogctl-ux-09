@@ -1,10 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:cogctl_ux/main.dart';
-import 'package:cogctl_ux/models/address_tag.dart';
-import 'package:cogctl_ux/services/mock_address_tag_service.dart';
+import 'package:cogctl_ux/features/yang_telemetry/domain/address_tag.dart';
+import 'package:cogctl_ux/features/yang_telemetry/data/mock_address_tag_service.dart';
+import 'package:cogctl_ux/core/di/service_locator.dart';
 
 void main() {
+  setUpAll(() {
+    initServiceLocator();
+  });
   group('YANG Address and Tag Validation Logic Tests', () {
     String? getValidationError(YangAddressTagType type, String value) {
       try {

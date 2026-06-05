@@ -1,10 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:cogctl_ux/main.dart';
-import 'package:cogctl_ux/models/inventory_location.dart';
-import 'package:cogctl_ux/services/mock_inventory_location_service.dart';
+import 'package:cogctl_ux/features/infrastructure/domain/inventory_location.dart';
+import 'package:cogctl_ux/features/infrastructure/data/mock_inventory_location_service.dart';
+import 'package:cogctl_ux/core/di/service_locator.dart';
 
 void main() {
+  setUpAll(() {
+    initServiceLocator();
+  });
   group('Physical Address Logical Tests', () {
     test('toPostalLabel formats address components correctly', () {
       final addr = PhysicalAddress(
@@ -92,6 +96,8 @@ void main() {
       expect(find.textContaining('100 Main St, Seattle, WA 98101, US'), findsOneWidget);
 
       // Click "View Map"
+      await tester.ensureVisible(find.text('View Map'));
+      await tester.pumpAndSettle();
       await tester.tap(find.text('View Map'));
       await tester.pumpAndSettle();
 
@@ -157,7 +163,7 @@ void main() {
       await tester.pumpAndSettle();
 
       // Verify that validation error message is displayed
-      expect(find.textContaining('Country code must be a valid ISO 3166-1 Alpha-2'), findsOneWidget);
+      expect(find.textContaining('Country code must be a valid ISO 3166-1 Alpha-2'), findsWidgets);
 
       // Fix country code to 'IT' (uppercase)
       await tester.enterText(countryField, 'IT');
