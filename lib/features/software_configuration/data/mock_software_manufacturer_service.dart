@@ -26,7 +26,7 @@ class MockSoftwareManufacturerService {
           componentIds: ['chassis-01', 'gigabit-port-01'],
         ));
       }
-    } catch (_) {}
+    } on FormatException catch (_) {}
 
     // Seed default configuration 1: Network Element ne-01
     _configs.add(MockSoftwareManufacturerConfig(

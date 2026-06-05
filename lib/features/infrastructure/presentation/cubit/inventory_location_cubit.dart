@@ -1,4 +1,5 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:cogctl_ux/core/utils/format_error.dart';
 import 'package:cogctl_ux/features/infrastructure/domain/inventory_location.dart';
 import 'package:cogctl_ux/features/infrastructure/domain/network_element.dart';
 import 'package:cogctl_ux/features/infrastructure/domain/repositories/i_inventory_location_repository.dart';
@@ -80,7 +81,7 @@ class InventoryLocationCubit extends Cubit<InventoryLocationState> {
           InventoryLocationValidator.validateCountryCode(trimmed);
           emit(state.copyWith(countryCodeError: () => null));
         } catch (e) {
-          emit(state.copyWith(countryCodeError: () => e.toString().replaceFirst('FormatException: ', '')));
+          emit(state.copyWith(countryCodeError: () => formatError(e)));
         }
         break;
       case 'timestamp':
@@ -144,7 +145,7 @@ class InventoryLocationCubit extends Cubit<InventoryLocationState> {
       loadData();
       return true;
     } catch (e) {
-      emit(state.copyWith(generalError: () => e.toString().replaceFirst('FormatException: ', '')));
+      emit(state.copyWith(generalError: () => formatError(e)));
       return false;
     }
   }
@@ -180,7 +181,7 @@ class InventoryLocationCubit extends Cubit<InventoryLocationState> {
       loadData();
       return true;
     } catch (e) {
-      emit(state.copyWith(generalError: () => e.toString().replaceFirst('FormatException: ', '')));
+      emit(state.copyWith(generalError: () => formatError(e)));
       return false;
     }
   }
@@ -218,7 +219,7 @@ class InventoryLocationCubit extends Cubit<InventoryLocationState> {
       ));
       loadData();
     } catch (e) {
-      emit(state.copyWith(neManagerError: () => e.toString().replaceFirst('FormatException: ', '')));
+      emit(state.copyWith(neManagerError: () => formatError(e)));
     }
   }
 
@@ -240,7 +241,7 @@ class InventoryLocationCubit extends Cubit<InventoryLocationState> {
       _networkInventoryRepository.addComponent(neId, componentId.trim());
       loadData();
     } catch (e) {
-      emit(state.copyWith(neManagerError: () => e.toString().replaceFirst('FormatException: ', '')));
+      emit(state.copyWith(neManagerError: () => formatError(e)));
     }
   }
 

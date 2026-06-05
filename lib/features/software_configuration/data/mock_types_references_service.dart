@@ -38,7 +38,7 @@ class MockTypesReferencesService {
           componentIds: ['chassis-01', 'gigabit-port-01'],
         ));
       }
-    } catch (_) {}
+    } on FormatException catch (_) {}
 
     // Seed default reference configurations
     _references.add(MockInventoryTypeReference(

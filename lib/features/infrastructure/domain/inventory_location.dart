@@ -67,7 +67,7 @@ class InventoryLocation {
 
   bool get isExpired {
     if (validUntil == null) return false;
-    return DateTime.now().isAfter(validUntil!);
+    return DateTime.now().toUtc().isAfter(validUntil!);
   }
 
   bool isValidAt(DateTime time) {

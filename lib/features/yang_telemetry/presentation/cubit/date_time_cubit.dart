@@ -1,4 +1,5 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:cogctl_ux/core/utils/format_error.dart';
 import 'package:cogctl_ux/features/yang_telemetry/domain/date_time.dart';
 import 'package:cogctl_ux/features/yang_telemetry/domain/repositories/i_date_time_repository.dart';
 import 'date_time_state.dart';
@@ -50,7 +51,7 @@ class DateTimeCubit extends Cubit<DateTimeState> {
       YangDateTimeValidator.validate(val, type);
       emit(state.copyWith(valueError: () => null));
     } catch (e) {
-      emit(state.copyWith(valueError: () => e.toString().replaceFirst('FormatException: ', '')));
+      emit(state.copyWith(valueError: () => formatError(e)));
     }
   }
 
@@ -60,7 +61,7 @@ class DateTimeCubit extends Cubit<DateTimeState> {
       _repository.updateNodeValue(id, val);
       loadNodes();
     } catch (e) {
-      emit(state.copyWith(generalError: () => e.toString().replaceFirst('FormatException: ', '')));
+      emit(state.copyWith(generalError: () => formatError(e)));
     }
   }
 }

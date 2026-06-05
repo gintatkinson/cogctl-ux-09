@@ -1,4 +1,5 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:cogctl_ux/core/utils/format_error.dart';
 import 'package:cogctl_ux/features/yang_telemetry/domain/counter_gauge.dart';
 import 'package:cogctl_ux/features/yang_telemetry/domain/repositories/i_counter_gauge_repository.dart';
 import 'counter_gauge_state.dart';
@@ -51,7 +52,7 @@ class CounterGaugeCubit extends Cubit<CounterGaugeState> {
       YangCounterGaugeValidator.validateValue(parsed, type);
       emit(state.copyWith(valueError: () => null));
     } catch (e) {
-      emit(state.copyWith(valueError: () => e.toString().replaceFirst('FormatException: ', '')));
+      emit(state.copyWith(valueError: () => formatError(e)));
     }
   }
 
@@ -62,7 +63,7 @@ class CounterGaugeCubit extends Cubit<CounterGaugeState> {
       _repository.updateNodeValue(id, parsed, discontinuity: discontinuity);
       loadNodes();
     } catch (e) {
-      emit(state.copyWith(valueError: () => e.toString().replaceFirst('FormatException: ', '')));
+      emit(state.copyWith(valueError: () => formatError(e)));
     }
   }
 

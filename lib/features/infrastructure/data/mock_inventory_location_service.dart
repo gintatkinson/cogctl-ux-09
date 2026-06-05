@@ -14,7 +14,7 @@ class MockInventoryLocationService {
 
   void _resetDefaults() {
     _locations.clear();
-    final now = DateTime.now();
+    final now = DateTime.now().toUtc();
     _locations.addAll([
       InventoryLocation(
         id: 'loc-london-hq',

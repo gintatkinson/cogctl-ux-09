@@ -105,6 +105,9 @@ class CartesianCoordinate extends LocationCoordinate {
       };
 
   factory CartesianCoordinate.fromJson(Map<String, dynamic> json) {
+    if (json['x'] == null || json['y'] == null || json['z'] == null) {
+      throw const FormatException('Cartesian coordinates require x, y, and z values');
+    }
     return CartesianCoordinate(
       x: (json['x'] as num).toDouble(),
       y: (json['y'] as num).toDouble(),
@@ -313,7 +316,8 @@ class ReferenceFrameValidator {
     if (parsed == null) {
       throw const FormatException("Must be a valid decimal number");
     }
-    const double limit = 9.223372036854775807e18;
+    // YANG decimal64 with fraction-digits 12: max = (2^63 - 1) / 10^12
+    const double limit = 9223372.036854775807;
     if (parsed < -limit || parsed > limit) {
       throw FormatException("$componentName exceeds the physical limits of decimal64");
     }

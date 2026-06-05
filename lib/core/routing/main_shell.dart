@@ -33,10 +33,16 @@ class _MainShellState extends State<MainShell> {
       return 'RFC 9911 Time Durations';
     } else if (path.startsWith('/addresses-tags')) {
       return 'RFC 9911 Addresses & Tags';
+    } else if (path.startsWith('/inventory-locations')) {
+      return 'IETF NI-Location Hierarchies';
     } else if (path.startsWith('/equipment-racks')) {
       return 'Equipment Racks Specs';
+    } else if (path.startsWith('/types-references')) {
+      return 'YANG Types & References';
+    } else if (path.startsWith('/software-manufacturer')) {
+      return 'Software & Manufacturer';
     } else {
-      return 'IETF NI-Location Hierarchies';
+      return 'Console Overview';
     }
   }
 

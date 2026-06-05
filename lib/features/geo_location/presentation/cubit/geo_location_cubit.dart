@@ -1,5 +1,6 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'dart:math';
+import 'package:cogctl_ux/core/utils/format_error.dart';
 import 'package:cogctl_ux/features/geo_location/domain/geo_location.dart';
 import 'package:cogctl_ux/features/geo_location/domain/repositories/i_location_repository.dart';
 import 'geo_location_state.dart';
@@ -88,7 +89,7 @@ class GeoLocationCubit extends Cubit<GeoLocationState> {
           ReferenceFrameValidator.validateAstronomicalBody(ReferenceFrameValidator.normalize(trimmed));
           emit(state.copyWith(bodyError: () => null));
         } catch (e) {
-          emit(state.copyWith(bodyError: () => e.toString().replaceFirst('FormatException: ', '')));
+          emit(state.copyWith(bodyError: () => formatError(e)));
         }
         break;
       case 'altSystem':
@@ -100,7 +101,7 @@ class GeoLocationCubit extends Cubit<GeoLocationState> {
           ReferenceFrameValidator.validateAlternateSystem(ReferenceFrameValidator.normalize(trimmed));
           emit(state.copyWith(altSystemError: () => null));
         } catch (e) {
-          emit(state.copyWith(altSystemError: () => e.toString().replaceFirst('FormatException: ', '')));
+          emit(state.copyWith(altSystemError: () => formatError(e)));
         }
         break;
       case 'datum':
@@ -112,7 +113,7 @@ class GeoLocationCubit extends Cubit<GeoLocationState> {
           ReferenceFrameValidator.validateGeodeticDatum(ReferenceFrameValidator.normalize(trimmed));
           emit(state.copyWith(datumError: () => null));
         } catch (e) {
-          emit(state.copyWith(datumError: () => e.toString().replaceFirst('FormatException: ', '')));
+          emit(state.copyWith(datumError: () => formatError(e)));
         }
         break;
       case 'coordAcc':
@@ -124,7 +125,7 @@ class GeoLocationCubit extends Cubit<GeoLocationState> {
           ReferenceFrameValidator.parseAccuracy(trimmed);
           emit(state.copyWith(coordAccError: () => null));
         } catch (e) {
-          emit(state.copyWith(coordAccError: () => e.toString().replaceFirst('FormatException: ', '')));
+          emit(state.copyWith(coordAccError: () => formatError(e)));
         }
         break;
       case 'heightAcc':
@@ -136,7 +137,7 @@ class GeoLocationCubit extends Cubit<GeoLocationState> {
           ReferenceFrameValidator.parseAccuracy(trimmed);
           emit(state.copyWith(heightAccError: () => null));
         } catch (e) {
-          emit(state.copyWith(heightAccError: () => e.toString().replaceFirst('FormatException: ', '')));
+          emit(state.copyWith(heightAccError: () => formatError(e)));
         }
         break;
       case 'lat':
@@ -148,7 +149,7 @@ class GeoLocationCubit extends Cubit<GeoLocationState> {
           ReferenceFrameValidator.parseLatitude(trimmed);
           emit(state.copyWith(latError: () => null));
         } catch (e) {
-          emit(state.copyWith(latError: () => e.toString().replaceFirst('FormatException: ', '')));
+          emit(state.copyWith(latError: () => formatError(e)));
         }
         break;
       case 'lon':
@@ -160,7 +161,7 @@ class GeoLocationCubit extends Cubit<GeoLocationState> {
           ReferenceFrameValidator.parseLongitude(trimmed);
           emit(state.copyWith(lonError: () => null));
         } catch (e) {
-          emit(state.copyWith(lonError: () => e.toString().replaceFirst('FormatException: ', '')));
+          emit(state.copyWith(lonError: () => formatError(e)));
         }
         break;
       case 'height':
@@ -172,7 +173,7 @@ class GeoLocationCubit extends Cubit<GeoLocationState> {
           ReferenceFrameValidator.parseHeight(trimmed);
           emit(state.copyWith(heightError: () => null));
         } catch (e) {
-          emit(state.copyWith(heightError: () => e.toString().replaceFirst('FormatException: ', '')));
+          emit(state.copyWith(heightError: () => formatError(e)));
         }
         break;
       case 'x':
@@ -184,7 +185,7 @@ class GeoLocationCubit extends Cubit<GeoLocationState> {
           ReferenceFrameValidator.parseCartesianCoordinate(trimmed, 'X');
           emit(state.copyWith(xError: () => null));
         } catch (e) {
-          emit(state.copyWith(xError: () => e.toString().replaceFirst('FormatException: ', '')));
+          emit(state.copyWith(xError: () => formatError(e)));
         }
         break;
       case 'y':
@@ -196,7 +197,7 @@ class GeoLocationCubit extends Cubit<GeoLocationState> {
           ReferenceFrameValidator.parseCartesianCoordinate(trimmed, 'Y');
           emit(state.copyWith(yError: () => null));
         } catch (e) {
-          emit(state.copyWith(yError: () => e.toString().replaceFirst('FormatException: ', '')));
+          emit(state.copyWith(yError: () => formatError(e)));
         }
         break;
       case 'z':
@@ -208,7 +209,7 @@ class GeoLocationCubit extends Cubit<GeoLocationState> {
           ReferenceFrameValidator.parseCartesianCoordinate(trimmed, 'Z');
           emit(state.copyWith(zError: () => null));
         } catch (e) {
-          emit(state.copyWith(zError: () => e.toString().replaceFirst('FormatException: ', '')));
+          emit(state.copyWith(zError: () => formatError(e)));
         }
         break;
       case 'vNorth':
@@ -220,7 +221,7 @@ class GeoLocationCubit extends Cubit<GeoLocationState> {
           ReferenceFrameValidator.parseVelocityComponent(trimmed, 'v-north');
           emit(state.copyWith(vNorthError: () => null));
         } catch (e) {
-          emit(state.copyWith(vNorthError: () => e.toString().replaceFirst('FormatException: ', '')));
+          emit(state.copyWith(vNorthError: () => formatError(e)));
         }
         break;
       case 'vEast':
@@ -232,7 +233,7 @@ class GeoLocationCubit extends Cubit<GeoLocationState> {
           ReferenceFrameValidator.parseVelocityComponent(trimmed, 'v-east');
           emit(state.copyWith(vEastError: () => null));
         } catch (e) {
-          emit(state.copyWith(vEastError: () => e.toString().replaceFirst('FormatException: ', '')));
+          emit(state.copyWith(vEastError: () => formatError(e)));
         }
         break;
       case 'vUp':
@@ -244,7 +245,7 @@ class GeoLocationCubit extends Cubit<GeoLocationState> {
           ReferenceFrameValidator.parseVelocityComponent(trimmed, 'v-up');
           emit(state.copyWith(vUpError: () => null));
         } catch (e) {
-          emit(state.copyWith(vUpError: () => e.toString().replaceFirst('FormatException: ', '')));
+          emit(state.copyWith(vUpError: () => formatError(e)));
         }
         break;
       case 'timestamp':
@@ -256,7 +257,7 @@ class GeoLocationCubit extends Cubit<GeoLocationState> {
           ReferenceFrameValidator.parseDateTime(trimmed, 'timestamp');
           emit(state.copyWith(timestampError: () => null));
         } catch (e) {
-          emit(state.copyWith(timestampError: () => e.toString().replaceFirst('FormatException: ', '')));
+          emit(state.copyWith(timestampError: () => formatError(e)));
         }
         break;
       case 'validUntil':
@@ -268,7 +269,7 @@ class GeoLocationCubit extends Cubit<GeoLocationState> {
           ReferenceFrameValidator.parseDateTime(trimmed, 'valid-until');
           emit(state.copyWith(validUntilError: () => null));
         } catch (e) {
-          emit(state.copyWith(validUntilError: () => e.toString().replaceFirst('FormatException: ', '')));
+          emit(state.copyWith(validUntilError: () => formatError(e)));
         }
         break;
     }
@@ -395,7 +396,7 @@ class GeoLocationCubit extends Cubit<GeoLocationState> {
       _repository.addLocation(newRecord);
       loadRecords();
     } catch (e) {
-      emit(state.copyWith(generalError: () => e.toString().replaceFirst('FormatException: ', '')));
+      emit(state.copyWith(generalError: () => formatError(e)));
     }
   }
 

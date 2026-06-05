@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:cogctl_ux/core/di/service_locator.dart';
+import 'package:cogctl_ux/core/utils/format_error.dart';
 import 'package:cogctl_ux/features/infrastructure/domain/inventory_location.dart';
 import 'package:cogctl_ux/features/infrastructure/domain/repositories/i_inventory_location_repository.dart';
 import 'package:cogctl_ux/features/infrastructure/domain/repositories/i_network_inventory_repository.dart';
@@ -886,7 +887,7 @@ class _InventoryLocationViewState extends State<_InventoryLocationView> {
                               });
                             } catch (e) {
                               ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(content: Text(e.toString().replaceFirst('FormatException: ', ''))),
+                                SnackBar(content: Text(formatError(e))),
                               );
                             }
                           },
@@ -993,7 +994,7 @@ class _InventoryLocationViewState extends State<_InventoryLocationView> {
                              print('DEBUG EXCEPTION: $e\n$stack');
                              ScaffoldMessenger.of(context).showSnackBar(
                                SnackBar(
-                                 content: Text(e.toString().replaceFirst('FormatException: ', '')),
+                                 content: Text(formatError(e)),
                                  backgroundColor: Colors.red,
                                ),
                              );
