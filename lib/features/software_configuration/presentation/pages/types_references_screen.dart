@@ -1,3 +1,4 @@
+import 'package:cogctl_ux/utils/theme_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:cogctl_ux/core/di/service_locator.dart';
@@ -171,12 +172,8 @@ class _TypesReferencesViewState extends State<_TypesReferencesView> {
   }
 
   Widget _buildSummary(ThemeData theme, TypesReferencesState state) {
-    final isDark = theme.brightness == Brightness.dark;
-    final cardBg = isDark ? const Color(0xFF2D2E30) : Colors.white;
-    final borderSide = BorderSide(
-      color: isDark ? const Color(0x1FFFFFFF) : const Color(0x1F000000),
-      width: 1,
-    );
+    final cardBg = cardBackground(theme);
+    final borderSide = subtleBorder(theme);
 
     int total = state.references.length;
     int valid = state.references.where((r) => context.read<TypesReferencesCubit>().validateReference(r) == 'Valid').length;
@@ -241,11 +238,8 @@ class _TypesReferencesViewState extends State<_TypesReferencesView> {
 
   Widget _buildFormCard(ThemeData theme, TypesReferencesState state) {
     final isDark = theme.brightness == Brightness.dark;
-    final cardBg = isDark ? const Color(0xFF2D2E30) : Colors.white;
-    final borderSide = BorderSide(
-      color: isDark ? const Color(0x1FFFFFFF) : const Color(0x1F000000),
-      width: 1,
-    );
+    final cardBg = cardBackground(theme);
+    final borderSide = subtleBorder(theme);
 
     final neRepo = sl<INetworkInventoryRepository>();
     final neList = neRepo.getNetworkElements();
@@ -455,11 +449,8 @@ class _TypesReferencesViewState extends State<_TypesReferencesView> {
 
   Widget _buildListPane(ThemeData theme, TypesReferencesState state) {
     final isDark = theme.brightness == Brightness.dark;
-    final cardBg = isDark ? const Color(0xFF2D2E30) : Colors.white;
-    final borderSide = BorderSide(
-      color: isDark ? const Color(0x1FFFFFFF) : const Color(0x1F000000),
-      width: 1,
-    );
+    final cardBg = cardBackground(theme);
+    final borderSide = subtleBorder(theme);
 
     return Card(
       color: cardBg,

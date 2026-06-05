@@ -1,3 +1,6 @@
+import 'package:cogctl_ux/widgets/dashboard_header.dart';
+import 'package:cogctl_ux/utils/snackbar_utils.dart';
+import 'package:cogctl_ux/utils/theme_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:cogctl_ux/core/di/service_locator.dart';
@@ -51,7 +54,7 @@ class _AddressTagViewState extends State<_AddressTagView> {
             ? Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  _buildAddressTagHeader(theme),
+                  const DashboardHeader(title: 'Addresses & Tags Dashboard', badgeLabel: 'RFC 9911 Address Specs'),
                   const SizedBox(height: 16),
                   _buildAddressTagSummary(theme, state.nodes),
                   const SizedBox(height: 24),
@@ -71,7 +74,7 @@ class _AddressTagViewState extends State<_AddressTagView> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    _buildAddressTagHeader(theme),
+                    const DashboardHeader(title: 'Addresses & Tags Dashboard', badgeLabel: 'RFC 9911 Address Specs'),
                     const SizedBox(height: 16),
                     _buildAddressTagSummary(theme, state.nodes),
                     const SizedBox(height: 24),
@@ -87,47 +90,11 @@ class _AddressTagViewState extends State<_AddressTagView> {
     );
   }
 
-  Widget _buildAddressTagHeader(ThemeData theme) {
-    return Wrap(
-      crossAxisAlignment: WrapCrossAlignment.center,
-      spacing: 8,
-      runSpacing: 8,
-      children: [
-        Text(
-          'Addresses & Tags Dashboard',
-          style: TextStyle(
-            fontSize: 20,
-            fontWeight: FontWeight.bold,
-            color: theme.primaryColor,
-          ),
-        ),
-        Container(
-          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-          decoration: BoxDecoration(
-            color: Colors.blue.withValues(alpha: 0.15),
-            border: Border.all(color: Colors.blue.withValues(alpha: 0.5)),
-            borderRadius: BorderRadius.circular(4),
-          ),
-          child: const Text(
-            'RFC 9911 Address Specs',
-            style: TextStyle(
-              color: Colors.blue,
-              fontSize: 10,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-        ),
-      ],
-    );
-  }
+
 
   Widget _buildAddressTagSummary(ThemeData theme, List<YangAddressTagReference> nodes) {
-    final isDark = theme.brightness == Brightness.dark;
-    final cardBg = isDark ? const Color(0xFF2D2E30) : Colors.white;
-    final borderSide = BorderSide(
-      color: isDark ? const Color(0x1FFFFFFF) : const Color(0x1F000000),
-      width: 1,
-    );
+    final cardBg = cardBackground(theme);
+    final borderSide = subtleBorder(theme);
 
     int total = nodes.length;
     int addresses = nodes.where((n) => n.type == YangAddressTagType.physAddress || n.type == YangAddressTagType.macAddress || n.type == YangAddressTagType.dottedQuad).length;
@@ -193,8 +160,7 @@ class _AddressTagViewState extends State<_AddressTagView> {
   }
 
   Widget _buildFormCard(ThemeData theme, AddressTagState state) {
-    final isDark = theme.brightness == Brightness.dark;
-    final cardBg = isDark ? const Color(0xFF2D2E30) : Colors.white;
+    final cardBg = cardBackground(theme);
 
     return Card(
       color: cardBg,
@@ -297,12 +263,7 @@ class _AddressTagViewState extends State<_AddressTagView> {
                               state.selectedNode!.id,
                               _valueController.text,
                             );
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(
-                                content: Text('Successfully updated ${state.selectedNode!.name} to ${_valueController.text}'),
-                                backgroundColor: Colors.green,
-                              ),
-                            );
+                            showSuccessSnackBar(context, 'Successfully updated ${state.selectedNode!.name} to ${_valueController.text}');
                           }
                         },
                         child: const Text('Update Value'),
@@ -319,8 +280,7 @@ class _AddressTagViewState extends State<_AddressTagView> {
   }
 
   Widget _buildListPane(ThemeData theme, AddressTagState state) {
-    final isDark = theme.brightness == Brightness.dark;
-    final cardBg = isDark ? const Color(0xFF2D2E30) : Colors.white;
+    final cardBg = cardBackground(theme);
     final isDesktop = MediaQuery.of(context).size.width > 900;
 
     final Widget listContent = state.nodes.isEmpty

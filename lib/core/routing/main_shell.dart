@@ -1,3 +1,4 @@
+import 'package:cogctl_ux/utils/theme_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
@@ -163,10 +164,7 @@ class _MainShellState extends State<MainShell> {
     final expandedWidth = 240.0;
     final isDark = theme.brightness == Brightness.dark;
     final sidebarBg = isDark ? const Color(0xFF202124) : Colors.white;
-    final borderSide = BorderSide(
-      color: isDark ? const Color(0x1FFFFFFF) : const Color(0x1F000000),
-      width: 1,
-    );
+    final borderSide = subtleBorder(theme);
 
     return AnimatedContainer(
       duration: const Duration(milliseconds: 200),

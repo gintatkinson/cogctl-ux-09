@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:cogctl_ux/utils/theme_utils.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:cogctl_ux/core/di/service_locator.dart';
 import 'package:cogctl_ux/core/utils/format_error.dart';
@@ -252,12 +253,8 @@ class _InventoryLocationViewState extends State<_InventoryLocationView> {
   }
 
   Widget _buildSummary(ThemeData theme, List<InventoryLocation> locations) {
-    final isDark = theme.brightness == Brightness.dark;
-    final cardBg = isDark ? const Color(0xFF2D2E30) : Colors.white;
-    final borderSide = BorderSide(
-      color: isDark ? const Color(0x1FFFFFFF) : const Color(0x1F000000),
-      width: 1,
-    );
+    final cardBg = cardBackground(theme);
+    final borderSide = subtleBorder(theme);
 
     int total = locations.length;
     int active = locations.where((l) => !l.isExpired).length;
@@ -324,7 +321,7 @@ class _InventoryLocationViewState extends State<_InventoryLocationView> {
 
   Widget _buildNetworkInventoryManager(ThemeData theme, InventoryLocationState state) {
     final isDark = theme.brightness == Brightness.dark;
-    final cardBg = isDark ? const Color(0xFF2D2E30) : Colors.white;
+    final cardBg = cardBackground(theme);
 
     return Card(
       color: cardBg,
@@ -509,8 +506,7 @@ class _InventoryLocationViewState extends State<_InventoryLocationView> {
   }
 
   Widget _buildFormCard(ThemeData theme, InventoryLocationState state) {
-    final isDark = theme.brightness == Brightness.dark;
-    final cardBg = isDark ? const Color(0xFF2D2E30) : Colors.white;
+    final cardBg = cardBackground(theme);
 
     final potentialParents = state.locations.where((loc) {
       if (!state.isEditing || state.selectedLocation == null) return true;
@@ -1014,8 +1010,7 @@ class _InventoryLocationViewState extends State<_InventoryLocationView> {
   }
 
   Widget _buildListPane(ThemeData theme, InventoryLocationState state) {
-    final isDark = theme.brightness == Brightness.dark;
-    final cardBg = isDark ? const Color(0xFF2D2E30) : Colors.white;
+    final cardBg = cardBackground(theme);
     final isDesktop = MediaQuery.of(context).size.width > 900;
 
     final treeNodes = _buildFlattenedTree(state.locations);

@@ -1,3 +1,4 @@
+import 'package:cogctl_ux/utils/theme_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:cogctl_ux/core/di/service_locator.dart';
@@ -286,9 +287,8 @@ class _SoftwareManufacturerViewState extends State<_SoftwareManufacturerView> {
   }
 
   Widget _buildSummary(ThemeData theme, SoftwareManufacturerState state) {
-    final isDark = theme.brightness == Brightness.dark;
-    final cardBg = isDark ? const Color(0xFF2D2E30) : Colors.white;
-    final borderSide = BorderSide(color: isDark ? const Color(0x1FFFFFFF) : const Color(0x1F000000));
+    final cardBg = cardBackground(theme);
+    final borderSide = subtleBorder(theme);
 
     int totalConfigs = state.configs.length;
     int neCount = state.configs.where((c) => c.targetType == 'Network Element').length;
@@ -373,9 +373,8 @@ class _SoftwareManufacturerViewState extends State<_SoftwareManufacturerView> {
   }
 
   Widget _buildFormCard(ThemeData theme, SoftwareManufacturerState state) {
-    final isDark = theme.brightness == Brightness.dark;
-    final cardBg = isDark ? const Color(0xFF2D2E30) : Colors.white;
-    final borderSide = BorderSide(color: isDark ? const Color(0x1FFFFFFF) : const Color(0x1F000000));
+    final cardBg = cardBackground(theme);
+    final borderSide = subtleBorder(theme);
 
     if (state.selectedConfig == null) {
       return Card(
@@ -529,9 +528,8 @@ class _SoftwareManufacturerViewState extends State<_SoftwareManufacturerView> {
   }
 
   Widget _buildListPane(ThemeData theme, SoftwareManufacturerState state) {
-    final isDark = theme.brightness == Brightness.dark;
-    final cardBg = isDark ? const Color(0xFF2D2E30) : Colors.white;
-    final borderSide = BorderSide(color: isDark ? const Color(0x1FFFFFFF) : const Color(0x1F000000));
+    final cardBg = cardBackground(theme);
+    final borderSide = subtleBorder(theme);
 
     final listContent = ListView.separated(
       shrinkWrap: true,
