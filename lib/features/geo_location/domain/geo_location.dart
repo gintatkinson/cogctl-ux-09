@@ -313,7 +313,8 @@ class ReferenceFrameValidator {
     if (parsed == null) {
       throw const FormatException("Must be a valid decimal number");
     }
-    const double limit = 9.223372036854775807e18;
+    // YANG decimal64 with fraction-digits 12: max = (2^63 - 1) / 10^12
+    const double limit = 9223372.036854775807;
     if (parsed < -limit || parsed > limit) {
       throw FormatException("$componentName exceeds the physical limits of decimal64");
     }

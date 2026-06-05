@@ -203,7 +203,11 @@ class EquipmentRackCubit extends Cubit<EquipmentRackState> {
       final width = int.parse(rawWidth.trim());
       final depth = int.parse(rawDepth.trim());
       final timestamp = DateTime.parse(rawTimestamp.trim());
-      final validUntil = DateTime.parse((rawValidUntil ?? '').trim());
+      final rawVU = (rawValidUntil ?? '').trim();
+      if (rawVU.isEmpty) {
+        throw const FormatException('Valid-until is required');
+      }
+      final validUntil = DateTime.parse(rawVU);
       final row = locationRef.isNotEmpty ? int.parse(rawRow.trim()) : 0;
       final col = locationRef.isNotEmpty ? int.parse(rawCol.trim()) : 0;
       final maxVoltage = int.parse(rawMaxVoltage.trim());
@@ -257,7 +261,11 @@ class EquipmentRackCubit extends Cubit<EquipmentRackState> {
       final width = int.parse(rawWidth.trim());
       final depth = int.parse(rawDepth.trim());
       final timestamp = DateTime.parse(rawTimestamp.trim());
-      final validUntil = DateTime.parse((rawValidUntil ?? '').trim());
+      final rawVU = (rawValidUntil ?? '').trim();
+      if (rawVU.isEmpty) {
+        throw const FormatException('Valid-until is required');
+      }
+      final validUntil = DateTime.parse(rawVU);
       final row = locationRef.isNotEmpty ? int.parse(rawRow.trim()) : 0;
       final col = locationRef.isNotEmpty ? int.parse(rawCol.trim()) : 0;
       final maxVoltage = int.parse(rawMaxVoltage.trim());

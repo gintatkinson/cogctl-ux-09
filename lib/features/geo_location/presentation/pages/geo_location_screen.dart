@@ -811,7 +811,7 @@ class _GeoLocationViewState extends State<_GeoLocationView> {
                   children: [
                     OutlinedButton(
                       onPressed: () {
-                        final base = DateTime.tryParse(_timestampController.text.trim()) ?? DateTime.now();
+                        final base = DateTime.tryParse(_timestampController.text.trim()) ?? DateTime.now().toUtc();
                         setState(() {
                           _validUntilController.text = base.add(const Duration(hours: 1)).toUtc().toIso8601String();
                         });
@@ -824,7 +824,7 @@ class _GeoLocationViewState extends State<_GeoLocationView> {
                     ),
                     OutlinedButton(
                       onPressed: () {
-                        final base = DateTime.tryParse(_timestampController.text.trim()) ?? DateTime.now();
+                        final base = DateTime.tryParse(_timestampController.text.trim()) ?? DateTime.now().toUtc();
                         setState(() {
                           _validUntilController.text = base.add(const Duration(days: 1)).toUtc().toIso8601String();
                         });
@@ -837,7 +837,7 @@ class _GeoLocationViewState extends State<_GeoLocationView> {
                     ),
                     OutlinedButton(
                       onPressed: () {
-                        final base = DateTime.tryParse(_timestampController.text.trim()) ?? DateTime.now();
+                        final base = DateTime.tryParse(_timestampController.text.trim()) ?? DateTime.now().toUtc();
                         setState(() {
                           _validUntilController.text = base.add(const Duration(days: 7)).toUtc().toIso8601String();
                         });

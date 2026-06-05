@@ -7,7 +7,7 @@ class MockLocationService {
   final List<GeoLocation> _locations = [];
 
   MockLocationService._internal() {
-    final now = DateTime.now();
+    final now = DateTime.now().toUtc();
     // Populate with SDN Multi-Domain Network Reference Frames & coordinates
     _locations.addAll([
       GeoLocation(

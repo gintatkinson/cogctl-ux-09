@@ -21,7 +21,7 @@ class _TemporalExpiryTrackerState extends State<TemporalExpiryTracker> {
     super.initState();
     _tickerStream = Stream<DateTime>.periodic(
       const Duration(seconds: 1),
-      (_) => DateTime.now(),
+      (_) => DateTime.now().toUtc(),
     );
   }
 
@@ -34,9 +34,9 @@ class _TemporalExpiryTrackerState extends State<TemporalExpiryTracker> {
 
     return StreamBuilder<DateTime>(
       stream: _tickerStream,
-      initialData: DateTime.now(),
+      initialData: DateTime.now().toUtc(),
       builder: (context, snapshot) {
-        final now = snapshot.data ?? DateTime.now();
+        final now = snapshot.data ?? DateTime.now().toUtc();
         if (validUntil.isBefore(now)) {
           return _buildBadge('EXPIRED', Colors.orange);
         } else {
