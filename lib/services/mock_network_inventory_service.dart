@@ -34,11 +34,9 @@ class MockNetworkInventoryService {
   }
 
   MockNetworkElement? getNetworkElement(String neId) {
-    try {
-      return _elements.firstWhere((e) => e.neId == neId);
-    } catch (_) {
-      return null;
-    }
+    final index = _elements.indexWhere((e) => e.neId == neId);
+    if (index == -1) return null;
+    return _elements[index];
   }
 
   void addNetworkElement(MockNetworkElement ne) {
@@ -49,7 +47,11 @@ class MockNetworkInventoryService {
   }
 
   void deleteNetworkElement(String neId) {
-    _elements.removeWhere((e) => e.neId == neId);
+    final index = _elements.indexWhere((e) => e.neId == neId);
+    if (index == -1) {
+      throw FormatException("Network Element '$neId' not found.");
+    }
+    _elements.removeAt(index);
   }
 
   void addComponent(String neId, String componentId) {
@@ -67,8 +69,13 @@ class MockNetworkInventoryService {
 
   void deleteComponent(String neId, String componentId) {
     final index = _elements.indexWhere((e) => e.neId == neId);
-    if (index == -1) return;
+    if (index == -1) {
+      throw FormatException("Network Element '$neId' not found.");
+    }
     final ne = _elements[index];
+    if (!ne.componentIds.contains(componentId)) {
+      throw FormatException("Component '$componentId' not found in Network Element '$neId'.");
+    }
     final updatedList = List<String>.from(ne.componentIds)..remove(componentId);
     _elements[index] = ne.copyWith(componentIds: updatedList);
   }

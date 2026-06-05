@@ -5392,10 +5392,17 @@ class _ReferenceFrameDashboardState extends State<ReferenceFrameDashboard> {
                 IconButton(
                   icon: const Icon(Icons.delete, size: 18, color: Colors.redAccent),
                   onPressed: () {
-                    setState(() {
+                    try {
                       _equipmentRackService.deleteRack(rack.id);
                       _refreshEquipmentRackList();
-                    });
+                    } catch (e) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text('Failed to delete rack: ${e.toString().replaceFirst('FormatException: ', '')}'),
+                          backgroundColor: Colors.red,
+                        ),
+                      );
+                    }
                   },
                 ),
               ],
@@ -6231,10 +6238,14 @@ class _ReferenceFrameDashboardState extends State<ReferenceFrameDashboard> {
                                       icon: const Icon(Icons.delete, size: 16, color: Colors.red),
                                       tooltip: 'Delete NE',
                                       onPressed: () {
-                                        setState(() {
+                                        try {
                                           _networkInventoryService.deleteNetworkElement(ne.neId);
-                                          _neManagerError = null;
-                                        });
+                                          setState(() {
+                                            _neManagerError = null;
+                                          });
+                                        } catch (e) {
+                                          setState(() => _neManagerError = e.toString().replaceFirst('FormatException: ', ''));
+                                        }
                                       },
                                     ),
                                   ],
@@ -6259,10 +6270,14 @@ class _ReferenceFrameDashboardState extends State<ReferenceFrameDashboard> {
                                     padding: EdgeInsets.zero,
                                     materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
                                     onDeleted: () {
-                                      setState(() {
+                                      try {
                                         _networkInventoryService.deleteComponent(ne.neId, comp);
-                                        _neManagerError = null;
-                                      });
+                                        setState(() {
+                                          _neManagerError = null;
+                                        });
+                                      } catch (e) {
+                                        setState(() => _neManagerError = e.toString().replaceFirst('FormatException: ', ''));
+                                      }
                                     },
                                   );
                                 }).toList(),
@@ -6387,7 +6402,7 @@ class _ReferenceFrameDashboardState extends State<ReferenceFrameDashboard> {
       try {
         InventoryLocationValidator.detectCircularLoop(_selectedInventoryLocation!.id, loc.id, _inventoryLocations);
         return true;
-      } catch (_) {
+      } on FormatException {
         return false;
       }
     }).toList();
