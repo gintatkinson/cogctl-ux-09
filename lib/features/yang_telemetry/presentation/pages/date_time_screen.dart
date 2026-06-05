@@ -1,3 +1,6 @@
+import 'package:cogctl_ux/widgets/dashboard_header.dart';
+import 'package:cogctl_ux/utils/snackbar_utils.dart';
+import 'package:cogctl_ux/utils/theme_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:cogctl_ux/core/di/service_locator.dart';
@@ -92,7 +95,7 @@ class _DateTimeViewState extends State<_DateTimeView> {
             ? Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  _buildDateTimeHeader(theme),
+                  const DashboardHeader(title: 'Date & Time Types Dashboard', badgeLabel: 'RFC 9911 Date-Time Specs'),
                   const SizedBox(height: 16),
                   _buildDateTimeSummary(theme, state.nodes),
                   const SizedBox(height: 24),
@@ -112,7 +115,7 @@ class _DateTimeViewState extends State<_DateTimeView> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    _buildDateTimeHeader(theme),
+                    const DashboardHeader(title: 'Date & Time Types Dashboard', badgeLabel: 'RFC 9911 Date-Time Specs'),
                     const SizedBox(height: 16),
                     _buildDateTimeSummary(theme, state.nodes),
                     const SizedBox(height: 24),
@@ -128,47 +131,11 @@ class _DateTimeViewState extends State<_DateTimeView> {
     );
   }
 
-  Widget _buildDateTimeHeader(ThemeData theme) {
-    return Wrap(
-      crossAxisAlignment: WrapCrossAlignment.center,
-      spacing: 8,
-      runSpacing: 8,
-      children: [
-        Text(
-          'Date & Time Types Dashboard',
-          style: TextStyle(
-            fontSize: 20,
-            fontWeight: FontWeight.bold,
-            color: theme.primaryColor,
-          ),
-        ),
-        Container(
-          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-          decoration: BoxDecoration(
-            color: Colors.blue.withValues(alpha: 0.15),
-            border: Border.all(color: Colors.blue.withValues(alpha: 0.5)),
-            borderRadius: BorderRadius.circular(4),
-          ),
-          child: const Text(
-            'RFC 9911 Date-Time Specs',
-            style: TextStyle(
-              color: Colors.blue,
-              fontSize: 10,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-        ),
-      ],
-    );
-  }
+
 
   Widget _buildDateTimeSummary(ThemeData theme, List<YangDateTimeReference> nodes) {
-    final isDark = theme.brightness == Brightness.dark;
-    final cardBg = isDark ? const Color(0xFF2D2E30) : Colors.white;
-    final borderSide = BorderSide(
-      color: isDark ? const Color(0x1FFFFFFF) : const Color(0x1F000000),
-      width: 1,
-    );
+    final cardBg = cardBackground(theme);
+    final borderSide = subtleBorder(theme);
 
     int total = nodes.length;
     int datetimes = nodes.where((n) => n.type == YangDateTimeType.dateAndTime).length;
@@ -236,8 +203,7 @@ class _DateTimeViewState extends State<_DateTimeView> {
   }
 
   Widget _buildFormCard(ThemeData theme, DateTimeState state) {
-    final isDark = theme.brightness == Brightness.dark;
-    final cardBg = isDark ? const Color(0xFF2D2E30) : Colors.white;
+    final cardBg = cardBackground(theme);
 
     return Card(
       color: cardBg,
@@ -344,12 +310,7 @@ class _DateTimeViewState extends State<_DateTimeView> {
                               state.selectedNode!.id,
                               _valueController.text,
                             );
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(
-                                content: Text('Successfully updated ${state.selectedNode!.name} to ${_valueController.text}'),
-                                backgroundColor: Colors.green,
-                              ),
-                            );
+                            showSuccessSnackBar(context, 'Successfully updated ${state.selectedNode!.name} to ${_valueController.text}');
                           }
                         },
                         child: const Text('Update Value'),
@@ -374,8 +335,7 @@ class _DateTimeViewState extends State<_DateTimeView> {
   }
 
   Widget _buildListPane(ThemeData theme, DateTimeState state) {
-    final isDark = theme.brightness == Brightness.dark;
-    final cardBg = isDark ? const Color(0xFF2D2E30) : Colors.white;
+    final cardBg = cardBackground(theme);
     final isDesktop = MediaQuery.of(context).size.width > 900;
 
     final Widget listContent = state.nodes.isEmpty

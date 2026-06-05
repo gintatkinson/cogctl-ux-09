@@ -1,3 +1,4 @@
+import 'package:cogctl_ux/utils/theme_utils.dart';
 import 'package:flutter/material.dart' hide Velocity;
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:cogctl_ux/core/di/service_locator.dart';
@@ -196,12 +197,8 @@ class _GeoLocationViewState extends State<_GeoLocationView> {
   }
 
   Widget _buildSDNStatusSummary(ThemeData theme, List<GeoLocation> records) {
-    final isDark = theme.brightness == Brightness.dark;
-    final cardBg = isDark ? const Color(0xFF2D2E30) : Colors.white;
-    final borderSide = BorderSide(
-      color: isDark ? const Color(0x1FFFFFFF) : const Color(0x1F000000),
-      width: 1,
-    );
+    final cardBg = cardBackground(theme);
+    final borderSide = subtleBorder(theme);
 
     int total = records.length;
     int terrestrial = records.where((r) => r.referenceFrame.astronomicalBody == 'earth' && ((r.networkDomain?.contains('Terrestrial') ?? false) || (r.networkDomain?.contains('Mobile') ?? false))).length;
@@ -309,8 +306,7 @@ class _GeoLocationViewState extends State<_GeoLocationView> {
   }
 
   Widget _buildFormCard(ThemeData theme, GeoLocationState state) {
-    final isDark = theme.brightness == Brightness.dark;
-    final cardBg = isDark ? const Color(0xFF2D2E30) : Colors.white;
+    final cardBg = cardBackground(theme);
 
     final networkDomains = [
       'Terrestrial Fiber (L0-L4)',

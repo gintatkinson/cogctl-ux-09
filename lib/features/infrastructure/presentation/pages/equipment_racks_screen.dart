@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:cogctl_ux/utils/theme_utils.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:cogctl_ux/core/di/service_locator.dart';
 import 'package:cogctl_ux/core/utils/format_error.dart';
@@ -199,12 +200,8 @@ class _EquipmentRacksViewState extends State<_EquipmentRacksView> {
   }
 
   Widget _buildSummary(ThemeData theme, List<EquipmentRack> racks) {
-    final isDark = theme.brightness == Brightness.dark;
-    final cardBg = isDark ? const Color(0xFF2D2E30) : Colors.white;
-    final borderSide = BorderSide(
-      color: isDark ? const Color(0x1FFFFFFF) : const Color(0x1F000000),
-      width: 1,
-    );
+    final cardBg = cardBackground(theme);
+    final borderSide = subtleBorder(theme);
 
     final total = racks.length;
     final standard = racks.where((r) => r.rackClass == 'rack-standard').length;
@@ -282,7 +279,7 @@ class _EquipmentRacksViewState extends State<_EquipmentRacksView> {
 
   Widget _buildFacilityFloorPlanCard(ThemeData theme, List<EquipmentRack> racks, List<InventoryLocation> locations) {
     final isDark = theme.brightness == Brightness.dark;
-    final cardBg = isDark ? const Color(0xFF2D2E30) : Colors.white;
+    final cardBg = cardBackground(theme);
 
     final activeLocationId = _selectedPlacementLocationId ?? '';
     final placedRacks = racks.where((rack) =>
@@ -491,7 +488,7 @@ class _EquipmentRacksViewState extends State<_EquipmentRacksView> {
 
   Widget _buildFormCard(ThemeData theme, EquipmentRackState state, List<InventoryLocation> locations) {
     final isDark = theme.brightness == Brightness.dark;
-    final cardBg = isDark ? const Color(0xFF2D2E30) : Colors.white;
+    final cardBg = cardBackground(theme);
 
     final networkElements = sl<INetworkInventoryRepository>().getNetworkElements();
 
@@ -1241,7 +1238,7 @@ class _EquipmentRacksViewState extends State<_EquipmentRacksView> {
 
   Widget _buildListPane(ThemeData theme, EquipmentRackState state) {
     final isDark = theme.brightness == Brightness.dark;
-    final cardBg = isDark ? const Color(0xFF2D2E30) : Colors.white;
+    final cardBg = cardBackground(theme);
     final isDesktop = MediaQuery.of(context).size.width > 900;
 
     final listContent = ListView.builder(

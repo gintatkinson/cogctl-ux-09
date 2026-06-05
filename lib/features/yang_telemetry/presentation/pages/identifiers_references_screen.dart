@@ -1,3 +1,6 @@
+import 'package:cogctl_ux/widgets/dashboard_header.dart';
+import 'package:cogctl_ux/utils/snackbar_utils.dart';
+import 'package:cogctl_ux/utils/theme_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:cogctl_ux/core/di/service_locator.dart';
@@ -51,7 +54,7 @@ class _IdentifiersReferencesViewState extends State<_IdentifiersReferencesView> 
             ? Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  _buildIdentifiersReferencesHeader(theme),
+                  const DashboardHeader(title: 'Identifiers & References Dashboard', badgeLabel: 'RFC 9911 / RFC 7950'),
                   const SizedBox(height: 16),
                   _buildIdentifiersReferencesSummary(theme, state.nodes),
                   const SizedBox(height: 24),
@@ -71,7 +74,7 @@ class _IdentifiersReferencesViewState extends State<_IdentifiersReferencesView> 
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    _buildIdentifiersReferencesHeader(theme),
+                    const DashboardHeader(title: 'Identifiers & References Dashboard', badgeLabel: 'RFC 9911 / RFC 7950'),
                     const SizedBox(height: 16),
                     _buildIdentifiersReferencesSummary(theme, state.nodes),
                     const SizedBox(height: 24),
@@ -87,47 +90,11 @@ class _IdentifiersReferencesViewState extends State<_IdentifiersReferencesView> 
     );
   }
 
-  Widget _buildIdentifiersReferencesHeader(ThemeData theme) {
-    return Wrap(
-      crossAxisAlignment: WrapCrossAlignment.center,
-      spacing: 8,
-      runSpacing: 8,
-      children: [
-        Text(
-          'Identifiers & References Dashboard',
-          style: TextStyle(
-            fontSize: 20,
-            fontWeight: FontWeight.bold,
-            color: theme.primaryColor,
-          ),
-        ),
-        Container(
-          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-          decoration: BoxDecoration(
-            color: Colors.blue.withValues(alpha: 0.15),
-            border: Border.all(color: Colors.blue.withValues(alpha: 0.5)),
-            borderRadius: BorderRadius.circular(4),
-          ),
-          child: const Text(
-            'RFC 9911 / RFC 7950',
-            style: TextStyle(
-              color: Colors.blue,
-              fontSize: 10,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-        ),
-      ],
-    );
-  }
+
 
   Widget _buildIdentifiersReferencesSummary(ThemeData theme, List<YangIdentifierReference> nodes) {
-    final isDark = theme.brightness == Brightness.dark;
-    final cardBg = isDark ? const Color(0xFF2D2E30) : Colors.white;
-    final borderSide = BorderSide(
-      color: isDark ? const Color(0x1FFFFFFF) : const Color(0x1F000000),
-      width: 1,
-    );
+    final cardBg = cardBackground(theme);
+    final borderSide = subtleBorder(theme);
 
     int total = nodes.length;
     int oids = nodes.where((n) => n.type == YangIdentifierType.objectIdentifier).length;
@@ -195,8 +162,7 @@ class _IdentifiersReferencesViewState extends State<_IdentifiersReferencesView> 
   }
 
   Widget _buildFormCard(ThemeData theme, IdentifiersReferencesState state) {
-    final isDark = theme.brightness == Brightness.dark;
-    final cardBg = isDark ? const Color(0xFF2D2E30) : Colors.white;
+    final cardBg = cardBackground(theme);
 
     return Card(
       color: cardBg,
@@ -302,12 +268,7 @@ class _IdentifiersReferencesViewState extends State<_IdentifiersReferencesView> 
                             state.selectedNode!.id,
                             _valueController.text,
                           );
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              content: Text('Successfully updated ${state.selectedNode!.name} to ${_valueController.text}'),
-                              backgroundColor: Colors.green,
-                            ),
-                          );
+                          showSuccessSnackBar(context, 'Successfully updated ${state.selectedNode!.name} to ${_valueController.text}');
                         }
                       },
                       child: const Text('Update Identifier'),
@@ -323,8 +284,7 @@ class _IdentifiersReferencesViewState extends State<_IdentifiersReferencesView> 
   }
 
   Widget _buildListPane(ThemeData theme, IdentifiersReferencesState state) {
-    final isDark = theme.brightness == Brightness.dark;
-    final cardBg = isDark ? const Color(0xFF2D2E30) : Colors.white;
+    final cardBg = cardBackground(theme);
     final isDesktop = MediaQuery.of(context).size.width > 900;
 
     final Widget listContent = state.nodes.isEmpty

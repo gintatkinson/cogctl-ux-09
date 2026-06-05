@@ -1,3 +1,6 @@
+import 'package:cogctl_ux/widgets/dashboard_header.dart';
+import 'package:cogctl_ux/utils/snackbar_utils.dart';
+import 'package:cogctl_ux/utils/theme_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:cogctl_ux/core/di/service_locator.dart';
@@ -53,7 +56,7 @@ class _CounterGaugeViewState extends State<_CounterGaugeView> {
             ? Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  _buildCountersGaugesHeader(theme),
+                  const DashboardHeader(title: 'Counters & Gauges Dashboard', badgeLabel: 'RFC 9911 / ietf-yang-types'),
                   const SizedBox(height: 16),
                   _buildCountersGaugesSummary(theme, state.nodes),
                   const SizedBox(height: 24),
@@ -73,7 +76,7 @@ class _CounterGaugeViewState extends State<_CounterGaugeView> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    _buildCountersGaugesHeader(theme),
+                    const DashboardHeader(title: 'Counters & Gauges Dashboard', badgeLabel: 'RFC 9911 / ietf-yang-types'),
                     const SizedBox(height: 16),
                     _buildCountersGaugesSummary(theme, state.nodes),
                     const SizedBox(height: 24),
@@ -89,45 +92,11 @@ class _CounterGaugeViewState extends State<_CounterGaugeView> {
     );
   }
 
-  Widget _buildCountersGaugesHeader(ThemeData theme) {
-    return Row(
-      children: [
-        Text(
-          'Counters & Gauges Dashboard',
-          style: TextStyle(
-            fontSize: 20,
-            fontWeight: FontWeight.bold,
-            color: theme.primaryColor,
-          ),
-        ),
-        const SizedBox(width: 8),
-        Container(
-          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-          decoration: BoxDecoration(
-            color: Colors.blue.withValues(alpha: 0.15),
-            border: Border.all(color: Colors.blue.withValues(alpha: 0.5)),
-            borderRadius: BorderRadius.circular(4),
-          ),
-          child: const Text(
-            'RFC 9911 / ietf-yang-types',
-            style: TextStyle(
-              color: Colors.blue,
-              fontSize: 10,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-        ),
-      ],
-    );
-  }
+
 
   Widget _buildCountersGaugesSummary(ThemeData theme, List<YangCounterGauge> nodes) {
-    final isDark = theme.brightness == Brightness.dark;
-    final cardBg = isDark ? const Color(0xFF2D2E30) : Colors.white;
-    final borderSide = BorderSide(
-      color: isDark ? const Color(0x1FFFFFFF) : const Color(0x1F000000),
-      width: 1,
-    );
+    final cardBg = cardBackground(theme);
+    final borderSide = subtleBorder(theme);
 
     int total = nodes.length;
     int counters = nodes.where((n) => n.isCounter).length;
@@ -197,8 +166,7 @@ class _CounterGaugeViewState extends State<_CounterGaugeView> {
   }
 
   Widget _buildFormCard(ThemeData theme, CounterGaugeState state) {
-    final isDark = theme.brightness == Brightness.dark;
-    final cardBg = isDark ? const Color(0xFF2D2E30) : Colors.white;
+    final cardBg = cardBackground(theme);
 
     return Card(
       color: cardBg,
@@ -334,12 +302,7 @@ class _CounterGaugeViewState extends State<_CounterGaugeView> {
                             discontinuity: _discontinuityChecked,
                           );
                           if (cubit.state.valueError == null) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(
-                                content: Text('Successfully updated $name to $newVal'),
-                                backgroundColor: Colors.green,
-                              ),
-                            );
+                            showSuccessSnackBar(context, 'Successfully updated $name to $newVal');
                             setState(() {
                               _discontinuityChecked = false;
                             });
@@ -378,8 +341,7 @@ class _CounterGaugeViewState extends State<_CounterGaugeView> {
   }
 
   Widget _buildListPane(ThemeData theme, CounterGaugeState state) {
-    final isDark = theme.brightness == Brightness.dark;
-    final cardBg = isDark ? const Color(0xFF2D2E30) : Colors.white;
+    final cardBg = cardBackground(theme);
     final isDesktop = MediaQuery.of(context).size.width > 900;
 
     final Widget listContent = state.nodes.isEmpty

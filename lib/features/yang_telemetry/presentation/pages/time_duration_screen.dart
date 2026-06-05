@@ -1,3 +1,6 @@
+import 'package:cogctl_ux/widgets/dashboard_header.dart';
+import 'package:cogctl_ux/utils/snackbar_utils.dart';
+import 'package:cogctl_ux/utils/theme_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:cogctl_ux/core/di/service_locator.dart';
@@ -41,12 +44,7 @@ class _TimeDurationViewState extends State<_TimeDurationView> {
 
     _valueController.text = '0';
     cubit.updateValue(selectedNode.id, '0');
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('Successfully updated ${selectedNode.name} to 0'),
-        backgroundColor: Colors.green,
-      ),
-    );
+    showSuccessSnackBar(context, 'Successfully updated ${selectedNode.name} to 0');
   }
 
   @override
@@ -65,7 +63,7 @@ class _TimeDurationViewState extends State<_TimeDurationView> {
             ? Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  _buildTimeDurationHeader(theme),
+                  const DashboardHeader(title: 'Time Durations Dashboard', badgeLabel: 'RFC 9911 Time-Duration Specs'),
                   const SizedBox(height: 16),
                   _buildTimeDurationSummary(theme, state.nodes),
                   const SizedBox(height: 24),
@@ -85,7 +83,7 @@ class _TimeDurationViewState extends State<_TimeDurationView> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    _buildTimeDurationHeader(theme),
+                    const DashboardHeader(title: 'Time Durations Dashboard', badgeLabel: 'RFC 9911 Time-Duration Specs'),
                     const SizedBox(height: 16),
                     _buildTimeDurationSummary(theme, state.nodes),
                     const SizedBox(height: 24),
@@ -101,47 +99,11 @@ class _TimeDurationViewState extends State<_TimeDurationView> {
     );
   }
 
-  Widget _buildTimeDurationHeader(ThemeData theme) {
-    return Wrap(
-      crossAxisAlignment: WrapCrossAlignment.center,
-      spacing: 8,
-      runSpacing: 8,
-      children: [
-        Text(
-          'Time Durations Dashboard',
-          style: TextStyle(
-            fontSize: 20,
-            fontWeight: FontWeight.bold,
-            color: theme.primaryColor,
-          ),
-        ),
-        Container(
-          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-          decoration: BoxDecoration(
-            color: Colors.blue.withValues(alpha: 0.15),
-            border: Border.all(color: Colors.blue.withValues(alpha: 0.5)),
-            borderRadius: BorderRadius.circular(4),
-          ),
-          child: const Text(
-            'RFC 9911 Time-Duration Specs',
-            style: TextStyle(
-              color: Colors.blue,
-              fontSize: 10,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-        ),
-      ],
-    );
-  }
+
 
   Widget _buildTimeDurationSummary(ThemeData theme, List<YangTimeDurationReference> nodes) {
-    final isDark = theme.brightness == Brightness.dark;
-    final cardBg = isDark ? const Color(0xFF2D2E30) : Colors.white;
-    final borderSide = BorderSide(
-      color: isDark ? const Color(0x1FFFFFFF) : const Color(0x1F000000),
-      width: 1,
-    );
+    final cardBg = cardBackground(theme);
+    final borderSide = subtleBorder(theme);
 
     int total = nodes.length;
     int ticks = nodes.where((n) => n.type == YangTimeDurationType.timeticks || n.type == YangTimeDurationType.timestamp).length;
@@ -207,8 +169,7 @@ class _TimeDurationViewState extends State<_TimeDurationView> {
   }
 
   Widget _buildFormCard(ThemeData theme, TimeDurationState state) {
-    final isDark = theme.brightness == Brightness.dark;
-    final cardBg = isDark ? const Color(0xFF2D2E30) : Colors.white;
+    final cardBg = cardBackground(theme);
 
     return Card(
       color: cardBg,
@@ -322,12 +283,7 @@ class _TimeDurationViewState extends State<_TimeDurationView> {
                               state.selectedNode!.id,
                               _valueController.text,
                             );
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(
-                                content: Text('Successfully updated ${state.selectedNode!.name} to ${_valueController.text}'),
-                                backgroundColor: Colors.green,
-                              ),
-                            );
+                            showSuccessSnackBar(context, 'Successfully updated ${state.selectedNode!.name} to ${_valueController.text}');
                           }
                         },
                         child: const Text('Update Value'),
@@ -354,8 +310,7 @@ class _TimeDurationViewState extends State<_TimeDurationView> {
   }
 
   Widget _buildListPane(ThemeData theme, TimeDurationState state) {
-    final isDark = theme.brightness == Brightness.dark;
-    final cardBg = isDark ? const Color(0xFF2D2E30) : Colors.white;
+    final cardBg = cardBackground(theme);
     final isDesktop = MediaQuery.of(context).size.width > 900;
 
     final Widget listContent = state.nodes.isEmpty
