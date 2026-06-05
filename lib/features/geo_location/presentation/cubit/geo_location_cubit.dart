@@ -69,7 +69,7 @@ class GeoLocationCubit extends Cubit<GeoLocationState> {
           computedHeading: () => null,
         ));
       }
-    } catch (_) {
+    } on FormatException {
       emit(state.copyWith(
         computedSpeed: () => null,
         computedHeading: () => null,
