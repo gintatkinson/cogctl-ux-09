@@ -1,9 +1,8 @@
-import 'package:equatable/equatable.dart';
 import 'package:cogctl_ux/features/yang_telemetry/domain/date_time.dart';
 
 enum DateTimeStatus { initial, success, failure }
 
-class DateTimeState extends Equatable {
+class DateTimeState {
   final List<YangDateTimeReference> nodes;
   final YangDateTimeReference? selectedNode;
   final DateTimeStatus status;
@@ -17,9 +16,6 @@ class DateTimeState extends Equatable {
     this.valueError,
     this.generalError,
   });
-
-  @override
-  List<Object?> get props => [nodes, selectedNode, status, valueError, generalError];
 
   DateTimeState copyWith({
     List<YangDateTimeReference>? nodes,

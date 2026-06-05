@@ -1,9 +1,8 @@
-import 'package:equatable/equatable.dart';
 import 'package:cogctl_ux/features/yang_telemetry/domain/counter_gauge.dart';
 
 enum CounterGaugeStatus { initial, success, failure }
 
-class CounterGaugeState extends Equatable {
+class CounterGaugeState {
   final List<YangCounterGauge> nodes;
   final YangCounterGauge? selectedNode;
   final CounterGaugeStatus status;
@@ -17,9 +16,6 @@ class CounterGaugeState extends Equatable {
     this.valueError,
     this.generalError,
   });
-
-  @override
-  List<Object?> get props => [nodes, selectedNode, status, valueError, generalError];
 
   CounterGaugeState copyWith({
     List<YangCounterGauge>? nodes,

@@ -1,10 +1,9 @@
-import 'package:equatable/equatable.dart';
 import 'package:cogctl_ux/features/infrastructure/domain/inventory_location.dart';
 import 'package:cogctl_ux/features/infrastructure/domain/network_element.dart';
 
 enum InventoryLocationStatus { initial, success, failure }
 
-class InventoryLocationState extends Equatable {
+class InventoryLocationState {
   final List<InventoryLocation> locations;
   final InventoryLocation? selectedLocation;
   final List<MockNetworkElement> networkElements;
@@ -36,24 +35,6 @@ class InventoryLocationState extends Equatable {
     this.isEditing = false,
     this.isNeManagerExpanded = false,
   });
-
-  @override
-  List<Object?> get props => [
-        locations,
-        selectedLocation,
-        networkElements,
-        status,
-        generalError,
-        idError,
-        typeError,
-        countryCodeError,
-        timestampError,
-        validUntilError,
-        neManagerError,
-        chassisError,
-        isEditing,
-        isNeManagerExpanded,
-      ];
 
   InventoryLocationState copyWith({
     List<InventoryLocation>? locations,

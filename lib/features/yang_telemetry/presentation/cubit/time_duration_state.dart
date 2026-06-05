@@ -1,9 +1,8 @@
-import 'package:equatable/equatable.dart';
 import 'package:cogctl_ux/features/yang_telemetry/domain/time_duration.dart';
 
 enum TimeDurationStatus { initial, success, failure }
 
-class TimeDurationState extends Equatable {
+class TimeDurationState {
   final List<YangTimeDurationReference> nodes;
   final YangTimeDurationReference? selectedNode;
   final TimeDurationStatus status;
@@ -17,9 +16,6 @@ class TimeDurationState extends Equatable {
     this.valueError,
     this.generalError,
   });
-
-  @override
-  List<Object?> get props => [nodes, selectedNode, status, valueError, generalError];
 
   TimeDurationState copyWith({
     List<YangTimeDurationReference>? nodes,
