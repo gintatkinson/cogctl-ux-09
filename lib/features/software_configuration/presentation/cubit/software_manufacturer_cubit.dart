@@ -1,4 +1,5 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:cogctl_ux/core/utils/format_error.dart';
 import 'package:cogctl_ux/features/software_configuration/domain/software_manufacturer.dart';
 import 'package:cogctl_ux/features/software_configuration/domain/repositories/i_software_manufacturer_repository.dart';
 import 'software_manufacturer_state.dart';
@@ -46,7 +47,7 @@ class SoftwareManufacturerCubit extends Cubit<SoftwareManufacturerState> {
       _repository.addConfig(config);
       loadConfigs();
     } catch (e) {
-      emit(state.copyWith(generalError: () => e.toString().replaceFirst('FormatException: ', '')));
+      emit(state.copyWith(generalError: () => formatError(e)));
     }
   }
 
@@ -56,7 +57,7 @@ class SoftwareManufacturerCubit extends Cubit<SoftwareManufacturerState> {
       _repository.updateConfig(config);
       loadConfigs();
     } catch (e) {
-      emit(state.copyWith(generalError: () => e.toString().replaceFirst('FormatException: ', '')));
+      emit(state.copyWith(generalError: () => formatError(e)));
     }
   }
 

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:cogctl_ux/core/di/service_locator.dart';
+import 'package:cogctl_ux/core/utils/format_error.dart';
 import 'package:cogctl_ux/features/infrastructure/domain/equipment_rack.dart';
 import 'package:cogctl_ux/features/infrastructure/domain/inventory_location.dart';
 import 'package:cogctl_ux/features/infrastructure/domain/repositories/i_equipment_rack_repository.dart';
@@ -1202,7 +1203,7 @@ class _EquipmentRacksViewState extends State<_EquipmentRacksView> {
                         _clearForm();
                         context.read<EquipmentRackCubit>().setEditing(false);
                       } catch (e) {
-                        final errMsg = e.toString().replaceFirst('FormatException: ', '');
+                        final errMsg = formatError(e);
                         context.read<EquipmentRackCubit>().setGeneralError(errMsg);
                       }
                     },

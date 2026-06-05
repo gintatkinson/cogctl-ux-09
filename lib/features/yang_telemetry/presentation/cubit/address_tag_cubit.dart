@@ -1,4 +1,5 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:cogctl_ux/core/utils/format_error.dart';
 import 'package:cogctl_ux/features/yang_telemetry/domain/address_tag.dart';
 import 'package:cogctl_ux/features/yang_telemetry/domain/repositories/i_address_tag_repository.dart';
 import 'address_tag_state.dart';
@@ -50,7 +51,7 @@ class AddressTagCubit extends Cubit<AddressTagState> {
       YangAddressTagValidator.validateAndNormalize(val, type);
       emit(state.copyWith(valueError: () => null));
     } catch (e) {
-      emit(state.copyWith(valueError: () => e.toString().replaceFirst('FormatException: ', '')));
+      emit(state.copyWith(valueError: () => formatError(e)));
     }
   }
 
@@ -60,7 +61,7 @@ class AddressTagCubit extends Cubit<AddressTagState> {
       _repository.updateNodeValue(id, val);
       loadNodes();
     } catch (e) {
-      emit(state.copyWith(generalError: () => e.toString().replaceFirst('FormatException: ', '')));
+      emit(state.copyWith(generalError: () => formatError(e)));
     }
   }
 }

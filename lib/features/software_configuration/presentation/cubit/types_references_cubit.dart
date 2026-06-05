@@ -1,4 +1,5 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:cogctl_ux/core/utils/format_error.dart';
 import 'package:cogctl_ux/features/software_configuration/domain/inventory_type_reference.dart';
 import 'package:cogctl_ux/features/software_configuration/domain/repositories/i_types_references_repository.dart';
 import 'types_references_state.dart';
@@ -31,7 +32,7 @@ class TypesReferencesCubit extends Cubit<TypesReferencesState> {
       _repository.addReference(ref);
       loadReferences();
     } catch (e) {
-      emit(state.copyWith(generalError: () => e.toString().replaceFirst('FormatException: ', '')));
+      emit(state.copyWith(generalError: () => formatError(e)));
     }
   }
 
